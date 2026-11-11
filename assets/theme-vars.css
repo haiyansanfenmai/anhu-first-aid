@@ -1,0 +1,105 @@
+/* 仅主题变量（从 assets/theme.css 原样抽出，不含任何组件样式与元素重置） */
+:root {
+  /* ---------- 品牌色：陶土橙（亲和、镇定、陪伴感） ---------- */
+  --brand-900: #4A3325;
+  --brand-700: #98562F;
+  --brand-600: #C47A48;
+  --brand-500: #D99A6C;
+  --brand-200: #EFD6C2;
+  --brand-100: #F8EBDF;
+  --brand-50:  #FCF6F0;
+
+  /* ---------- 功能色 ---------- */
+  --urgent-600: #BE4A32;   /* 急救 / 拨打 120 / 高危警示，白字对比 >=4.5:1 */
+  --urgent-500: #D2593F;
+  --urgent-100: #F6DCD2;
+  --urgent-50:  #FCEEE8;
+  --warn-500:   #D98B26;
+  --warn-50:    #FDF4E5;
+  --success-600:#22845F;
+  --success-50: #E9F6EF;
+  --info-600:   #2C6DA8;
+  --info-50:    #EDF4FB;
+
+  /* ---------- 中性色：暖灰棕，与暖底一致 ---------- */
+  --ink-900: #3A2C22;
+  --ink-700: #5A483A;
+  --ink-500: #8A7666;
+  --ink-300: #C4B3A3;
+  --line:    #EDE3D9;
+  --line-soft: #F3EAE1;
+  --bg:      #FBF7F2;
+  --surface: #FFFFFF;
+
+  /* ---------- 形状：超大圆角 ---------- */
+  --r-xs: 8px;
+  --r-sm: 16px;
+  --r:    22px;
+  --r-lg: 28px;
+  --r-pill: 999px;
+
+  /* ---------- 阴影：极轻暖色，避免焦虑感 ---------- */
+  --sh-1: 0 2px 8px rgba(120, 80, 50, .05), 0 12px 30px rgba(120, 80, 50, .07);
+  --sh-2: 0 8px 24px rgba(120, 80, 50, .10);
+  --sh-urgent: 0 8px 22px rgba(190, 74, 50, .22);
+
+  /* ---------- 字体 ---------- */
+  --font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC",
+          system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-num: "Inter", "DIN Alternate", "Segoe UI", var(--font);
+
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px;
+
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+[data-theme="clarity"] {
+  --brand-900: #0B3B44;
+  --brand-700: #0E6B75;
+  --brand-600: #0F7C86;
+  --brand-500: #1695A0;
+  --brand-200: #BCE4E6;
+  --brand-100: #E3F3F4;
+  --brand-50:  #F1FAFA;
+  --urgent-600: #D94536;
+  --urgent-500: #EF5B45;
+  --urgent-100: #FBDCD7;
+  --urgent-50:  #FEF0ED;
+  --ink-900: #16262D;
+  --ink-700: #3C525C;
+  --ink-500: #5C727D;
+  --ink-300: #A9BAC2;
+  --line: #E2EAEE;
+  --line-soft: #EDF3F5;
+  --bg: #F5F9FA;
+  --r-sm: 12px; --r: 16px; --r-lg: 22px;
+  --sh-1: 0 2px 8px rgba(16, 60, 70, .045), 0 10px 28px rgba(16, 60, 70, .05);
+  --sh-2: 0 8px 24px rgba(16, 60, 70, .09);
+  --sh-urgent: 0 8px 22px rgba(217, 69, 54, .22);
+}
+
+[data-theme="rescue"] {
+  --brand-900: #102A4C;
+  --brand-700: #1B4B8F;
+  --brand-600: #1D5FA8;
+  --brand-500: #3A7FC4;
+  --brand-200: #C6DCF2;
+  --brand-100: #E4EFF9;
+  --brand-50:  #F2F7FD;
+  --urgent-600: #D42E24;
+  --urgent-500: #EC4433;
+  --urgent-100: #F7C9C5;
+  --urgent-50:  #FCEDEC;
+  --ink-900: #16262D;
+  --ink-700: #3C525C;
+  --ink-500: #5C727D;
+  --ink-300: #A9BAC2;
+  --line: #E2EAEE;
+  --line-soft: #EDF3F5;
+  --bg: #F4F7FC;
+  --r-sm: 8px; --r: 10px; --r-lg: 14px;
+  --sh-1: 0 2px 6px rgba(16, 42, 76, .07), 0 8px 20px rgba(16, 42, 76, .06);
+  --sh-2: 0 8px 20px rgba(16, 42, 76, .10);
+  --sh-urgent: 0 8px 22px rgba(212, 46, 36, .22);
+}

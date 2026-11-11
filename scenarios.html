@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="warm">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>意外伤害场景科普 · 安护急救通</title>
+<meta name="description" content="按场景认识意外伤害：厨房、浴室、客厅、餐厅、泳池、操场、户外、通勤路上，每个场景可能发生的意外与预防要点。">
+<link rel="stylesheet" href="assets/theme.css">
+<script src="js/theme.js"></script>
+<style>
+  /* 仅本页布局，不改任何主题变量 */
+  .sc-anchor {
+    position: sticky; top: var(--header-h, 68px); z-index: 40;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: saturate(1.6) blur(12px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .sc-anchor-inner { display: flex; gap: 8px; padding: 10px 0; overflow-x: auto; scrollbar-width: none; }
+  .sc-anchor-inner::-webkit-scrollbar { display: none; }
+  .sc-anchor-inner a { flex: none; }
+
+  .sc-scene { scroll-margin-top: calc(var(--header-h, 68px) + 60px); }
+  .sc-scene + .sc-scene { border-top: 1px solid var(--line-soft); }
+
+  .sc-media {
+    overflow: hidden; border-radius: var(--r-lg);
+    border: 1px solid var(--line-soft);
+    background: var(--brand-50); box-shadow: var(--sh-1);
+  }
+  .sc-media img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .sc-media figcaption { padding: 12px 18px; background: var(--surface); }
+
+  .sc-rev .sc-media { order: 2; }
+  .sc-risk .icon-box { width: 48px; height: 48px; }
+  .sc-risk .icon-box svg { width: 24px; height: 24px; }
+
+  @media (max-width: 900px) {
+    .sc-rev .sc-media { order: 0; }
+    .sc-anchor { top: var(--header-h, 68px); }
+  }
+
+  /* 阅读进度条 */
+  .sc-progress { position: fixed; inset: 0 0 auto; height: 3px; z-index: 60; pointer-events: none; }
+  .sc-progress span { display: block; height: 100%; width: 0; background: var(--brand-600); transition: width .1s linear; }
+
+  /* 图片风险热点 */
+  .sc-frame { position: relative; }
+  .sc-hot {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 34px; height: 34px; padding: 0; border: 0; background: transparent;
+    cursor: pointer; display: grid; place-items: center;
+  }
+  .sc-hot-dot {
+    width: 14px; height: 14px; border-radius: 50%; background: var(--urgent-500);
+    box-shadow: 0 0 0 6px rgba(210, 89, 63, .16); position: relative;
+    transition: transform .2s var(--ease);
+  }
+  .sc-hot:hover .sc-hot-dot, .sc-hot:focus-visible .sc-hot-dot { transform: scale(1.3); }
+  .sc-hot-dot::after {
+    content: ""; position: absolute; inset: -7px; border-radius: 50%;
+    border: 2px solid var(--urgent-500); animation: sc-ping 2.2s var(--ease) infinite;
+  }
+  @keyframes sc-ping {
+    0% { transform: scale(.6); opacity: .75; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .sc-hot-label {
+    position: absolute; bottom: calc(100% + 4px); left: 50%;
+    transform: translateX(-50%) translateY(4px); white-space: nowrap;
+    background: var(--ink-900); color: #fff; font-size: 12px; line-height: 1;
+    padding: 7px 10px; border-radius: var(--r-pill);
+    opacity: 0; pointer-events: none; transition: .18s var(--ease);
+  }
+  .sc-hot:hover .sc-hot-label, .sc-hot:focus-visible .sc-hot-label {
+    opacity: 1; transform: translateX(-50%);
+  }
+
+  /* 折叠：3 步处置 */
+  .sc-fold { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .sc-fold summary {
+    cursor: pointer; list-style: none; font-size: 13px; font-weight: 600;
+    color: var(--brand-700); display: inline-flex; align-items: center; gap: 6px;
+  }
+  .sc-fold summary::-webkit-details-marker { display: none; }
+  .sc-fold summary::after { content: "＋"; font-size: 14px; }
+  .sc-fold[open] summary::after { content: "－"; }
+  .sc-steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  .sc-steps li { display: flex; gap: 10px; font-size: 14px; color: var(--ink-700); line-height: 1.7; }
+  .sc-steps b { flex: none; width: 46px; color: var(--brand-700); }
+
+  /* 场景安全自检 */
+  .sc-check {
+    border: 1px solid var(--line-soft); background: var(--surface);
+    border-radius: var(--r); overflow: hidden;
+  }
+  .sc-check > summary {
+    cursor: pointer; list-style: none; padding: 14px 18px; font-weight: 600;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .sc-check > summary::-webkit-details-marker { display: none; }
+  .sc-check > summary::after { content: "展开"; font-size: 12px; font-weight: 500; color: var(--ink-500); }
+  .sc-check[open] > summary::after { content: "收起"; }
+  .sc-check-body { padding: 0 18px 16px; border-top: 1px solid var(--line-soft); }
+  .sc-check label {
+    display: flex; gap: 10px; align-items: flex-start; padding: 9px 0;
+    font-size: 14px; color: var(--ink-700); cursor: pointer;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+  .sc-check label:last-of-type { border-bottom: 0; }
+  .sc-check label.is-done span { color: var(--ink-300); text-decoration: line-through; }
+  .sc-check input {
+    flex: none; width: 16px; height: 16px; margin-top: 3px;
+    accent-color: var(--brand-600);
+  }
+  .sc-score { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 13px; color: var(--ink-500); }
+  .sc-score-bar { flex: 1; height: 8px; border-radius: var(--r-pill); background: var(--brand-100); overflow: hidden; }
+  .sc-score-bar i { display: block; height: 100%; width: 0; background: var(--brand-600); transition: width .3s var(--ease); }
+  .sc-score b { font-family: var(--font-num); color: var(--brand-700); }
+  .sc-score.is-risk .sc-score-bar i { background: var(--urgent-600); }
+
+  /* 滚动淡入 + 定位高亮 */
+  .sc-anim { opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+  .sc-anim.sc-in { opacity: 1; transform: none; }
+  .sc-flash { box-shadow: 0 0 0 2px var(--brand-500), var(--sh-1) !important; border-color: var(--brand-200) !important; }
+
+  /* 顶栏固定搜索 */
+  .sc-qsearch {
+    position: relative; flex: none; display: flex; align-items: center; gap: 8px;
+    width: 250px; height: 40px; padding: 0 14px;
+    border-radius: var(--r-pill); background: var(--bg); border: 1px solid var(--line);
+    transition: border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+  }
+  .sc-qsearch:focus-within { background: var(--surface); border-color: var(--brand-200); box-shadow: var(--sh-1); }
+  .sc-qsearch > svg { width: 17px; height: 17px; flex: none; stroke: var(--ink-500); stroke-width: 2; fill: none; stroke-linecap: round; }
+  .sc-qsearch input { flex: 1; min-width: 0; border: 0; background: transparent; outline: none; font-size: 13px; color: var(--ink-900); }
+  .sc-qsearch input::placeholder { color: var(--ink-300); }
+  .sc-qsearch input::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+  .sc-qpanel {
+    position: absolute; top: calc(100% + 8px); right: 0; width: 340px;
+    max-height: 340px; overflow-y: auto; padding: 6px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r); box-shadow: var(--sh-2);
+  }
+  .sc-qgroup { padding: 7px 10px 4px; font-size: 11px; letter-spacing: .08em; color: var(--ink-500); }
+  .sc-qitem {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px 10px; border-radius: var(--r-sm); text-align: left;
+    transition: background .15s var(--ease);
+  }
+  .sc-qitem:hover, .sc-qitem.is-active { background: var(--brand-50); }
+  .sc-qtag {
+    flex: none; font-size: 11px; padding: 2px 7px; border-radius: var(--r-pill);
+    background: var(--brand-50); color: var(--brand-700); border: 1px solid var(--brand-100);
+  }
+  .sc-qtag.is-scene { background: var(--bg); color: var(--ink-500); border-color: var(--line); }
+  .sc-qtext { min-width: 0; }
+  .sc-qtext b { display: block; font-size: 13px; font-weight: 600; color: var(--ink-900); }
+  .sc-qtext span { display: block; font-size: 11px; color: var(--ink-500); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sc-qempty { padding: 18px 12px; font-size: 13px; color: var(--ink-500); text-align: center; }
+
+  @media (max-width: 900px) {
+    .sc-qsearch { width: 200px; }
+    .sc-qpanel { width: 300px; }
+  }
+
+  @media (max-width: 620px) {
+    .sc-check > summary { padding: 12px 14px; font-size: 14px; }
+    .sc-hot { width: 30px; height: 30px; }
+    .sc-qsearch { flex: 1; width: auto; height: 38px; padding: 0 12px; }
+    .sc-qpanel { width: min(84vw, 320px); }
+  }
+</style>
+</head>
+<body class="page-scenarios">
+
+<div class="sc-progress" aria-hidden="true"><span></span></div>
+
+<div id="site-topbar"></div>
+
+<!-- 本页搜索框：脚本会把它移入全站顶栏，保留原有 id 与脚本 -->
+<div id="sc-search-mount" hidden>
+  <div class="sc-qsearch" role="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+    <input id="qsInput" type="text" placeholder="搜索急救方法 / 场景" autocomplete="off"
+           aria-label="搜索急救方法或场景" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="qsPanel">
+    <div class="sc-qpanel" id="qsPanel" role="listbox" aria-label="搜索结果" hidden></div>
+  </div>
+</div>
+
+<main>
+
+  <section class="section-sm">
+    <div class="container">
+      <span class="eyebrow">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        场景科普
+      </span>
+      <h1 class="h1 mt-4">意外，总发生在我们最熟悉的地方</h1>
+      <p class="lead mt-4" style="max-width: 720px;">
+        同样一处烫伤，在厨房和在餐厅处理方式不同；同样是摔倒，浴室和操场的风险也不一样。
+        按场景认识风险，比背十条急救口诀更容易在关键时刻想起来。
+      </p>
+      <div class="grid grid-4 mt-8">
+        <div class="stat"><div class="stat-label">高频场景</div><div class="stat-value is-brand num">8</div></div>
+        <div class="stat"><div class="stat-label">常见意外</div><div class="stat-value num">16</div></div>
+        <div class="stat"><div class="stat-label">对应急救知识</div><div class="stat-value num">8</div></div>
+        <div class="stat"><div class="stat-label">黄金应对</div><div class="stat-value is-urgent">先打 120</div></div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="sc-anchor" aria-label="场景快速跳转">
+    <div class="container sc-anchor-inner">
+      <a class="chip" href="#kitchen">厨房</a>
+      <a class="chip" href="#bathroom">浴室</a>
+      <a class="chip" href="#living">客厅</a>
+      <a class="chip" href="#dining">餐厅</a>
+      <a class="chip" href="#pool">泳池</a>
+      <a class="chip" href="#playground">操场</a>
+      <a class="chip" href="#outdoor">户外高温</a>
+      <a class="chip" href="#commute">通勤路上</a>
+    </div>
+  </nav>
+
+  <!-- 01 厨房 -->
+  <section class="section-sm sc-scene" id="kitchen">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-kitchen.jpg" alt="厨房场景插画：灶台上冒着热气的汤锅" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">厨房 · 明火、热油、开水最集中的地方</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 01</span>
+            <span class="chip chip-neutral">家庭</span>
+          </div>
+          <h2 class="h2 mt-3">厨房</h2>
+          <p class="lead mt-3">厨房是家里意外密度最高的空间：油温、沸水、刀具和燃气同时存在，而人往往一手拿锅一手接电话。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3s5 4.5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3 1-6 1-7.5z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">烫伤</h3>
+                    <p class="small muted">热油飞溅、掀锅盖被蒸汽冲到、端锅时泼洒</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=burns">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">割伤出血</h3>
+                    <p class="small muted">切菜时滑刀、清洗破碎的碗碟</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=cut">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>热锅把手朝内、油锅旁常备锅盖；切菜时手指内扣成爪形；燃气用完随手关阀。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 浴室 -->
+  <section class="section-sm sc-scene sc-rev" id="bathroom">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-bathroom.jpg" alt="浴室场景插画：湿滑地面与浴缸" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">浴室 · 湿滑地面与浴缸，滑倒是首要风险</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 02</span>
+            <span class="chip chip-neutral">家庭</span>
+          </div>
+          <h2 class="h2 mt-3">浴室</h2>
+          <p class="lead mt-3">洗澡时人体血管扩张、地面湿滑，是晕倒和滑倒的高发地；而插座与吹风机又让触电风险成倍增加。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">滑倒扭伤</h3>
+                    <p class="small muted">瓷砖积水、光脚进出浴缸时崴脚或磕碰</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=sprain">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">触电</h3>
+                    <p class="small muted">湿手插拔插座、吹风机掉进水中</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=electric">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>铺防滑垫、装扶手；浴室插座加防溅盒；吹风机等电器远离浴缸，用完拔插头。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 客厅 -->
+  <section class="section-sm sc-scene" id="living">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-living.jpg" alt="客厅场景插画：沙发、插座与垂落的电线" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">客厅 · 沙发、插座与拖在地上的电线</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 03</span>
+            <span class="chip chip-neutral">家庭</span>
+          </div>
+          <h2 class="h2 mt-3">客厅</h2>
+          <p class="lead mt-3">客厅看似最安全，却是儿童意外最多的地方：地上拖着电线，茶几上摆着坚果果冻，沙发缝里还塞着硬币。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">触电</h3>
+                    <p class="small muted">孩子把手指或金属物伸进插座、啃咬充电线</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=electric">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><path d="M8 21v-5l4-3 4 3v5"/><path d="M6 12l3-1M18 12l-3-1"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">噎住窒息</h3>
+                    <p class="small muted">边跑边吃坚果、果冻，或把小玩具含在嘴里</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=choking">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>插座装保护盖、电线收进线槽；3 岁以下不吃整颗坚果和果冻；吃东西时不追跑打闹。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 餐厅 -->
+  <section class="section-sm sc-scene sc-rev" id="dining">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-dining.jpg" alt="餐厅场景插画：一家人围坐吃火锅" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">餐厅 · 热汤热油上桌，说话和大笑同时发生</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 04</span>
+            <span class="chip chip-neutral">家庭 / 食堂</span>
+          </div>
+          <h2 class="h2 mt-3">餐厅</h2>
+          <p class="lead mt-3">吃饭时说话、大笑、赶时间，是噎食最常见的触发条件；而火锅、热汤、刚出锅的油炸食物则带来烫伤风险。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><path d="M8 21v-5l4-3 4 3v5"/><path d="M6 12l3-1M18 12l-3-1"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">噎住窒息</h3>
+                    <p class="small muted">大块肉、汤圆、鱼刺卡喉后继续吞咽</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=choking">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3s5 4.5 5 9a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3 1-6 1-7.5z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">烫伤</h3>
+                    <p class="small muted">热汤洒出、火锅汤底溅到手臂或大腿</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=burns">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>细嚼慢咽、吃饭时不追跑说笑；热汤放过桌内侧；给老人小孩把食物切小块。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 泳池 -->
+  <section class="section-sm sc-scene" id="pool">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-pool.jpg" alt="泳池场景插画：池边与救生圈" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">泳池 · 安静溺水往往没有扑水声</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 05</span>
+            <span class="chip chip-neutral">户外 / 场馆</span>
+          </div>
+          <h2 class="h2 mt-3">泳池</h2>
+          <p class="lead mt-3">真实的溺水多数是安静的：头后仰、口鼻时沉时浮、无法呼救。把孩子交给“会游泳的同伴”看管，是最常见的失误。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">溺水</h3>
+                    <p class="small muted">腿抽筋、浅水区滑倒、贸然下水救人</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=drowning">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">滑倒扭伤</h3>
+                    <p class="small muted">池边追逐、湿脚踩在瓷砖上</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=sprain">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>下水前热身、不空腹不酒后游泳；儿童全程由成人一臂距离内看护；遇险先呼救、用竿或圈施救，不盲目下水。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 操场 -->
+  <section class="section-sm sc-scene sc-rev" id="playground">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-playground.jpg" alt="操场场景插画：塑胶跑道与午后阳光" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">操场 · 跑跳冲撞集中，踝关节最容易受伤</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 06</span>
+            <span class="chip chip-neutral">校园</span>
+          </div>
+          <h2 class="h2 mt-3">操场</h2>
+          <p class="lead mt-3">体育课和课间是扭伤、摔倒最集中的时段，落地姿势不当、场地不平、没热身都会让踝关节瞬间受伤。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">扭伤 / 骨折</h3>
+                    <p class="small muted">跳下器械时脚踝内翻、摔倒手撑地</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=sprain">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">流鼻血</h3>
+                    <p class="small muted">碰撞鼻部、天气干燥时抠鼻</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=nosebleed">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>运动前充分热身、穿合脚运动鞋；检查场地有无坑洼和杂物；摔倒时尽量团身、避免手肘直撑。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 户外高温 -->
+  <section class="section-sm sc-scene" id="outdoor">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-outdoor.jpg" alt="户外场景插画：烈日下的公园长椅" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">户外高温 · 正午暴晒与闷热无风最危险</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 07</span>
+            <span class="chip chip-neutral">户外</span>
+          </div>
+          <h2 class="h2 mt-3">户外高温</h2>
+          <p class="lead mt-3">高温加高湿时汗液难以蒸发，体温调节会突然失效。中暑不是“晒晕”，而是可能迅速恶化的急症。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">中暑</h3>
+                    <p class="small muted">军训、体测、长时间户外作业后头晕恶心</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=heatstroke">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">流鼻血</h3>
+                    <p class="small muted">空气干燥、鼻腔黏膜脆弱时突然出血</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=nosebleed">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>少量多次补水、避开 11:00–15:00 暴晒；穿浅色透气衣物；出现头晕、恶心立即到阴凉处降温。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 通勤路上 -->
+  <section class="section-sm sc-scene sc-rev" id="commute">
+    <div class="container">
+      <div class="grid grid-2">
+        <figure class="sc-media">
+          <img src="assets/images/scene-commute.jpg" alt="通勤场景插画：城市街道斑马线与自行车" loading="lazy" width="800" height="600">
+          <figcaption class="small muted">通勤路上 · 摔倒、擦伤与出血最常见</figcaption>
+        </figure>
+        <div>
+          <div class="flex items-center gap-3 wrap">
+            <span class="chip">场景 08</span>
+            <span class="chip chip-neutral">交通</span>
+          </div>
+          <h2 class="h2 mt-3">通勤路上</h2>
+          <p class="lead mt-3">骑车急刹、雨天打滑、拥挤时被行李磕碰，都是上学路上常见的受伤原因，伤后最先要判断的是“出血压得住吗”。</p>
+          <div class="stack-4 mt-6">
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-urgent" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">割伤 / 出血</h3>
+                    <p class="small muted">摔倒擦伤、被玻璃或金属边缘划破</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=cut">查看应对措施</a>
+              </div>
+            </article>
+            <article class="card card-hover sc-risk">
+              <div class="flex items-center justify-between gap-4 wrap">
+                <div class="flex items-center gap-4">
+                  <span class="icon-box is-warn" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="3" transform="rotate(-45 12 12)"/><path d="M9 15l6-6"/></svg>
+                  </span>
+                  <div>
+                    <h3 class="h3">扭伤 / 骨折</h3>
+                    <p class="small muted">湿滑路面刹车、下车时脚踝别住</p>
+                  </div>
+                </div>
+                <a class="btn btn-ghost btn-sm" href="detail.html?id=sprain">查看应对措施</a>
+              </div>
+            </article>
+          </div>
+          <div class="alert alert-warn mt-6">
+            <span class="icon-box is-warn" aria-hidden="true" style="width:36px;height:36px;">
+              <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+            </span>
+            <div><strong>预防要点：</strong>雨天减速、不撑伞骑单车；背包带、鞋带系紧；车内站稳扶好，不急停时不抢门。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 收尾引导 -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="alert alert-urgent">
+        <span class="icon-box is-urgent" aria-hidden="true" style="width:40px;height:40px;">
+          <svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 9v5M12 17h.01"/></svg>
+        </span>
+        <div>
+          <strong>记住这个顺序：先判断、再呼救、后施救。</strong>
+          意识不清、呼吸困难、大出血、抽搐等情况，不要自行搬运，立即拨打 120 并说明地点与伤情。
+        </div>
+      </div>
+      <p class="muted mt-6">内容参考中国红十字会现场救护指南，仅供科普，不能替代专业医疗判断。</p>
+    </div>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script src="js/site.js"></script>
+<script>
+/* 把本页搜索框移入全站顶栏（保留原 id 与事件绑定） */
+(function () {
+  var slot = document.getElementById('site-search-slot');
+  var q = document.querySelector('.sc-qsearch');
+  if (slot && q) {
+    slot.appendChild(q);
+    if (window.SITE && window.SITE.syncHeaderHeight) window.SITE.syncHeaderHeight();
+  }
+})();
+</script>
+
+<script src="assets/aid-data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 配置：改文案只改这里 ================= */
+
+  // 每条急救的 3 步处置（与 detail.html?id= 的 id 对应）
+  var STEPS = {
+    burns: [
+      ['冲', '流动冷水持续冲洗 15–30 分钟，不要用冰块直接敷'],
+      ['脱', '小心剪开或脱去衣物，已经粘住的部分不要硬撕'],
+      ['盖送', '干净纱布松散覆盖；面积大、起大水泡立即就医']
+    ],
+    cut: [
+      ['压', '干净纱布或毛巾直接压迫伤口 10 分钟，中途不要松手'],
+      ['抬', '抬高患肢高于心脏位置，减少出血'],
+      ['送', '血止不住、伤口深或污染重，尽快去医院处理']
+    ],
+    sprain: [
+      ['停', '立即停止活动，不要揉搓，也不要热敷'],
+      ['冰敷', '48 小时内每次冰敷 15–20 分钟，垫布后加压包扎'],
+      ['抬高', '抬高患肢；不能负重或剧痛变形，按骨折处理并就医']
+    ],
+    electric: [
+      ['断', '先切断电源，用干燥木棍挑开电线，绝不徒手拉人'],
+      ['呼', '无呼吸无反应，立即心肺复苏，并让旁人大声呼救'],
+      ['送', '电击伤表面小也可能深部受损，一律就医检查']
+    ],
+    choking: [
+      ['咳', '还能咳嗽就鼓励用力咳，不要拍背、不要灌水'],
+      ['拍背', '咳不出声时上身前倾，在肩胛骨之间拍击 5 次'],
+      ['冲击', '无效则腹部冲击（海姆立克）；婴儿用拍背加胸部按压']
+    ],
+    drowning: [
+      ['呼救', '大声呼救并拨打 120，不熟悉水性绝不盲目下水'],
+      ['抛', '抛救生圈、绳索或空瓶，从岸上拖拽上岸'],
+      ['复苏', '上岸后无呼吸立即心肺复苏，不要先控水']
+    ],
+    heatstroke: [
+      ['转移', '立刻移到阴凉通风处，解开衣领和腰带'],
+      ['降温', '冷水擦拭颈部、腋下、大腿根，清醒时小口补淡盐水'],
+      ['送医', '意识模糊、抽搐或体温超过 40℃，立即拨打 120']
+    ],
+    nosebleed: [
+      ['坐', '坐位、身体前倾、低头，不要仰头'],
+      ['捏', '捏住鼻翼软骨处持续 10 分钟，用嘴呼吸'],
+      ['就医', '止不住或 20 分钟仍在出血，尽快就医']
+    ]
+  };
+
+  // 场景图片上的风险热点：x/y 为图片百分比，i 对应第几张风险卡（从 0 开始），坐标按配图实际内容校准
+  var HOTSPOTS = {
+    kitchen:    [{ x: 28, y: 58, i: 0, label: '热油沸水烫伤' }, { x: 69, y: 63, i: 1, label: '水槽洗碗割伤' }],
+    bathroom:   [{ x: 49, y: 82, i: 0, label: '地面积水' }, { x: 64, y: 52, i: 1, label: '吹风机落水' }],
+    living:     [{ x: 18, y: 65, i: 0, label: '插座与电线' }, { x: 49, y: 60, i: 1, label: '沙发上吃零食' }],
+    dining:     [{ x: 37, y: 45, i: 0, label: '边吃边说笑' }, { x: 53, y: 68, i: 1, label: '火锅热汤' }],
+    pool:       [{ x: 72, y: 48, i: 0, label: '深水区' }, { x: 16, y: 62, i: 1, label: '湿滑池边' }],
+    playground: [{ x: 38, y: 62, i: 0, label: '跑道落地扭伤' }, { x: 84, y: 32, i: 1, label: '球门碰撞鼻部' }],
+    outdoor:    [{ x: 58, y: 15, i: 0, label: '烈日暴晒' }, { x: 55, y: 66, i: 1, label: '空气干燥·鼻出血' }],
+    commute:    [{ x: 29, y: 85, i: 0, label: '路面擦伤' }, { x: 50, y: 72, i: 1, label: '自行车急刹别脚' }]
+  };
+
+  // 场景自检：高危时段 / 人群 / 4 条检查项
+  var CHECKS = {
+    kitchen: {
+      time: '晚餐前后', people: '儿童、老人',
+      items: ['热锅把手朝向炉台内侧', '油锅旁常备锅盖，人不离开灶台', '刀具收进刀架，不泡在水槽里', '用完随手关闭燃气阀门']
+    },
+    bathroom: {
+      time: '洗澡与清晨', people: '老人、儿童',
+      items: ['地面铺防滑垫，保持干燥', '浴缸或淋浴旁装扶手', '插座加装防溅盒', '电器远离水源，用完拔插头']
+    },
+    living: {
+      time: '傍晚与饭后', people: '3 岁以下儿童',
+      items: ['低处插座装保护盖', '电线收进线槽或固定上墙', '坚果果冻放在孩子够不到处', '不让孩子含着小物件奔跑']
+    },
+    dining: {
+      time: '午餐与晚餐', people: '老人、儿童',
+      items: ['进食细嚼慢咽，不边吃边说笑', '热汤热茶放在桌子内侧', '鱼刺卡喉不吞饭团、不喝醋', '食物提前切成小块']
+    },
+    pool: {
+      time: '夏季午后', people: '儿童、初学者',
+      items: ['下水前充分热身', '儿童保持一臂距离看护', '不空腹、不酒后游泳', '池边不追跑打闹']
+    },
+    playground: {
+      time: '体育课与课间', people: '中小学生',
+      items: ['运动前做 5 分钟热身', '穿合脚的运动鞋', '场地无坑洼、无杂物', '摔倒时团身护住头部']
+    },
+    outdoor: {
+      time: '11:00–15:00', people: '军训、体测人群',
+      items: ['少量多次补水，不等口渴才喝', '避开正午长时间暴晒', '穿浅色透气衣物、戴帽子', '头晕恶心立即到阴凉处降温']
+    },
+    commute: {
+      time: '上下学高峰', people: '骑车通勤者',
+      items: ['雨天减速，不撑伞骑车', '骑行佩戴头盔', '鞋带、背包带提前系紧', '乘车站稳扶好，不抢门']
+    }
+  };
+
+  /* ================= 1. 图片风险热点 ================= */
+  document.querySelectorAll('.sc-scene').forEach(function (scene) {
+    var spots = HOTSPOTS[scene.id];
+    var fig = scene.querySelector('.sc-media');
+    var img = fig && fig.querySelector('img');
+    if (!spots || !img) return;
+
+    var frame = document.createElement('div');
+    frame.className = 'sc-frame';
+    img.parentNode.insertBefore(frame, img);
+    frame.appendChild(img);
+
+    var risks = scene.querySelectorAll('.sc-risk');
+    spots.forEach(function (s) {
+      var target = risks[s.i];
+      if (!target) return;
+      target.id = scene.id + '-risk-' + (s.i + 1);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sc-hot';
+      btn.style.left = s.x + '%';
+      btn.style.top = s.y + '%';
+      btn.setAttribute('aria-label', '查看风险：' + s.label);
+      btn.innerHTML = '<span class="sc-hot-dot"></span><span class="sc-hot-label">' + s.label + '</span>';
+      btn.addEventListener('click', function () {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target.classList.add('sc-flash');
+        setTimeout(function () { target.classList.remove('sc-flash'); }, 1600);
+      });
+      frame.appendChild(btn);
+    });
+
+    var cap = fig.querySelector('figcaption');
+    if (cap) cap.appendChild(document.createTextNode(' · 点击圆点定位风险'));
+  });
+
+  /* ================= 2. 高危标签 / 3 步处置 / 安全自检 ================= */
+  document.querySelectorAll('.sc-scene').forEach(function (scene) {
+    var meta = CHECKS[scene.id];
+
+    // 高危时段 + 人群
+    var lead = scene.querySelector('p.lead');
+    if (meta && lead) {
+      var tags = document.createElement('div');
+      tags.className = 'flex gap-3 wrap mt-4';
+      tags.innerHTML =
+        '<span class="chip chip-warn">高危时段：' + meta.time + '</span>' +
+        '<span class="chip chip-neutral">高危人群：' + meta.people + '</span>';
+      lead.insertAdjacentElement('afterend', tags);
+    }
+
+    // 每张风险卡的 3 步处置
+    scene.querySelectorAll('.sc-risk').forEach(function (card) {
+      var link = card.querySelector('a[href*="detail.html?id="]');
+      if (!link) return;
+      var aid = link.getAttribute('href').split('id=')[1];
+      var steps = STEPS[aid];
+      if (!steps) return;
+
+      var fold = document.createElement('details');
+      fold.className = 'sc-fold';
+      fold.innerHTML = '<summary>展开 3 步处置</summary><ol class="sc-steps">' +
+        steps.map(function (s) { return '<li><b>' + s[0] + '</b><span>' + s[1] + '</span></li>'; }).join('') +
+        '</ol>';
+      card.appendChild(fold);
+    });
+
+    // 场景安全自检
+    if (!meta) return;
+    var box = document.createElement('details');
+    box.className = 'sc-check mt-6';
+    var body = '<summary><span class="sc-check-title">场景安全自检</span></summary><div class="sc-check-body">';
+    meta.items.forEach(function (text, i) {
+      body += '<label><input type="checkbox" data-i="' + i + '"><span>' + text + '</span></label>';
+    });
+    body += '<div class="sc-score"><span class="sc-score-bar"><i></i></span>' +
+            '<b>0/4</b><span class="sc-tip">待自检</span></div></div>';
+    box.innerHTML = body;
+
+    var alert = scene.querySelector('.alert');
+    if (alert) alert.insertAdjacentElement('beforebegin', box);
+
+    var key = 'anjia-sc-' + scene.id;
+    var inputs = box.querySelectorAll('input');
+    var fill = box.querySelector('.sc-score-bar i');
+    var scoreText = box.querySelector('.sc-score b');
+    var tip = box.querySelector('.sc-tip');
+    var title = box.querySelector('.sc-check-title');
+    var saved = [];
+    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch (e) { saved = []; }
+
+    function refresh() {
+      var n = 0;
+      inputs.forEach(function (input) {
+        if (input.checked) n++;
+        input.parentNode.classList.toggle('is-done', input.checked);
+      });
+      var total = inputs.length;
+      var pct = Math.round(n / total * 100);
+      fill.style.width = pct + '%';
+      scoreText.textContent = n + '/' + total;
+      title.textContent = '场景安全自检 · ' + n + '/' + total;
+      tip.textContent = n === total ? '这个场景准备得很好'
+        : n >= total - 1 ? '基本安全，补齐剩下的一项'
+        : n >= 2 ? '还有明显隐患，建议逐条改善'
+        : '风险较高，先处理最要紧的';
+      box.querySelector('.sc-score').classList.toggle('is-risk', n < 2);
+      try {
+        localStorage.setItem(key, JSON.stringify(
+          Array.prototype.filter.call(inputs, function (input) { return input.checked; })
+            .map(function (input) { return +input.getAttribute('data-i'); })
+        ));
+      } catch (e) {}
+    }
+
+    inputs.forEach(function (input) {
+      input.checked = saved.indexOf(+input.getAttribute('data-i')) > -1;
+      input.addEventListener('change', refresh);
+    });
+    refresh();
+  });
+
+  /* ================= 3. 阅读进度 + 滚动淡入 ================= */
+  var bar = document.querySelector('.sc-progress span');
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (max > 0 ? Math.min(100, window.scrollY / max * 100) : 0) + '%';
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('sc-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -6% 0px' });
+
+    document.querySelectorAll('.sc-scene').forEach(function (scene) {
+      scene.classList.add('sc-anim');
+      io.observe(scene);
+    });
+  }
+
+  /* ================= 顶栏搜索：急救方法 + 场景 ================= */
+  var qWrap = document.querySelector('.sc-qsearch');
+  var qInput = document.getElementById('qsInput');
+  var qPanel = document.getElementById('qsPanel');
+
+  if (qWrap && qInput && qPanel) {
+    var SCENE_LIST = [
+      ['kitchen', '厨房', '热油、沸水、刀具'],
+      ['bathroom', '浴室', '湿滑地面、浴缸'],
+      ['living', '客厅', '插座、沙发'],
+      ['dining', '餐厅', '火锅、边吃边说'],
+      ['pool', '泳池', '深水区、湿滑池边'],
+      ['playground', '操场', '跑道、球门'],
+      ['outdoor', '户外高温', '暴晒、空气干燥'],
+      ['commute', '通勤路上', '路面、自行车']
+    ];
+
+    // 建立搜索索引：8 条急救知识 + 8 个场景
+    var INDEX = [];
+    Object.keys(window.AID_DATA || {}).forEach(function (id) {
+      var d = window.AID_DATA[id];
+      var names = (d.scenes || []).map(function (s) { return s.name; }).join(' ');
+      INDEX.push({
+        type: 'aid',
+        title: d.title,
+        desc: d.sub,
+        tag: '急救',
+        href: 'detail.html?id=' + id,
+        key: [d.title, d.sub, d.aliases, d.category, names].join(' ').toLowerCase()
+      });
+    });
+    SCENE_LIST.forEach(function (s) {
+      INDEX.push({
+        type: 'scene',
+        title: s[1],
+        desc: s[2],
+        tag: '场景',
+        href: '#' + s[0],
+        key: (s[1] + ' ' + s[2]).toLowerCase()
+      });
+    });
+
+    var PICK = ['burns', 'choking', 'heatstroke', 'sprain', 'cut', 'electric'];
+    var active = -1;
+
+    function itemHtml(it) {
+      return '<button type="button" class="sc-qitem" role="option" data-href="' + it.href + '">' +
+        '<span class="sc-qtag' + (it.type === 'scene' ? ' is-scene' : '') + '">' + it.tag + '</span>' +
+        '<span class="sc-qtext"><b>' + it.title + '</b><span>' + it.desc + '</span></span>' +
+        '</button>';
+    }
+
+    function render(q) {
+      q = q.trim().toLowerCase();
+      var list = INDEX.filter(function (it) {
+        if (!q) return it.type === 'aid' && PICK.indexOf(it.href.split('=')[1]) > -1;
+        return it.key.indexOf(q) > -1;
+      });
+      active = -1;
+
+      if (!list.length) {
+        qPanel.innerHTML = '<div class="sc-qempty">没有找到相关内容，试试“烫伤”“噎住”“厨房”</div>';
+        return;
+      }
+
+      var html = '';
+      var aids = list.filter(function (it) { return it.type === 'aid'; });
+      var scenes = list.filter(function (it) { return it.type === 'scene'; });
+      if (aids.length) {
+        html += '<div class="sc-qgroup">急救方法</div>';
+        aids.forEach(function (it) { html += itemHtml(it); });
+      }
+      if (scenes.length) {
+        html += '<div class="sc-qgroup">场景</div>';
+        scenes.forEach(function (it) { html += itemHtml(it); });
+      }
+      qPanel.innerHTML = html;
+      qPanel.scrollTop = 0;
+    }
+
+    function open() {
+      render(qInput.value);
+      qPanel.hidden = false;
+      qInput.setAttribute('aria-expanded', 'true');
+    }
+
+    function close() {
+      qPanel.hidden = true;
+      qInput.setAttribute('aria-expanded', 'false');
+      active = -1;
+    }
+
+    function go(href) {
+      if (href.charAt(0) === '#') {
+        var el = document.querySelector(href);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          history.replaceState(null, '', href);
+        }
+        close();
+        qInput.blur();
+      } else {
+        window.location.href = href;
+      }
+    }
+
+    function paint(items) {
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.toggle('is-active', i === active);
+        items[i].setAttribute('aria-selected', i === active ? 'true' : 'false');
+      }
+      if (items[active]) items[active].scrollIntoView({ block: 'nearest' });
+    }
+
+    qInput.addEventListener('focus', open);
+    qInput.addEventListener('input', function () {
+      render(qInput.value);
+      qPanel.hidden = false;
+      qInput.setAttribute('aria-expanded', 'true');
+    });
+
+    qInput.addEventListener('keydown', function (e) {
+      var items = qPanel.querySelectorAll('.sc-qitem');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (qPanel.hidden) { open(); items = qPanel.querySelectorAll('.sc-qitem'); }
+        active = Math.min(active + 1, items.length - 1);
+        paint(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        active = Math.max(active - 1, 0);
+        paint(items);
+      } else if (e.key === 'Enter') {
+        if (active > -1 && items[active]) items[active].click();
+      } else if (e.key === 'Escape') {
+        close();
+        qInput.blur();
+      }
+    });
+
+    qPanel.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.sc-qitem') : null;
+      if (btn) go(btn.getAttribute('data-href'));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!qWrap.contains(e.target)) close();
+    });
+  }
+
+})();
+</script>
+
+</body>
+</html>

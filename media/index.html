@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-site-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>安护急救通 · 急救视频与拍照识别</title>
+
+<!-- 全站统一视觉规范：温柔科普 Warm Care · 陶土橙 -->
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="assets/theme.css">
+
+<style>
+/* ============================================================
+   页面级样式
+   规则：只消费 theme.css 的变量与组件，不覆盖任何主题变量。
+   仅新增本页专有的板块（视频卡 / 识别面板 / 流程条）。
+   ============================================================ */
+
+/* ---------- 01 排版微调（字体层面） ---------- */
+body{
+  line-height: 1.75;
+  letter-spacing: .008em;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3{ text-wrap: balance; }
+p{ text-wrap: pretty; }
+
+.h1{ letter-spacing: -.025em; }
+.h2{ letter-spacing: -.018em; }
+
+/* 中文正文行距略放，英文小标签收紧 */
+.lead{ line-height: 1.95; max-width: 30em; }
+.small{ line-height: 1.85; }
+
+/* 数字统一等宽 + 接近字距，避免跳动 */
+.num{
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  letter-spacing: -.015em;
+}
+
+/* 统一的小标签 */
+.label{
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-500);
+}
+.label b{ color: var(--brand-600); font-weight: 700; }
+
+/* ---------- 02 版面骨架 ---------- */
+.skip{
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--brand-900); color: #fff;
+  padding: 10px 16px; border-radius: 0 0 var(--r-sm) 0;
+  font-size: 15px; font-weight: 600;
+}
+.skip:focus{ left: 0; }
+
+.section-tight{ padding-block: clamp(28px, 4vw, 44px); }
+
+/* 锚点跳转时避开吸顶栏 */
+#module, #scenes, #videoCard{ scroll-margin-top: 88px; }
+
+.hero{ padding-block: clamp(44px, 6vw, 76px) clamp(24px, 4vw, 36px); }
+.hero .eyebrow{ margin-bottom: 22px; }
+.hero .h1{ max-width: 15em; }
+.hero .lead{ margin-top: 20px; }
+.hero-chips{ margin-top: 24px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+.section-head{
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+  padding-bottom: 16px; margin-bottom: clamp(20px, 3vw, 28px);
+  border-bottom: 1px solid var(--line);
+}
+.section-head h2{ font-size: clamp(21px, 2.3vw, 27px); letter-spacing: -.018em; }
+.section-head p{ font-size: 14px; color: var(--ink-500); }
+
+/* ---------- 03 主模块 ---------- */
+.module{
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 24px);
+  align-items: stretch;
+}
+
+/* 3.1 视频卡
+   左卡保持 16:9 的自然高度；右卡 stretch 到同一行高，
+   这样初始状态两块卡片顶底对齐，出结果后左卡不被拉变形 */
+.video-card{
+  display: flex; flex-direction: column; align-self: start;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-1);
+}
+.video-card.is-flash{
+  box-shadow: 0 0 0 3px var(--brand-200), var(--sh-2);
+}
+.stage{
+  position: relative; aspect-ratio: 16 / 9;
+  background: var(--brand-50); overflow: hidden; isolation: isolate;
+}
+.stage-art{ position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* 视频层 */
+.stage-video{
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  background: #17110C;
+  opacity: 0;
+  transition: opacity .4s var(--ease);
+  pointer-events: none;
+}
+.stage.has-video .stage-video{ opacity: 1; pointer-events: auto; }
+.stage.has-video .stage-art{ opacity: 0; }
+.stage-art{ transition: opacity .4s var(--ease); }
+
+/* 播放中：字幕条转为深色，文字转白 */
+.stage.has-video .stage-caption{
+  background: linear-gradient(to top, rgba(38, 26, 18, .82) 8%, rgba(38, 26, 18, 0));
+}
+.stage.has-video .stage-title{ color: #fff; }
+.stage.has-video .stage-sub{ color: rgba(255, 255, 255, .78); }
+
+/* 播放时隐藏中心按钮，鼠标移回画面才显形 */
+.stage.is-playing .play{ opacity: 0; }
+.stage.is-playing:hover .play{ opacity: 1; }
+.stage.is-playing .play:focus-visible{ opacity: 1; }
+.play{ z-index: 5; }
+
+.stage-corner{
+  position: absolute; width: 14px; height: 14px; z-index: 2;
+  border: 1px solid rgba(152, 86, 47, .38); pointer-events: none;
+}
+.stage-corner.tl{ top: 16px; left: 16px; border-right: 0; border-bottom: 0; }
+.stage-corner.tr{ top: 16px; right: 16px; border-left: 0; border-bottom: 0; }
+.stage-corner.bl{ bottom: 16px; left: 16px; border-right: 0; border-top: 0; }
+.stage-corner.br{ bottom: 16px; right: 16px; border-left: 0; border-top: 0; }
+
+.stage-tag{
+  position: absolute; top: 15px; left: 44px; z-index: 2;
+  font-size: 11px; font-weight: 600; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--brand-700); opacity: .72;
+}
+.stage-ratio{
+  position: absolute; top: 15px; right: 44px; z-index: 2;
+  font-size: 11px; letter-spacing: .16em; color: var(--ink-300);
+}
+
+.play{
+  position: absolute; inset: 0; margin: auto;
+  width: 78px; height: 78px; border-radius: 50%;
+  background: rgba(255, 255, 255, .95);
+  color: var(--brand-700);
+  display: grid; place-items: center;
+  box-shadow: 0 12px 30px rgba(120, 80, 50, .22);
+  transition: transform .22s var(--ease), background .22s var(--ease),
+              box-shadow .22s var(--ease), opacity .22s var(--ease);
+}
+.play:hover{ transform: scale(1.06); background: #fff; box-shadow: 0 16px 36px rgba(120, 80, 50, .28); }
+.play:active{ transform: scale(.99); }
+.play svg{ width: 22px; height: 22px; margin-left: 3px; fill: currentColor; }
+.play::before{
+  content: ""; position: absolute; inset: -11px; border-radius: 50%;
+  border: 1px solid rgba(196, 122, 72, .28); pointer-events: none;
+}
+.play.is-playing svg{ display: none; }
+.play.is-playing::after{
+  content: ""; width: 16px; height: 16px; border-radius: 3px; background: currentColor;
+}
+
+.stage-caption{
+  position: absolute; left: 0; right: 0; bottom: 0;
+  z-index: 3;
+  display: flex; align-items: flex-end; gap: 14px;
+  padding: 22px 24px 18px;
+  background: linear-gradient(to top, rgba(255,255,255,.97) 22%, rgba(255,255,255,0));
+  pointer-events: none;
+}
+.stage-title{ font-size: clamp(15px, 1.5vw, 18px); font-weight: 700; letter-spacing: -.01em; }
+.stage-sub{ margin-top: 3px; font-size: 13px; color: var(--ink-500); }
+
+.video-meta{ display: grid; grid-template-columns: repeat(3, 1fr); flex: none; border-top: 1px solid var(--line-soft); }
+.meta-item{ padding: 14px 22px; border-right: 1px solid var(--line-soft); }
+.meta-item:last-child{ border-right: 0; }
+.meta-k{ display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .14em; color: var(--ink-300); text-transform: uppercase; }
+.meta-v{ display: block; margin-top: 4px; font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+.meta-v small{ font-size: 13px; font-weight: 500; color: var(--ink-500); margin-left: 2px; }
+
+/* 3.2 识别面板 */
+.panel{
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  box-shadow: var(--sh-1);
+}
+.panel > .preview,
+.panel > .analysis,
+.panel > .result,
+.panel > .err{ flex: none; }
+.panel-head{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding-bottom: 14px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--line-soft);
+  flex: none;
+}
+.panel-title{ font-size: 16.5px; font-weight: 700; letter-spacing: -.01em; }
+
+.status{
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600; letter-spacing: .04em; color: var(--ink-500);
+}
+.status::before{
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-300);
+  transition: background .2s var(--ease);
+}
+.status.is-busy{ color: var(--info-600); }
+.status.is-busy::before{ background: var(--info-600); animation: pulse 1.1s var(--ease) infinite; }
+.status.is-done{ color: var(--success-600); }
+.status.is-done::before{ background: var(--success-600); }
+@keyframes pulse{ 50%{ opacity: .28; transform: scale(.82); } }
+
+/* 上传区 */
+.dropzone{
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1 1 auto;
+  gap: 11px; min-height: 208px; padding: 26px 20px;
+  border: 1.5px dashed var(--brand-200);
+  border-radius: var(--r);
+  background: var(--brand-50);
+  text-align: center;
+  transition: border-color .2s var(--ease), background .2s var(--ease), transform .2s var(--ease);
+}
+.dropzone:hover{ border-color: var(--brand-500); background: var(--brand-100); }
+.dropzone.is-over{ border-color: var(--brand-600); background: var(--brand-100); transform: scale(1.006); }
+.dropzone-icon{
+  width: 52px; height: 52px; border-radius: var(--r-sm);
+  background: var(--surface); color: var(--brand-600);
+  display: grid; place-items: center;
+  box-shadow: 0 2px 8px rgba(120, 80, 50, .08);
+  transition: transform .22s var(--ease);
+}
+.dropzone:hover .dropzone-icon{ transform: translateY(-2px); }
+.dropzone-icon svg{ width: 23px; height: 23px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.dropzone-title{ font-size: 15.5px; font-weight: 700; }
+.dropzone-hint{ font-size: 13px; color: var(--ink-500); line-height: 1.8; }
+.dropzone-actions{ display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+
+/* 交互蓝：取自主题 info 色，保持体系内一致 */
+.btn-blue{
+  background: var(--info-600); color: #fff;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--info-600) 24%, transparent);
+}
+.btn-blue:hover{ background: color-mix(in srgb, var(--info-600) 86%, #16283A); }
+.btn-blue:disabled{ background: var(--ink-300); box-shadow: none; cursor: not-allowed; transform: none; }
+
+.btn-blue-soft{
+  background: var(--info-50); color: var(--info-600);
+  border: 1px solid color-mix(in srgb, var(--info-600) 22%, var(--surface));
+}
+.btn-blue-soft:hover{ background: color-mix(in srgb, var(--info-600) 10%, var(--surface)); }
+.btn-blue-soft:disabled{ color: var(--ink-300); border-color: var(--line); background: var(--bg); cursor: not-allowed; transform: none; }
+
+/* 图片预览 */
+.preview{ position: relative; border-radius: var(--r-sm); overflow: hidden; background: var(--brand-50); }
+.preview img{ width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.preview-re{
+  position: absolute; top: 8px; right: 8px;
+  min-height: 30px; padding: 0 12px;
+  border-radius: var(--r-pill); border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .95); color: var(--ink-700);
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: color .2s var(--ease), border-color .2s var(--ease);
+}
+.preview-re:hover{ color: var(--brand-700); border-color: var(--brand-200); }
+
+/* 进度 */
+.analysis{ margin-top: 14px; }
+.analysis-line{ height: 4px; border-radius: var(--r-pill); background: var(--info-50); overflow: hidden; }
+.analysis-fill{
+  display: block; height: 100%; width: 0; border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand-500), var(--info-600));
+  transition: width .42s var(--ease);
+}
+.analysis-phase{ margin-top: 9px; font-size: 13px; color: var(--ink-500); min-height: 1.6em; }
+
+/* 结果 */
+.result{
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .26s var(--ease), transform .26s var(--ease);
+}
+.result.is-in{ opacity: 1; transform: none; }
+.result-head{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.result-label{ font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.result-meta{ font-size: 12px; color: var(--ink-500); }
+
+.score{
+  display: flex; align-items: flex-end; gap: 7px; flex-wrap: wrap;
+  padding: 16px 18px;
+  background: var(--brand-50);
+  border: 1px solid var(--brand-100);
+  border-radius: var(--r-sm);
+}
+.score-num{
+  font-family: var(--font-num); font-variant-numeric: tabular-nums;
+  font-size: 45px; font-weight: 700; line-height: 1;
+  color: var(--brand-700); letter-spacing: -.03em;
+}
+.score-unit{ font-size: 13px; font-weight: 600; color: var(--brand-700); opacity: .7; padding-bottom: 6px; }
+.score-bar{ flex: 1 1 100%; height: 6px; margin-top: 12px; border-radius: var(--r-pill); background: var(--brand-100); overflow: hidden; }
+.score-bar i{ display: block; height: 100%; width: 0; border-radius: inherit; background: var(--brand-600); transition: width .62s var(--ease); }
+
+.result-text{
+  margin-top: 12px; padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 14.5px; line-height: 1.95; color: var(--ink-900);
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 250px; overflow: auto;
+}
+.result-actions{ margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.result-actions .btn{ flex: 1 1 auto; }
+
+.err{
+  margin-top: 12px; padding: 14px 16px;
+  background: var(--urgent-50);
+  border: 1px solid var(--urgent-100);
+  border-radius: var(--r-sm);
+  font-size: 13.5px; line-height: 1.85; color: var(--ink-700);
+}
+.err strong{ color: var(--urgent-600); }
+.err code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px; background: var(--surface);
+  padding: 2px 6px; border-radius: 6px; border: 1px solid var(--line);
+}
+
+/* 顶栏：单页展示，仅保留品牌标识 */
+
+/* ---------- 04 流程条 ---------- */
+.flow{ display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(20px, 3vw, 28px); }
+.flow-item{
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  box-shadow: var(--sh-1);
+}
+.flow-no{
+  flex: none; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--brand-50); color: var(--brand-700);
+  font-family: var(--font-num); font-size: 14px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.flow-t{ font-size: 15px; font-weight: 700; }
+.flow-d{ margin-top: 3px; font-size: 13.5px; color: var(--ink-500); line-height: 1.8; }
+
+/* ---------- 05 场景速查：环形（Coverflow）轮播 ---------- */
+.ring-wrap{ position: relative; }
+.ring-frame{ position: relative; }
+
+.ring-stage{
+  position: relative;
+  height: clamp(360px, 34vw, 404px);
+  perspective: 1400px;
+  perspective-origin: 50% 46%;
+  overflow: hidden;
+}
+
+.ring{
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.ring:focus-visible{ outline: 3px solid var(--brand-500); outline-offset: 4px; border-radius: var(--r); }
+
+.ring .scene{
+  --cw: 360px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--cw);
+  height: 320px;
+  margin-left: calc(var(--cw) / -2);
+  margin-top: -160px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 24px 26px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  transition: transform .68s cubic-bezier(.22, .61, .36, 1),
+              opacity .46s var(--ease),
+              box-shadow .5s var(--ease);
+}
+.ring .scene.is-active{
+  box-shadow: 0 20px 48px -20px rgba(120, 80, 50, .44), var(--sh-2);
+}
+
+.scene-icon{
+  width: 48px; height: 48px; flex: none;
+  border-radius: var(--r-sm);
+  display: grid; place-items: center;
+  background: var(--brand-50); color: var(--brand-700);
+}
+.scene-icon svg{ width: 24px; height: 24px; stroke: currentColor; stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.scene-t{
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: -.015em;
+  margin-top: 2px;
+}
+.scene-d{
+  font-size: 15px;
+  color: var(--ink-500);
+  line-height: 1.75;
+  letter-spacing: .005em;
+  text-wrap: pretty;
+  flex: 1;
+  overflow: hidden;
+}
+.scene-link{ display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; letter-spacing: .01em; color: var(--brand-700); }
+.scene-link svg{ width: 13px; height: 13px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s var(--ease); }
+.scene:hover .scene-link svg{ transform: translateX(3px); }
+
+/* 卡片内的等级标签稍大一点，与放大后的标题呼应 */
+.ring .scene .chip{ font-size: 13.5px; height: 27px; padding: 0 12px; }
+
+/* 左右按钮 */
+.rail-nav{
+  position: absolute; top: 50%; z-index: 30;
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--sh-2);
+  color: var(--ink-700);
+  transform: translateY(-50%);
+  transition: color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+}
+.rail-nav--prev{ left: 0; }
+.rail-nav--next{ right: 0; }
+.rail-nav:hover{ color: var(--brand-700); border-color: var(--brand-200); }
+.rail-nav:active{ transform: translateY(-50%) scale(.94); }
+.rail-nav svg{ width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* 圆点指示 */
+.ring-dots{
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-top: 18px;
+}
+.ring-dot{
+  width: 7px; height: 7px; padding: 0;
+  border: none; border-radius: 999px;
+  background: var(--brand-200);
+  cursor: pointer;
+  transition: width .32s var(--ease), background .32s var(--ease);
+}
+.ring-dot:hover{ background: var(--brand-500); }
+.ring-dot.is-on{ width: 24px; background: var(--brand-600); }
+
+.rail-hint{
+  margin-top: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 13px; color: var(--ink-500); letter-spacing: .03em;
+}
+.rail-hint svg{ width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- 06 紧急行动条 ---------- */
+.emergency{
+  margin-top: clamp(32px, 4vw, 48px);
+  padding: 22px clamp(20px, 3vw, 28px);
+  background: var(--urgent-50);
+  border: 1px solid var(--urgent-100);
+  border-radius: var(--r-lg);
+  box-shadow: inset 4px 0 0 var(--urgent-600);
+}
+.emergency-t{ font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.emergency-d{ margin-top: 6px; font-size: 14px; color: var(--ink-700); }
+
+/* ---------- 07 页脚 ---------- */
+
+/* ---------- 08 纠错与建议 ---------- */
+.fb{ display: grid; gap: 12px; max-width: 720px; }
+.fb-row{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fb-input{
+  width: 100%; min-height: 46px; padding: 10px 14px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-family: inherit; font-size: 14px; color: var(--ink-900);
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
+}
+.fb-input:focus{ outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 4px var(--brand-50); }
+.fb-select{
+  appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A7666' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  padding-right: 38px;
+}
+.fb-area{
+  width: 100%; min-height: 112px; padding: 12px 14px; resize: vertical;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  font-family: inherit; font-size: 14px; line-height: 1.8; color: var(--ink-900);
+  transition: border-color .18s var(--ease), box-shadow .18s var(--ease);
+}
+.fb-area:focus{ outline: none; border-color: var(--brand-500); box-shadow: 0 0 0 4px var(--brand-50); }
+.fb-input::placeholder, .fb-area::placeholder{ color: var(--ink-300); }
+.fb-foot{ display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fb-count{ font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink-300); }
+.fb-msg{ font-size: 13px; color: var(--success-600); min-height: 1.3em; }
+.fb-msg.is-err{ color: var(--urgent-600); }
+.fb-list{ list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; max-width: 720px; }
+.fb-item{
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  font-size: 13.5px; line-height: 1.8; color: var(--ink-700);
+}
+.fb-item b{ color: var(--brand-700); font-weight: 600; }
+.fb-item time{ font-size: 12px; color: var(--ink-300); margin-left: 8px; font-variant-numeric: tabular-nums; }
+.fb-empty{ font-size: 13px; color: var(--ink-300); }
+
+/* ---------- 08 响应式 ---------- */
+@media (max-width: 1024px){
+  .module{ grid-template-columns: 1fr; }
+}
+@media (max-width: 900px){
+  .flow{ grid-template-columns: 1fr; }
+  .ring .scene{ --cw: 312px; height: 296px; margin-top: -148px; }
+  .stage-tag, .stage-ratio{ display: none; }
+}
+@media (max-width: 620px){
+  .video-meta{ grid-template-columns: 1fr; }
+  .meta-item{ border-right: 0; border-bottom: 1px solid var(--line-soft); }
+  .meta-item:last-child{ border-bottom: 0; }
+  .score-num{ font-size: 39px; }
+  .rail-nav{ width: 40px; height: 40px; }
+  .rail-nav--prev{ left: -2px; }
+  .rail-nav--next{ right: -2px; }
+  .ring .scene{ --cw: 264px; height: 280px; margin-top: -140px; padding: 20px 22px; gap: 11px; }
+  .scene-t{ font-size: 17px; }
+  .scene-d{ font-size: 13.5px; }
+  .scene-link{ font-size: 13px; }
+  .ring .scene .chip{ font-size: 12.5px; height: 25px; padding: 0 11px; }
+  .fb-row{ grid-template-columns: 1fr; }
+}
+
+/* ---------- 09 无障碍 ---------- */
+@media (prefers-reduced-motion: reduce){
+  .play:hover, .scene:hover, .dropzone.is-over,
+  .dropzone:hover .dropzone-icon, .btn:hover{ transform: none; }
+}
+
+[hidden]{ display: none !important; }
+
+/* ---------- 10 字号整体放大 ----------
+   服务人群覆盖各年龄段，正文与控件统一上调一档 */
+body{ font-size: 16px; line-height: 1.8; }
+.lead{ font-size: 18px; }
+.btn{ font-size: 15px; }
+.btn-sm{ font-size: 14px; }
+.btn-lg{ font-size: 16px; }
+.chip{ font-size: 13px; }
+.eyebrow{ font-size: 12.5px; }
+.footer{ font-size: 14px; }
+
+/* 接入全站：小屏保留导航（原 theme.css 在 ≤900px 会把 .nav 隐藏） */
+@media (max-width: 900px) {
+  .topbar-inner { flex-wrap: wrap; height: auto; gap: 8px; padding: 10px 0; }
+  .nav { display: flex; order: 3; width: 100%; margin-left: 0; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; }
+}
+</style>
+</head>
+
+<body id="top">
+<a class="skip" href="#main">跳到主要内容</a>
+
+<!-- 全站导航（由 ../js/site.js 注入） -->
+<div id="site-topbar"></div>
+
+<main id="main">
+
+  <!-- ==================== Hero ==================== -->
+  <section class="container hero">
+    <span class="eyebrow">多媒体交互 · Media Interaction</span>
+    <h1 class="h1">先看清伤情，再动手施救。</h1>
+    <p class="lead">观看标准操作视频，或用手机拍下现场照片——混元视觉模型识别图片内容，返回文字结论与评分。</p>
+    <div class="hero-chips">
+      <span class="chip chip-ok">已校对</span>
+      <span class="chip">建议全屏观看</span>
+      <span class="chip chip-neutral">演示数据 · 不构成医疗建议</span>
+    </div>
+  </section>
+
+  <!-- ==================== 主模块 ==================== -->
+  <section class="container section section-tight" id="module">
+    <div class="section-head">
+      <h2 class="h2">急救视频 · 拍照识别</h2>
+      <p>识别结果仅用于引导学习，紧急情况请直接拨打 120</p>
+    </div>
+
+    <div class="module">
+
+<article class="video-card" id="videoCard">
+        <div class="stage" id="stage">
+          <video class="stage-video" id="stageVideo" playsinline preload="none"
+                 aria-label="急救教学视频"></video>
+          <svg class="stage-art" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="gBg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#FDF7F0"/>
+                <stop offset="1" stop-color="#F6E7D8"/>
+              </linearGradient>
+              <linearGradient id="gPulse" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#D99A6C" stop-opacity="0"/>
+                <stop offset=".35" stop-color="#D99A6C"/>
+                <stop offset="1" stop-color="#98562F"/>
+              </linearGradient>
+              <pattern id="gGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M40 0H0V40" fill="none" stroke="#4A3325" stroke-opacity=".045" stroke-width="1"/>
+              </pattern>
+            </defs>
+
+            <rect width="800" height="450" fill="url(#gBg)"/>
+            <rect width="800" height="450" fill="url(#gGrid)"/>
+
+            <circle cx="400" cy="214" r="118" fill="#FFFFFF" opacity=".6"/>
+            <circle cx="400" cy="214" r="118" fill="none" stroke="#98562F" stroke-opacity=".26"
+                    stroke-width="1" stroke-dasharray="2 7"/>
+            <circle cx="400" cy="214" r="148" fill="none" stroke="#98562F" stroke-opacity=".10" stroke-width="1"/>
+
+            <path d="M318 214h34l14-30 20 62 16-32h56"
+                  fill="none" stroke="url(#gPulse)" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+
+            <text x="400" y="262" text-anchor="middle"
+                  font-size="10.5" letter-spacing="4" fill="#98562F" opacity=".55">FIRST AID · VIDEO</text>
+          </svg>
+
+          <span class="stage-corner tl" aria-hidden="true"></span>
+          <span class="stage-corner tr" aria-hidden="true"></span>
+          <span class="stage-corner bl" aria-hidden="true"></span>
+          <span class="stage-corner br" aria-hidden="true"></span>
+
+          <span class="stage-tag">Media Preview</span>
+          <span class="stage-ratio num">16 : 9</span>
+
+          <button class="play" id="playBtn" type="button" aria-label="播放演示视频" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5z"/></svg>
+          </button>
+
+          <div class="stage-caption">
+            <div>
+              <h3 class="stage-title" id="videoTitle">急救视频操作</h3>
+              <p class="stage-sub" id="videoSub">选择下方场景，播放对应处置视频</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="video-meta">
+          <div class="meta-item">
+            <span class="meta-k">Duration</span>
+            <span class="meta-v num" id="metaDur">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-k">Quality</span>
+            <span class="meta-v num">720p</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-k">Source</span>
+            <span class="meta-v">急救帮帮忙</span>
+          </div>
+        </div>
+      </article>
+
+<aside class="panel" aria-labelledby="panelTitle">
+        <div class="panel-head">
+          <h3 class="panel-title" id="panelTitle">拍照识别</h3>
+          <span class="status" id="status" aria-live="polite">待上传</span>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+          <span class="dropzone-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7l1.3-2h6l1.3 2h1.7A2.5 2.5 0 0 1 20 8.5v9A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5"/>
+              <circle cx="12" cy="12.5" r="3.6"/>
+            </svg>
+          </span>
+          <span class="dropzone-title">拍照或上传图片</span>
+          <span class="dropzone-hint">拖拽图片到这里，或使用下方按钮<br>支持 JPG / PNG，单张不超过 8MB</span>
+
+          <div class="dropzone-actions">
+            <button class="btn btn-blue" id="cameraBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7l1.3-2h6l1.3 2h1.7A2.5 2.5 0 0 1 20 8.5v9A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5z"/>
+                <circle cx="12" cy="12.5" r="3.4"/>
+              </svg>
+              拍照
+            </button>
+            <button class="btn btn-blue-soft" id="uploadBtn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/>
+                <path d="M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/>
+              </svg>
+              上传图片
+            </button>
+          </div>
+
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+          <input type="file" id="uploadInput" accept="image/*" hidden>
+        </div>
+
+        <div class="preview" id="preview" hidden>
+          <img id="previewImg" alt="待识别的图片">
+          <button class="preview-re" id="reBtn" type="button">更换</button>
+        </div>
+
+        <div class="analysis" id="analysis" hidden>
+          <div class="analysis-line"><i class="analysis-fill" id="analysisFill"></i></div>
+          <p class="analysis-phase" id="analysisPhase">准备中…</p>
+        </div>
+
+        <div class="result" id="result" hidden>
+          <div class="result-head">
+            <span class="result-label">识别结果</span>
+            <span class="result-meta" id="rMeta">hunyuan-vision</span>
+          </div>
+
+          <div class="score" id="scoreBox" hidden>
+            <span class="score-num" id="scoreNum">0</span>
+            <span class="score-unit">分</span>
+            <div class="score-bar"><i id="scoreFill"></i></div>
+          </div>
+
+          <pre class="result-text" id="rText"></pre>
+
+          <div class="result-actions">
+            <button class="btn btn-blue btn-sm" id="retryBtn" type="button">重新识别</button>
+            <button class="btn btn-ghost btn-sm" id="clearBtn" type="button">更换图片</button>
+          </div>
+        </div>
+
+        <div class="err" id="errorBox" role="alert" hidden></div>
+      </aside>
+
+    </div>
+
+    <div class="flow">
+      <div class="flow-item">
+        <span class="flow-no">01</span>
+        <div>
+          <p class="flow-t">拍摄现场</p>
+          <p class="flow-d">保持光线充足、距离 30–50cm，拍清主体全貌。</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <span class="flow-no">02</span>
+        <div>
+          <p class="flow-t">智能识别</p>
+          <p class="flow-d">提交混元视觉模型，返回识别文字与得分。</p>
+        </div>
+      </div>
+      <div class="flow-item">
+        <span class="flow-no">03</span>
+        <div>
+          <p class="flow-t">对照学习</p>
+          <p class="flow-d">回到上方视频，按标准步骤操作。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 场景速查 ==================== -->
+  <section class="container section section-tight" id="scenes">
+    <div class="section-head">
+      <h2 class="h2">常见场景速查</h2>
+      <p>按等级排序，红色仅用于高危</p>
+    </div>
+
+<div class="ring-wrap" role="region" aria-roledescription="轮播" aria-label="常见场景速查">
+      <div class="ring-frame">
+        <div class="ring-stage">
+          <div class="ring" id="sceneRing" tabindex="0"
+               aria-label="场景环形轮播，可用左右方向键切换"></div>
+        </div>
+
+        <button class="rail-nav rail-nav--prev" id="railPrev" type="button" aria-label="上一个场景">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="rail-nav rail-nav--next" id="railNext" type="button" aria-label="下一个场景">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="ring-dots" id="ringDots"></div>
+
+      <p class="rail-hint">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 12H3M5.5 9.5 3 12l2.5 2.5"/>
+          <path d="M16 12h5M18.5 9.5 21 12l-2.5 2.5"/>
+        </svg>
+        点击左右箭头或圆点，环形浏览全部场景
+      </p>
+    </div>
+
+<div class="emergency">
+      <p class="emergency-t">情况紧急？不要停下来查资料。</p>
+      <p class="emergency-d">出现意识不清、呼吸停止或大出血时，请立即拨打 120，并听从调度员指引。</p>
+    </div>
+  </section>
+
+  <!-- ==================== 纠错与建议 ==================== -->
+  <section class="container section-tight" id="feedback">
+    <div class="section-head">
+      <h2 class="h2">纠错与建议</h2>
+      <p>提交后保存到服务器数据库，所有访问者可见</p>
+    </div>
+
+    <form class="fb" id="fbForm" novalidate>
+      <div class="fb-row">
+        <input class="fb-input" id="fbName" maxlength="20" placeholder="称呼（可选）">
+        <select class="fb-input fb-select" id="fbScene">
+          <option value="">相关场景（可选）</option>
+          <option value="burn">烧烫伤</option>
+          <option value="cut">割伤出血</option>
+          <option value="sprain">轻微扭伤</option>
+          <option value="choke">气道异物</option>
+          <option value="heat">中暑</option>
+          <option value="shock">触电</option>
+        </select>
+      </div>
+
+      <textarea class="fb-area" id="fbContent" maxlength="200" required
+                placeholder="发现哪里写错了？或希望补充什么内容？（2–200 字）"></textarea>
+
+      <div class="fb-foot">
+        <span class="fb-count" id="fbCount">0 / 200</span>
+        <button class="btn btn-primary" type="submit" id="fbSubmit">提交</button>
+      </div>
+      <p class="fb-msg" id="fbMsg" aria-live="polite"></p>
+    </form>
+
+    <ul class="fb-list" id="fbList" aria-live="polite"></ul>
+  </section>
+
+</main>
+
+<!-- ==================== 页脚 ==================== -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      安护急救通 · 急救视频多媒体交互模块<br>
+      演示内容与识别结果仅用于界面设计参考，不构成医疗建议；紧急情况请拨打 120。
+    </div>
+  </div>
+</footer>
+
+<script src="hunyuan.js"></script>
+
+<script>
+/* ============================================================
+   页面逻辑：拍照 / 上传 → 混元视觉识别 → 文字结果与打分
+   依赖 hunyuan.js（独立实现模块，接口与 Token 与指定文件一致）
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var el = {
+    dropzone: $('dropzone'),
+    cameraBtn: $('cameraBtn'),
+    uploadBtn: $('uploadBtn'),
+    cameraInput: $('cameraInput'),
+    uploadInput: $('uploadInput'),
+    preview: $('preview'),
+    previewImg: $('previewImg'),
+    reBtn: $('reBtn'),
+    analysis: $('analysis'),
+    analysisFill: $('analysisFill'),
+    analysisPhase: $('analysisPhase'),
+    result: $('result'),
+    rMeta: $('rMeta'),
+    scoreBox: $('scoreBox'),
+    scoreNum: $('scoreNum'),
+    scoreFill: $('scoreFill'),
+    rText: $('rText'),
+    retryBtn: $('retryBtn'),
+    clearBtn: $('clearBtn'),
+    errorBox: $('errorBox'),
+    status: $('status'),
+    playBtn: $('playBtn'),
+    videoSub: $('videoSub')
+  };
+
+  var API = window.HunyuanVision;
+
+  /* 提示词：
+   *   API.PROMPTS.generic —— 通用版，试卷与伤害现场都会给出「得分」
+   *   API.PROMPTS.exam    —— 与指定 js 文件中的提示词原文完全一致 */
+  var PROMPT = API ? API.PROMPTS.generic : '';
+
+  var current = null;        // 当前 File
+  var previewUrl = null;     // 预览 ObjectURL
+  var ticker = null;         // 进度文案计时器
+  var maxSize = 8 * 1024 * 1024;
+
+  /* 支持 ?proxy=http://127.0.0.1:8787/chat/completions 免改代码切代理 */
+  /* 由服务端托管时，识别统一走后端代理（密钥留在服务端，同时绕开 CORS） */
+  var proxy = new URLSearchParams(location.search).get('proxy');
+  if (API) {
+    if (proxy) API.setProxy(proxy);
+    else if (/^https?:$/.test(location.protocol)) API.setProxy('/api/recognize');
+  }
+
+  var reduceMotion = function () {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  };
+
+  function esc(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function setStatus(text, mode) {
+    el.status.textContent = text;
+    el.status.className = 'status' + (mode ? ' is-' + mode : '');
+  }
+
+  function setBusy(on) {
+    el.cameraBtn.disabled = on;
+    el.uploadBtn.disabled = on;
+  }
+
+  /* ---------------- 进度文案 ---------------- */
+  var PHASES = ['压缩图片…', '上传至混元…', '模型识别中…', '解析识别结果…'];
+  var phaseIdx = 0;
+
+  function startTicker() {
+    phaseIdx = 0;
+    el.analysis.hidden = false;
+    el.analysisFill.style.width = '18%';
+    el.analysisPhase.textContent = PHASES[0];
+
+    window.clearInterval(ticker);
+    ticker = window.setInterval(function () {
+      phaseIdx = Math.min(phaseIdx + 1, PHASES.length - 1);
+      el.analysisPhase.textContent = PHASES[phaseIdx];
+      el.analysisFill.style.width = (24 + phaseIdx * 20) + '%';
+    }, 1400);
+  }
+
+  function stopTicker() {
+    window.clearInterval(ticker);
+    ticker = null;
+    el.analysisFill.style.width = '100%';
+  }
+
+  /* ---------------- 选择文件 ---------------- */
+  function onPick(e) {
+    var file = e.target.files && e.target.files[0];
+    if (file) handleFile(file);
+    e.target.value = '';
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+
+    if (!file.type || file.type.indexOf('image/') !== 0) {
+      showError('请选择图片文件（JPG / PNG）。');
+      return;
+    }
+    if (file.size > maxSize) {
+      showError('图片超过 8MB，请压缩后再试。');
+      return;
+    }
+
+    current = file;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+
+    el.previewImg.src = previewUrl;
+    el.preview.hidden = false;
+    el.dropzone.hidden = true;
+
+    el.result.hidden = true;
+    el.result.classList.remove('is-in');
+    el.errorBox.hidden = true;
+    el.scoreBox.hidden = true;
+    el.scoreFill.style.width = '0%';
+
+    runRecognize();
+  }
+
+  /* ---------------- 调用混元 ---------------- */
+  function runRecognize() {
+    if (!current) return;
+
+    if (!API) {
+      showError('未能加载 hunyuan.js，请确认它与 index.html 在同一目录。');
+      return;
+    }
+
+    el.errorBox.hidden = true;
+    el.result.hidden = true;
+    el.result.classList.remove('is-in');
+    setBusy(true);
+    setStatus('识别中', 'busy');
+    startTicker();
+
+    API.recognizeFile(current, { prompt: PROMPT })
+      .then(function (res) {
+        stopTicker();
+        renderResult(res);
+      })
+      .catch(function (err) {
+        stopTicker();
+        el.analysis.hidden = true;
+        showError(err && err.message ? err.message : '识别失败，请重试');
+      })
+      .then(function () {
+        setBusy(false);
+      });
+  }
+
+  /* ---------------- 渲染结果（图片下方） ---------------- */
+  function renderResult(res) {
+    el.analysis.hidden = true;
+    el.result.hidden = false;
+
+    el.rText.textContent = res.text || '（模型未返回文字内容）';
+    el.rMeta.textContent = 'hunyuan-vision · ' + ((res.elapsed || 0) / 1000).toFixed(1) + 's';
+
+    var score = typeof res.score === 'number' ? res.score : null;
+    if (score !== null) {
+      el.scoreBox.hidden = false;
+      el.scoreNum.textContent = score;
+      window.requestAnimationFrame(function () {
+        el.scoreFill.style.width = Math.max(0, Math.min(100, score)) + '%';
+      });
+    } else {
+      el.scoreBox.hidden = true;
+    }
+
+    window.requestAnimationFrame(function () {
+      el.result.classList.add('is-in');
+    });
+
+    setStatus('识别完成', 'done');
+  }
+
+  /* ---------------- 错误 ---------------- */
+  function showError(msg) {
+    el.analysis.hidden = true;
+    el.result.hidden = true;
+    el.errorBox.hidden = false;
+
+    var hint = /CORS|无法直连|Failed to fetch/i.test(msg)
+      ? '<br>浏览器直连被拦截：先运行 <code>node proxy.mjs</code>，' +
+        '再用 <code>index.html?proxy=http://127.0.0.1:8787/chat/completions</code> 打开页面。'
+      : '';
+
+    el.errorBox.innerHTML = '<b>识别失败：</b>' + esc(msg) + hint;
+    setStatus('识别失败');
+  }
+
+  /* ---------------- 重置 ---------------- */
+  function reset() {
+    current = null;
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+
+    el.preview.hidden = true;
+    el.dropzone.hidden = false;
+    el.analysis.hidden = true;
+    el.result.hidden = true;
+    el.result.classList.remove('is-in');
+    el.errorBox.hidden = true;
+    el.scoreFill.style.width = '0%';
+    el.analysisFill.style.width = '0%';
+
+    setBusy(false);
+    setStatus('待上传');
+  }
+
+  /* ---------------- 事件绑定 ---------------- */
+  if (el.cameraBtn) el.cameraBtn.addEventListener('click', function () { el.cameraInput.click(); });
+  if (el.uploadBtn) el.uploadBtn.addEventListener('click', function () { el.uploadInput.click(); });
+  if (el.cameraInput) el.cameraInput.addEventListener('change', onPick);
+  if (el.uploadInput) el.uploadInput.addEventListener('change', onPick);
+  if (el.reBtn) el.reBtn.addEventListener('click', reset);
+  if (el.clearBtn) el.clearBtn.addEventListener('click', reset);
+  if (el.retryBtn) {
+    el.retryBtn.addEventListener('click', function () { if (current) runRecognize(); });
+  }
+
+  /* 拖拽上传 */
+  ['dragenter', 'dragover'].forEach(function (evt) {
+    el.dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      el.dropzone.classList.add('is-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    el.dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      el.dropzone.classList.remove('is-over');
+    });
+  });
+  el.dropzone.addEventListener('drop', function (e) {
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  });
+
+  /* 平滑滚动用统一的减弱动效判断 */
+  void reduceMotion;
+
+  /* 控制台自检：接入后可在 Console 里快速验证配置 */
+  if (API) {
+    console.info('[hunyuan] endpoint =', API.CONFIG.proxy || API.CONFIG.endpoint);
+    console.info('[hunyuan] model    =', API.CONFIG.model);
+  } else {
+    console.warn('[hunyuan] 未找到 HunyuanVision，请检查 hunyuan.js 是否加载成功');
+  }
+})();
+</script>
+<script>
+/* 场景速查：环形轮播 + 选中后播放对应视频 */
+(function () {
+  var ring = document.getElementById('sceneRing');
+  var prev = document.getElementById('railPrev');
+  var next = document.getElementById('railNext');
+  var dotsBox = document.getElementById('ringDots');
+  if (!ring || !prev || !next) return;
+
+  var cards = [], dots = [], n = 0, active = 0;
+  var SCENES = {};
+
+  var stage = document.getElementById('stage');
+  var video = document.getElementById('stageVideo');
+  var playBtn = document.getElementById('playBtn');
+  var elTitle = document.getElementById('videoTitle');
+  var elSub = document.getElementById('videoSub');
+  var elDur = document.getElementById('metaDur');
+  var videoCard = document.getElementById('videoCard');
+  var currentKey = null;
+
+  /* ---------------- 兜底数据 ---------------- */
+  var FALLBACK = [
+    { key: 'burn', name: '烧烫伤', level: 'urgent', level_text: '高危 · 立即处理',
+      summary: '冲、脱、泡、盖、送五步法，切勿涂抹牙膏或酱油。',
+      steps: ['立即用流动冷水持续冲洗 15–20 分钟', '小心剪开衣物，不要撕扯粘连部分',
+              '覆盖清洁敷料，不要涂抹牙膏、酱油、香油', '面积大于手掌或位于面部、关节，立即就医'],
+      video: 'assets/videos/burn.mp4', duration: '03:00',
+      video_title: '烧烫伤现场处理', video_sub: '冲洗降温 · 覆盖保护 · 及时就医',
+      icon: ['M12 3c2.6 3.4 5.4 5.7 5.4 9.1a5.4 5.4 0 0 1-10.8 0c0-1.7.8-3 2-4.3.8 1 1.3.6 2-1.2.4-1 .9-2 1.4-3.6z',
+             'M12 18.5c-1.4 0-2.4-1-2.4-2.2 0-1.3 1.4-2.2 2.4-3.6 1 1.4 2.4 2.3 2.4 3.6 0 1.2-1 2.2-2.4 2.2z'] },
+    { key: 'cut', name: '割伤出血', level: 'watch', level_text: '需观察',
+      summary: '直接压迫止血，判断出血量，必要时就近急诊缝合。',
+      steps: ['用清洁纱布直接压迫伤口 5–10 分钟', '抬高患肢高于心脏位置',
+              '止血后生理盐水冲洗，覆盖无菌敷料', '伤口深、边缘张开或污染严重，24 小时内就医'],
+      video: 'assets/videos/cut.mp4', duration: '03:17',
+      video_title: '止血现场处理', video_sub: '直接压迫 · 加压包扎 · 判断就医',
+      icon: ['M3.5 12a8.5 8.5 0 0 1 17 0', 'M3.5 12v3.2A2.8 2.8 0 0 0 6.3 18h.9v-6H6.3',
+             'M20.5 12v3.2A2.8 2.8 0 0 1 17.7 18h-.9v-6h.9', 'M12 8.6v4M12 15.4v.6'] },
+    { key: 'sprain', name: '轻微扭伤', level: 'mild', level_text: '可自行处理',
+      summary: '休息、冰敷、加压、抬高，48 小时内避免热敷揉搓。',
+      steps: ['停止活动，避免患处承重', '48 小时内冰敷，每次 15–20 分钟',
+              '弹力绷带加压包扎，注意不要过紧', '抬高患肢；48 小时内禁止热敷与揉搓'],
+      video: 'assets/videos/sprain.mp4', duration: '03:28',
+      video_title: '踝关节扭伤现场处理', video_sub: '制动 · 冰敷 · 加压 · 抬高',
+      icon: ['M20 12a8 8 0 1 1-2.6-5.9', 'M20 4v4.4h-4.4', 'M12 9.8a2.2 2.2 0 1 0 0 4.4a2.2 2.2 0 1 0 0-4.4'] },
+    { key: 'choke', name: '气道异物', level: 'urgent', level_text: '高危 · 立即处理',
+      summary: '无法发声、双手抓喉，立即使用海姆立克法解除梗阻。',
+      steps: ['询问「你能说话吗」，不能发声即为完全梗阻', '成人采用海姆立克腹部冲击法',
+              '婴儿采用背部拍击 + 胸部按压', '患者失去意识，立即拨打 120 并开始心肺复苏'],
+      video: 'assets/videos/choke.mp4', duration: '04:10',
+      video_title: '气道异物梗阻现场处理', video_sub: '海姆立克 · 婴儿拍背 · 无意识处理',
+      icon: ['M4 8h8a3 3 0 1 0-3-3', 'M4 12h5', 'M4 16h8a3 3 0 1 1-3 3'] },
+    { key: 'heat', name: '中暑', level: 'watch', level_text: '需观察',
+      summary: '迅速移至阴凉处，解开衣物，补充含盐饮料并降温。',
+      steps: ['立即转移到阴凉通风处', '解开衣物，用湿毛巾擦拭降温',
+              '意识清醒者少量多次补充含盐饮料', '出现高热、昏迷、抽搐，立即送医'],
+      video: 'assets/videos/heat.mp4', duration: '04:01',
+      video_title: '中暑现场处理', video_sub: '转移阴凉 · 快速降温 · 补充液体',
+      icon: ['M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8',
+             'M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4'] },
+    { key: 'shock', name: '触电', level: 'urgent', level_text: '高危 · 立即处理',
+      summary: '先断电或用绝缘物挑开电源，切勿徒手拉扯伤者。',
+      steps: ['立即切断电源或用干燥木棍挑开电线', '切勿徒手接触伤者',
+              '确认环境安全后再施救', '呼吸心跳停止，立即心肺复苏并拨打 120'],
+      video: 'assets/videos/shock.mp4', duration: '03:03',
+      video_title: '触电现场处理', video_sub: '先断电 · 再施救 · 心肺复苏',
+      icon: ['M13 2 4 14h6l-1 8 9-12h-6l1-8z'] }
+  ];
+
+  function normalize(rows) {
+    return rows.map(function (s) {
+      var icon = s.icon, steps = s.steps;
+      if (typeof icon === 'string') { try { icon = JSON.parse(icon); } catch (e) { icon = []; } }
+      if (typeof steps === 'string') { try { steps = JSON.parse(steps); } catch (e) { steps = []; } }
+      if (!Array.isArray(icon)) icon = [];
+      if (!Array.isArray(steps)) steps = [];
+      return {
+        key: s.key,
+        name: s.name,
+        level: s.level,
+        levelText: s.level_text,
+        summary: s.summary || '',
+        steps: steps,
+        icon: icon,
+        videoTitle: s.video_title || s.name,
+        videoSub: s.video_sub || s.summary || '',
+        video: s.video,
+        duration: s.duration
+      };
+    });
+  }
+
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+
+  function makeCard(s) {
+    var art = document.createElement('article');
+    art.className = 'scene';
+    art.setAttribute('data-key', s.key);
+
+    var chip = document.createElement('span');
+    chip.className = 'chip ' + (s.level === 'urgent' ? 'chip-urgent'
+      : s.level === 'watch' ? 'chip-warn' : 'chip-ok');
+    chip.textContent = s.levelText;
+
+    var iconBox = document.createElement('span');
+    iconBox.className = 'scene-icon';
+    iconBox.setAttribute('aria-hidden', 'true');
+    var svg = svgEl('svg', { viewBox: '0 0 24 24' });
+    s.icon.forEach(function (d) { svg.appendChild(svgEl('path', { d: d })); });
+    iconBox.appendChild(svg);
+
+    var title = document.createElement('h3');
+    title.className = 'scene-t';
+    title.textContent = s.name;
+
+    var desc = document.createElement('p');
+    desc.className = 'scene-d';
+    desc.textContent = s.summary;
+
+    var link = document.createElement('a');
+    link.className = 'scene-link';
+    link.href = '#videoCard';
+    link.appendChild(document.createTextNode('查看处置步骤 '));
+    var arrow = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true' });
+    arrow.appendChild(svgEl('path', { d: 'M5 12h13M13 6l6 6-6 6' }));
+    link.appendChild(arrow);
+
+    art.appendChild(chip);
+    art.appendChild(iconBox);
+    art.appendChild(title);
+    art.appendChild(desc);
+    art.appendChild(link);
+    return art;
+  }
+
+  function build(list) {
+    ring.innerHTML = '';
+    cards = []; dots = []; SCENES = {};
+
+    list.forEach(function (s) {
+      var el = makeCard(s);
+      ring.appendChild(el);
+      cards.push(el);
+      SCENES[s.key] = s;
+    });
+    n = cards.length;
+
+    if (dotsBox) {
+      dotsBox.innerHTML = '';
+      cards.forEach(function (card, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ring-dot';
+        b.setAttribute('aria-label', '第 ' + (i + 1) + ' 个场景：' + list[i].name);
+        b.addEventListener('click', function () { goTo(i); });
+        dotsBox.appendChild(b);
+        dots.push(b);
+      });
+    }
+
+    active = 0;
+    render();
+    
+  }
+
+  /* ---------------- 步骤与视频 ---------------- */
+  function scrollToStage() {
+    if (!videoCard) return;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    videoCard.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    videoCard.classList.add('is-flash');
+    setTimeout(function () { videoCard.classList.remove('is-flash'); }, 1600);
+  }
+
+  function selectScene(key) {
+    var s = SCENES[key];
+    if (!s) return;
+    currentKey = key;
+
+    if (elTitle) elTitle.textContent = s.videoTitle;
+    if (elSub) elSub.textContent = s.videoSub;
+    if (elDur) elDur.textContent = s.duration;
+
+    if (video) {
+      if (video.getAttribute('data-src') !== s.video) {
+        video.setAttribute('data-src', s.video);
+        video.src = s.video;
+        video.load();
+      }
+      if (stage) stage.classList.add('has-video');
+      var pr = video.play();
+      if (pr && pr.catch) pr.catch(function () {});
+    }
+
+    scrollToStage();
+  }
+
+  function togglePlay() {
+    if (!video) return;
+    if (!currentKey) { selectScene(Object.keys(SCENES)[0]); return; }
+    if (video.paused) {
+      if (stage) stage.classList.add('has-video');
+      var pr = video.play();
+      if (pr && pr.catch) pr.catch(function () {});
+    } else {
+      video.pause();
+    }
+  }
+
+  if (video) {
+    video.addEventListener('click', togglePlay);
+    video.addEventListener('play', function () {
+      if (stage) stage.classList.add('is-playing');
+      if (playBtn) {
+        playBtn.classList.add('is-playing');
+        playBtn.setAttribute('aria-pressed', 'true');
+        playBtn.setAttribute('aria-label', '暂停视频');
+      }
+    });
+    video.addEventListener('pause', function () {
+      if (stage) stage.classList.remove('is-playing');
+      if (playBtn) {
+        playBtn.classList.remove('is-playing');
+        playBtn.setAttribute('aria-pressed', 'false');
+        playBtn.setAttribute('aria-label', '播放视频');
+      }
+    });
+    video.addEventListener('error', function () {
+      if (stage) stage.classList.remove('has-video', 'is-playing');
+      if (elSub) elSub.textContent = '视频加载失败，请检查 assets/videos/ 下的文件';
+    });
+  }
+
+  if (playBtn) {
+    playBtn.addEventListener('click', function (e) { e.preventDefault(); togglePlay(); });
+  }
+
+  /* ---------------- 环形轮播 ---------------- */
+  function offsetOf(i) {
+    var d = i - active;
+    var half = n / 2;
+    return ((d + half) % n + n) % n - half;
+  }
+
+  function render() {
+    if (!n) return;
+    var w = cards[0].offsetWidth || 312;
+    var unit = w * 0.8;
+
+    for (var i = 0; i < n; i++) {
+      var card = cards[i];
+      var d = offsetOf(i);
+      var abs = Math.abs(d);
+      var show = abs <= 2;
+
+      card.style.transform =
+        'translate3d(' + (d * unit) + 'px,' + (abs * 10) + 'px,' + (-abs * unit * 0.5) + 'px) ' +
+        'rotateY(' + (-d * 24) + 'deg) scale(' + (1 - abs * 0.09) + ')';
+      card.style.opacity = show ? (abs === 0 ? 1 : (abs === 1 ? 0.95 : 0.6)) : 0;
+      card.style.visibility = show ? 'visible' : 'hidden';
+      card.style.zIndex = String(20 - abs);
+      card.classList.toggle('is-active', abs === 0);
+      card.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+
+    for (var k = 0; k < dots.length; k++) {
+      dots[k].classList.toggle('is-on', k === active);
+      dots[k].setAttribute('aria-current', k === active ? 'true' : 'false');
+    }
+  }
+
+  function goTo(i) {
+    if (!n) return;
+    active = ((i % n) + n) % n;
+    render();
+  }
+
+  function step(dir) { goTo(active + dir); }
+
+  prev.addEventListener('click', function () { step(-1); });
+  next.addEventListener('click', function () { step(1); });
+
+  ring.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { step(1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { step(-1); e.preventDefault(); }
+  });
+
+  ring.addEventListener('click', function (e) {
+    var link = e.target && e.target.closest ? e.target.closest('.scene-link') : null;
+    if (!link) return;
+    var card = link.closest('.scene');
+    var key = card ? card.getAttribute('data-key') : null;
+    e.preventDefault();
+    if (key) selectScene(key);
+  });
+
+  window.addEventListener('resize', render);
+  window.addEventListener('load', render);
+
+  if (location.protocol === 'file:') {
+    build(normalize(FALLBACK));
+    return;
+  }
+
+  fetch('/api/scenes', { headers: { Accept: 'application/json' } })
+    .then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function (rows) {
+      if (!Array.isArray(rows) || !rows.length) throw new Error('empty');
+      build(normalize(rows));
+    })
+    .catch(function () {
+      build(normalize(FALLBACK));
+    });
+})();
+</script>
+<script>
+/* 纠错与建议：写入后端 SQLite（server.mjs） */
+(function () {
+  var form = document.getElementById('fbForm');
+  var nameEl = document.getElementById('fbName');
+  var sceneEl = document.getElementById('fbScene');
+  var area = document.getElementById('fbContent');
+  var count = document.getElementById('fbCount');
+  var msg = document.getElementById('fbMsg');
+  var list = document.getElementById('fbList');
+  var submit = document.getElementById('fbSubmit');
+  if (!form || !area) return;
+
+  var SCENE_NAME = {
+    burn: '烧烫伤', cut: '割伤出血', sprain: '轻微扭伤',
+    choke: '气道异物', heat: '中暑', shock: '触电'
+  };
+
+  function setMsg(text, isErr) {
+    msg.textContent = text || '';
+    msg.className = 'fb-msg' + (isErr ? ' is-err' : '');
+  }
+
+  function renderList(rows) {
+    list.innerHTML = '';
+    if (!rows || !rows.length) {
+      var empty = document.createElement('li');
+      empty.className = 'fb-empty';
+      empty.textContent = '还没有留言，欢迎留下第一条建议。';
+      list.appendChild(empty);
+      return;
+    }
+    rows.forEach(function (r) {
+      var li = document.createElement('li');
+      li.className = 'fb-item';
+
+      var who = document.createElement('b');
+      who.textContent = (r.nickname || '匿名') +
+        (r.scene && SCENE_NAME[r.scene] ? ' · ' + SCENE_NAME[r.scene] : '');
+
+      var t = document.createElement('time');
+      t.textContent = String(r.created_at || '').replace('T', ' ').slice(0, 16);
+
+      var body = document.createElement('div');
+      body.textContent = r.content;
+
+      li.appendChild(who);
+      li.appendChild(t);
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+  }
+
+  function load() {
+    fetch('/api/feedback?limit=5')
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(renderList)
+      .catch(function () {
+        list.innerHTML = '<li class="fb-empty">留言加载失败（需要后端服务）。</li>';
+      });
+  }
+
+  area.addEventListener('input', function () {
+    count.textContent = area.value.length + ' / 200';
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var content = area.value.trim();
+    if (content.length < 2) { setMsg('至少写 2 个字', true); return; }
+
+    submit.disabled = true;
+    setMsg('提交中…');
+
+    fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scene: sceneEl.value,
+        nickname: nameEl.value.trim(),
+        content: content
+      })
+    })
+      .then(function (r) {
+        return r.json().then(function (j) { return { ok: r.ok, data: j }; });
+      })
+      .then(function (res) {
+        if (!res.ok) {
+          throw new Error((res.data && res.data.error && res.data.error.message) || '提交失败');
+        }
+        area.value = '';
+        nameEl.value = '';
+        count.textContent = '0 / 200';
+        setMsg('已提交，感谢反馈');
+        load();
+      })
+      .catch(function (err) {
+        setMsg(err.message || '网络异常，请稍后重试', true);
+      })
+      .then(function () { submit.disabled = false; });
+  });
+
+  load();
+})();
+</script>
+<script src="../js/site.js"></script>
+
+</body>
+</html>

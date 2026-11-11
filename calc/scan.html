@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-site-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../assets/theme-vars.css">
+<link rel="stylesheet" href="../assets/shell.css">
+<title>急救费用拍照识别与报销方案</title>
+<style>
+/* 暖色温馨主题：与导航首页 / 测算模块共用同一套色板 */
+:root{
+  --bg:#faf6ee; --card:#fffdf8; --ink:#3b2f26; --ink2:#5b4a3b; --muted:#73604e;
+  --line:#e8dac5; --line2:#f2e8d9;
+  --blue:#9a5a31; --blue2:#7d4726; --blue3:#a56238; --blue-soft:#f8ecd8;
+  --green:#7a552c; --green-soft:#f3e8d4; --amber:#b07d33; --amber-soft:#fbf0dc;
+  --red:#8f463a; --red-soft:#f9e9e3;
+  --shadow:0 1px 2px rgba(112,80,52,.05),0 10px 28px rgba(112,80,52,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+a{color:var(--blue);text-decoration:none}
+button,input,select{font-family:inherit;font-size:inherit}
+.top{background:linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%);color:#fff;padding:22px 0 24px}
+.top .in{max-width:940px;margin:0 auto;padding:0 20px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.top h1{font-size:21px;margin:0;font-weight:650}
+.top p{font-size:12.5px;opacity:.88;margin:5px 0 0}
+.back{color:#fffdf8;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 12px;font-size:12.5px;white-space:nowrap}
+.back:hover{background:rgba(255,255,255,.14)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;font-size:11.5px}
+.page{max-width:940px;margin:0 auto;padding:20px 20px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:22px;margin-bottom:16px}
+.card h2{font-size:15.5px;margin:0 0 4px;font-weight:650;display:flex;align-items:center;gap:9px}
+.step{width:23px;height:23px;border-radius:7px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.desc{color:var(--muted);font-size:12.5px;margin:0 0 16px 32px}
+.btn-blue{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:linear-gradient(180deg,var(--blue3),var(--blue));color:#fff;border:1px solid var(--blue2);
+  border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;
+  box-shadow:0 2px 6px rgba(146,85,47,.22);transition:transform .12s,filter .15s;min-height:42px}
+.btn-blue:hover{filter:brightness(1.07)}
+.btn-blue:active{transform:translateY(1px)}
+.btn-blue:disabled{background:#cbb49c;border-color:#cbb49c;box-shadow:none;cursor:not-allowed;filter:none}
+.btn-blue.ghost{background:var(--card);color:var(--blue);border-color:#e2d2bd;box-shadow:none}
+.btn-blue.ghost:hover{background:var(--blue-soft)}
+.btn-blue svg{width:17px;height:17px;flex:none}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spinner{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.drop{border:2px dashed #e2d2bd;background:linear-gradient(180deg,#fffaf2,#faf1e2);border-radius:13px;padding:26px 18px;text-align:center;transition:.18s}
+.drop.over{border-color:var(--blue);background:var(--blue-soft)}
+.drop-ico{width:46px;height:46px;margin:0 auto 10px;border-radius:13px;background:var(--blue-soft);display:grid;place-items:center}
+.drop-ico svg{width:24px;height:24px;stroke:var(--blue)}
+.drop-title{font-size:14px;font-weight:600}
+.drop-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.drop .btn-row{justify-content:center;margin-top:16px}
+input[type=file]{display:none}
+.hidden{display:none!important}
+.preview{margin-top:18px}
+.preview-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.preview-head .t{font-size:13px;font-weight:600}
+.meta{font-size:11.5px;color:var(--muted)}
+.imgbox{background:#faf1e2;border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.imgbox img{max-width:100%;max-height:420px;border-radius:8px;display:block;margin:0 auto;box-shadow:0 2px 12px rgba(112,80,52,.12)}
+.result{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.result-h{padding:11px 15px;background:var(--blue-soft);border-bottom:1px solid #ecd9bb;font-size:12.5px;font-weight:650;color:var(--blue2);
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+.result-b{padding:18px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{font-size:11.5px;color:var(--muted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--line2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600}
+.tag.A{background:var(--green-soft);color:var(--green)}
+.tag.B{background:var(--blue-soft);color:var(--blue)}
+.tag.C{background:var(--red-soft);color:var(--red)}
+.total-line{display:flex;justify-content:space-between;align-items:baseline;padding:11px 8px 0;margin-top:4px;border-top:1px solid var(--line);font-size:13px}
+.total-line b{font-size:18px;font-variant-numeric:tabular-nums}
+.raw{margin-top:14px;font-size:11.5px;color:var(--muted)}
+.raw pre{white-space:pre-wrap;word-break:break-word;background:#fffaf2;border:1px solid var(--line2);border-radius:9px;
+  padding:11px 13px;margin:6px 0 0;font-size:12px;line-height:1.75;color:var(--ink2);font-family:inherit;max-height:190px;overflow:auto}
+.loading-box{text-align:center;padding:26px 12px;color:var(--muted);font-size:13px}
+.loading-box .dots{display:inline-flex;gap:5px;margin-bottom:10px}
+.loading-box .dots i{width:7px;height:7px;border-radius:50%;background:var(--blue3);animation:bounce 1s infinite}
+.loading-box .dots i:nth-child(2){animation-delay:.15s}
+.loading-box .dots i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.45}40%{transform:translateY(-6px);opacity:1}}
+.err{background:var(--red-soft);border:1px solid #eccfc5;border-radius:10px;padding:13px 15px;color:#8f463a;font-size:12.5px;line-height:1.7}
+.err b{display:block;font-size:13px;margin-bottom:4px}
+.placeholder{text-align:center;color:var(--muted);font-size:12.5px;padding:20px 10px}
+.params{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--ink2);font-weight:550;margin-bottom:5px}
+.field label span{color:var(--muted);font-weight:400}
+input[type=text],input[type=number]{width:100%;border:1px solid var(--line);background:#fffaf2;border-radius:8px;padding:8px 10px;color:var(--ink);outline:none;min-height:36px}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(154,90,49,.13);background:var(--card)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2);border-radius:10px;overflow:hidden}
+.metric{background:var(--card);padding:11px 12px}
+.metric .k{font-size:11px;color:var(--muted)}
+.metric .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px}
+.metric .v.g{color:var(--green)}
+.metric .v.b{color:var(--blue)}
+.metric .v.r{color:var(--red)}
+.bar{height:9px;border-radius:6px;background:#f1e5d3;overflow:hidden;margin-top:14px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue3),var(--blue));border-radius:6px;transition:width .4s}
+.tips{display:grid;gap:8px;margin-top:14px}
+.tip{padding:9px 11px;border-radius:9px;font-size:12px;line-height:1.6}
+.tip.info{background:var(--blue-soft);color:#7a4a28}
+.tip.warn{background:var(--amber-soft);color:#8a5a24}
+.tip.ok{background:var(--green-soft);color:#6b4a2c}
+details.cfg{margin-top:14px;border:1px solid var(--line);border-radius:11px;background:#fffaf2}
+details.cfg summary{padding:11px 14px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink2);list-style:none}
+details.cfg summary::-webkit-details-marker{display:none}
+details.cfg summary::before{content:"▸";margin-right:8px;color:var(--blue);display:inline-block}
+details.cfg[open] summary::before{transform:rotate(90deg)}
+.cfg-b{padding:6px 14px 16px;border-top:1px solid var(--line2);font-size:12px;color:var(--ink2);line-height:1.85}
+.cfg-b code{background:#f4eadb;padding:1px 5px;border-radius:4px}
+.switch{display:flex;align-items:center;gap:9px;font-size:12.5px;cursor:pointer}
+.switch input{appearance:none;width:36px;height:20px;border-radius:12px;background:#dccbb4;position:relative;margin:0;cursor:pointer;flex:none}
+.switch input::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--card);top:3px;left:3px;transition:.2s}
+.switch input:checked{background:var(--blue)}
+.switch input:checked::after{left:19px}
+.foot{text-align:center;color:var(--muted);font-size:11.5px;line-height:1.8;padding-top:8px}
+@media(max-width:720px){.params,.metrics{grid-template-columns:1fr 1fr}.top .in,.page{padding-left:14px;padding-right:14px}.card{padding:16px}.btn-blue{flex:1;min-width:140px}}
+
+/* ============================================================
+   接入全站：只接「颜色」变量，不动尺寸、圆角、间距、字体。
+   不注入任何元素级重置，页面自身样式原样生效。
+   ============================================================ */
+:root{
+  --bg: var(--brand-50);
+  --card: color-mix(in srgb, var(--surface) 95%, var(--brand-100));
+  --ink: var(--ink-900);
+  --ink2: var(--ink-700);
+  --muted: var(--ink-500);
+  --line: color-mix(in srgb, var(--line-soft) 62%, var(--brand-100));
+  --line2: var(--line-soft);
+  --brand: var(--brand-700);
+  --brand2: var(--brand-900);
+  --brand-soft: var(--brand-100);
+  --blue: var(--brand-700);
+  --blue-soft: var(--brand-50);
+  --amber: var(--warn-500);
+  --amber-soft: var(--warn-50);
+  --red: var(--urgent-600);
+  --red-soft: var(--urgent-50);
+  --green: var(--success-600);
+  --green-soft: var(--success-50);
+  --shadow: var(--sh-1);
+}
+/* 页面自带横幅：默认主题保持原色，切换后随主题走 */
+:root { --calc-hero: linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%); }
+html[data-theme="clarity"] { --calc-hero: linear-gradient(120deg,#0B3B44 0%,#0E6B75 52%,#0F7C86 100%); }
+html[data-theme="rescue"]  { --calc-hero: linear-gradient(120deg,#102A4C 0%,#1B4B8F 52%,#1D5FA8 100%); }
+.topbar, .top { background: var(--calc-hero); }
+</style>
+</head>
+<body>
+
+<div id="site-topbar"></div>
+
+<div class="top">
+  <div class="in">
+    <div class="top-row">
+      <div>
+        <h1>急救费用拍照识别与报销方案</h1>
+        <p>拍照上传急救发票 / 费用清单，识别费用项目与金额，自动生成报销方案</p>
+      </div>
+      <a class="back" href="index.html">← 返回导航首页</a>
+    </div>
+    <div class="chips">
+      <span class="chip">拍照 / 上传单据</span><span class="chip">混元视觉识别</span>
+      <span class="chip">自动生成报销方案</span><span class="chip">明细可带入测算模块</span>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="card">
+    <h2><span class="step">1</span>上传急救费用单据</h2>
+    <p class="desc">支持急诊发票、费用清单、收据、结算单；手机点击「拍照」调起后置摄像头，也可拖拽图片或 Ctrl+V 粘贴截图。</p>
+    <div class="drop" id="drop">
+      <div class="drop-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      </div>
+      <div class="drop-title">请拍清单据上的费用项目名称与金额</div>
+      <div class="drop-sub">图片自动压缩后提交，最长边不超过 1600px；识别结果需要人工核对</div>
+      <div class="btn-row">
+        <button class="btn-blue" id="btnCamera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h3l2-3h8l2 3h3v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg>拍照识别费用
+        </button>
+        <button class="btn-blue ghost" id="btnUpload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>上传单据图片
+        </button>
+      </div>
+    </div>
+    <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div class="preview hidden" id="preview">
+      <div class="preview-head"><div class="t">单据图片</div><div class="meta" id="imgMeta"></div></div>
+      <div class="imgbox"><img id="previewImg" alt="待识别的急救费用单据"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn-blue" id="btnRecognize"><span id="recognizeLabel">识别费用并生成报销方案</span></button>
+        <button class="btn-blue ghost" id="btnChange">重新选择图片</button>
+      </div>
+
+      <!-- 识别结果：显示在图片下方 -->
+      <div class="result" id="result">
+        <div class="result-h"><span>识别结果 · 费用明细</span><span id="resultState" style="font-weight:400">等待识别</span></div>
+        <div class="result-b" id="resultBody">
+          <div class="placeholder">选好单据后点击上方按钮，识别出的费用明细会显示在这里（图片下方）。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="planCard">
+    <h2><span class="step">2</span>报销方案</h2>
+    <p class="desc">基于识别出的费用明细，按下面的参保地政策参数即时测算；可调整参数，方案会同步更新。</p>
+    <div class="params">
+      <div class="field"><label>起付线 <span>元</span></label><input type="number" id="pDeductible" value="800" min="0" step="any"></div>
+      <div class="field"><label>乙类先自付 <span>%</span></label><input type="number" id="pPrepay" value="10" min="0" max="100" step="any"></div>
+      <div class="field"><label>报销比例 <span>%</span></label><input type="number" id="pRate" value="85" min="0" max="100" step="any"></div>
+      <div class="field"><label>年度封顶线 <span>元，留空不限</span></label><input type="number" id="pCeiling" value="300000" min="0" step="any"></div>
+      <div class="field"><label>异地比例调整 <span>百分点，负数为下调</span></label><input type="number" id="pAdjust" value="0" step="any"></div>
+      <div class="field"><label>就医情形</label>
+        <select id="pScenario" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:36px;background:#fffaf2;color:var(--ink)">
+          <option value="local">参保地本地急诊</option>
+          <option value="emergency">异地急诊抢救（视同备案）</option>
+          <option value="unregistered">异地非急诊未备案</option>
+        </select>
+      </div>
+    </div>
+    <div id="planBody"><div class="placeholder">等待识别结果，生成报销方案后在此展示。</div></div>
+    <div class="btn-row" style="margin-top:16px">
+      <button class="btn-blue ghost" id="btnTransfer" disabled>把明细带入测算模块 →</button>
+      <a class="btn-blue ghost" href="calc.html" style="text-decoration:none">直接打开测算模块</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>接口与数据说明</h2>
+    <p class="desc">调用链路由服务端统一管理，页面不接触密钥。</p>
+    <details class="cfg">
+      <summary>查看接口配置</summary>
+      <div class="cfg-b">
+        <div id="cfgInfo"></div>
+        <div style="margin-top:10px">
+          <label class="switch"><input type="checkbox" id="cfgProxy"><span>本地开发模式：直连 <code>http://127.0.0.1:8787/vision</code>（需先执行 node proxy.js）</span></label>
+        </div>
+        <div style="margin-top:10px;color:var(--muted)">
+          线上由同源 <code>/api/vision</code> 转发到上游混元接口，无跨域问题；上游地址与 Bearer Token 保存在服务端 <code>cloud-env.cjs</code>，与指定 js 文件一致。
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div id="cloudPanel"></div>
+
+  <div class="foot">
+    识别结果与报销方案由模型与本地计算引擎生成，仅供辅助参考；实际报销以医保经办机构结算单为准<br>
+    <a href="index.html">返回导航首页</a> · <a href="calc.html">急救医疗费用与医保报销测算</a>
+  </div>
+</div>
+
+<script src="hunyuan.js"></script>
+<script src="engine.js"></script>
+<script src="cloud-sdk.js"></script>
+<script src="cloud.js"></script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var H = window.Hunyuan, E = window.__MED_ENGINE__;
+if (!H || !E) {
+  $('resultBody').innerHTML = '<div class="err"><b>模块加载失败</b>请确认 hunyuan.js 与 engine.js 位于同一目录。</div>';
+  return;
+}
+document.documentElement.setAttribute('data-scan-ready', H.CONFIG.MODEL + '|engine');
+
+$('cfgInfo').innerHTML =
+  '<div>调用链路：<code>同源 ' + H.CONFIG.API_URL + '</code> → 服务端转发 → <code>' + H.CONFIG.UPSTREAM_URL + '</code></div>' +
+  '<div>模型：<code>' + H.CONFIG.MODEL + '</code> · 鉴权：由服务端持有，前端不下发</div>';
+
+function apiUrl(){ return $('cfgProxy').checked ? 'http://127.0.0.1:8787/vision' : H.CONFIG.API_URL; }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function money(v){ return '¥' + (Math.round(Number(v||0)*100)/100).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function bytes(n){ return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(2)+' MB'; }
+
+var state = { base64:'', fileName:'', fileSize:0, dim:'', encodedKB:0, items:[], rawText:'', plan:null, loading:false };
+
+/* ---- 图片选择 ---- */
+function handleFile(file){
+  if (!file) return;
+  if (!/^image\//.test(file.type||'')) { alert('请选择图片文件'); return; }
+  H.imageFileToBase64Jpeg(file).then(function(b64){
+    state.base64 = b64;
+    state.fileName = file.name || '相机拍摄';
+    state.fileSize = file.size || 0;
+    state.encodedKB = Math.round(b64.length*3/4/1024);
+    var img = $('previewImg'), url = URL.createObjectURL(file);
+    img.onload = function(){ state.dim = img.naturalWidth+' × '+img.naturalHeight; updateMeta(); URL.revokeObjectURL(url); };
+    img.src = url;
+    $('preview').classList.remove('hidden');
+    $('btnRecognize').disabled = false;
+    $('resultState').textContent = '待识别';
+    $('resultBody').innerHTML = '<div class="placeholder">单据已就绪，点击「识别费用并生成报销方案」提交给混元视觉模型。</div>';
+    updateMeta();
+  }).catch(function(e){
+    $('resultBody').innerHTML = '<div class="err"><b>图片处理失败</b>'+esc(e.message||e)+'</div>';
+  });
+}
+function updateMeta(){
+  $('imgMeta').textContent = state.fileName+' · 原始 '+bytes(state.fileSize)+
+    (state.dim?' · '+state.dim:'')+' · 压缩后约 '+state.encodedKB+' KB';
+}
+$('btnCamera').addEventListener('click',function(){ $('cameraInput').click(); });
+$('btnUpload').addEventListener('click',function(){ $('fileInput').click(); });
+$('btnChange').addEventListener('click',function(){ $('fileInput').click(); });
+$('cameraInput').addEventListener('change',function(e){ handleFile(e.target.files[0]); e.target.value=''; });
+$('fileInput').addEventListener('change',function(e){ handleFile(e.target.files[0]); e.target.value=''; });
+var drop=$('drop');
+['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('over');}); });
+['dragleave','drop'].forEach(function(ev){ drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('over');}); });
+drop.addEventListener('drop',function(e){ if(e.dataTransfer.files&&e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+document.addEventListener('paste',function(e){ var f=e.clipboardData&&e.clipboardData.files; if(f&&f[0]) handleFile(f[0]); });
+
+/* ---- 报销方案参数 ---- */
+function buildPolicy(){
+  var sc = $('pScenario').value;
+  var autoAdjust = sc==='unregistered' ? -20 : 0;
+  return {
+    insured:true,
+    prepayRate:Number($('pPrepay').value)||0,
+    deductible:Number($('pDeductible').value)||0,
+    deductibleUplift:0,
+    ceiling:$('pCeiling').value===''?'':Number($('pCeiling').value),
+    rateAdjust:(Number($('pAdjust').value)||0)+autoAdjust,
+    retireBonus:0, usedDeductible:0, usedBasicReimburse:0,
+    segments:[{cap:'',rate:Number($('pRate').value)||0}],
+    critical:{enabled:false}, rescue:{enabled:false}
+  };
+}
+function renderPlan(){
+  if (!state.items.length) return;
+  var r = E.calculate({items:state.items, policy:buildPolicy()});
+  state.plan = r;
+  var pct = r.total>0 ? r.totalReimburse/r.total*100 : 0;
+  var tips = [];
+  if (r.total>0 && r.outOfScope/r.total>=0.3) tips.push(['warn','目录外自费占比 '+(r.outOfScope/r.total*100).toFixed(1)+'%，建议核对救护车费、进口耗材与自费药等项目。']);
+  if (r.flags.belowDeductible) tips.push(['warn','政策范围内费用未超过起付线，本次基本医保可能不产生报销。']);
+  if (r.flags.hitCeiling) tips.push(['warn','已触及基本医保年度最高支付限额，超出部分需由大病保险或个人承担。']);
+  if ($('pScenario').value==='emergency') tips.push(['info','异地急诊抢救视同已备案，请确认医院按急诊抢救标识录入；部分地区支付比例最多下调 10 个百分点。']);
+  if ($('pScenario').value==='unregistered') tips.push(['info','建议在出院结算前补办异地就医备案，可明显提高报销水平。']);
+  if (!tips.length) tips.push(['ok','已按当前参数生成方案，请对照费用清单与结算单核对分类。']);
+
+  $('planBody').innerHTML =
+    '<div class="metrics">'+
+      '<div class="metric"><div class="k">费用总额</div><div class="v">'+money(r.total)+'</div></div>'+
+      '<div class="metric"><div class="k">医保报销</div><div class="v g">'+money(r.totalReimburse)+'</div></div>'+
+      '<div class="metric"><div class="k">个人自付</div><div class="v r">'+money(r.finalSelf)+'</div></div>'+
+      '<div class="metric"><div class="k">报销率</div><div class="v b">'+pct.toFixed(1)+'%</div></div>'+
+    '</div>'+
+    '<div class="bar"><i style="width:'+Math.min(100,Math.max(0,pct)).toFixed(1)+'%"></i></div>'+
+    '<div style="font-size:11.5px;color:var(--muted);margin-top:6px">政策范围内费用 '+money(r.compliant)+
+      ' · 目录外自费 '+money(r.outOfScope)+' · 起付线自付 '+money(r.deductibleSelf)+'</div>'+
+    '<div class="tips">'+tips.map(function(x){return '<div class="tip '+x[0]+'">'+esc(x[1])+'</div>';}).join('')+'</div>';
+
+  window.AppSnapshot = { get: function(){ return {
+    kind:'expense', title:'急救费用识别方案',
+    total:r.total, reimbursed:r.totalReimburse, selfPay:r.finalSelf,
+    itemCount:state.items.length, rawText:state.rawText.slice(0,2000)
+  }; } };
+}
+['pDeductible','pPrepay','pRate','pCeiling','pAdjust','pScenario'].forEach(function(id){
+  $(id).addEventListener('input',renderPlan);
+  $(id).addEventListener('change',renderPlan);
+});
+
+$('btnTransfer').addEventListener('click',function(){
+  try { localStorage.setItem('wb_transfer_items', JSON.stringify(state.items)); } catch(e){}
+  location.href = 'calc.html';
+});
+
+/* ---- 识别 ---- */
+function setLoading(on){
+  state.loading=on;
+  var b=$('btnRecognize'); b.disabled=on||!state.base64;
+  $('recognizeLabel').textContent = on?'识别中…':'重新识别并生成方案';
+  var sp=b.querySelector('.spinner');
+  if(on){ if(!sp){var s=document.createElement('span');s.className='spinner';b.insertBefore(s,b.firstChild);} }
+  else if(sp) sp.remove();
+}
+function renderLoading(){
+  $('resultBody').innerHTML='<div class="loading-box"><div class="dots"><i></i><i></i><i></i></div>'+
+    '<div>正在调用混元视觉模型识别急救费用项目与金额…</div></div>';
+}
+function renderError(e){
+  var code=e&&e.code||'UNKNOWN';
+  $('resultBody').innerHTML='<div class="err"><b>识别失败（'+esc(code)+'）</b>'+esc(e&&e.message||String(e))+
+    '<div style="margin-top:8px;color:#8f463a">若无法识别，可改用「直接打开测算模块」手工录入费用明细。</div></div>';
+  $('resultState').textContent='失败';
+}
+function renderItems(parsed){
+  state.items = parsed.items;
+  state.rawText = parsed.raw;
+  var rows = parsed.items.map(function(x){
+    var tag = x.type==='A'?'甲类 · 全计入':x.type==='B'?'乙类 · 先自付':'丙类 · 自费';
+    return '<tr><td>'+esc(x.name)+'</td><td><span class="tag '+x.type+'">'+tag+'</span></td>'+
+      '<td class="num">'+money(x.amount)+'</td></tr>';
+  }).join('');
+  if (!parsed.items.length){
+    $('resultBody').innerHTML='<div class="err"><b>未能解析出费用明细</b>模型返回内容见下方，可手工到测算模块录入。'+
+      '<pre style="white-space:pre-wrap;font-size:11.5px">'+esc(parsed.raw.slice(0,800))+'</pre></div>';
+    $('resultState').textContent='需人工核对';
+    $('btnTransfer').disabled=true;
+    $('planBody').innerHTML='<div class="placeholder">没有可用明细，暂无法生成报销方案。</div>';
+    return;
+  }
+  $('resultBody').innerHTML =
+    '<table class="tbl"><thead><tr><th>费用项目</th><th>目录归属（识别建议）</th><th class="num">金额</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="total-line"><span>单据合计（共 '+parsed.items.length+' 项）</span><b>'+money(parsed.total)+'</b></div>'+
+    (parsed.note?'<div class="raw">模型说明：'+esc(parsed.note)+'</div>':'')+
+    '<div class="raw">模型返回的完整文字结果<pre>'+esc(parsed.raw)+'</pre></div>';
+  $('resultState').textContent='已完成';
+  $('btnTransfer').disabled=false;
+  renderPlan();
+}
+
+$('btnRecognize').addEventListener('click',function(){
+  if(state.loading||!state.base64) return;
+  setLoading(true); renderLoading();
+  H.callHunyuanAPI(state.base64,{apiUrl:apiUrl(),timeoutMs:H.CONFIG.TIMEOUT_MS})
+    .then(function(text){ renderItems(H.parseExpense(text)); })
+    .catch(function(e){ renderError(e); })
+    .then(function(){ setLoading(false); });
+});
+$('btnRecognize').disabled=true;
+})();
+</script>
+<div id="site-footer"></div>
+<script src="../js/site.js"></script>
+
+</body>
+</html>

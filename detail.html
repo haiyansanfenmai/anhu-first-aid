@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="warm">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>急救应对措施 · 安护急救通</title>
+<meta name="description" content="烫伤、噎住、溺水、触电、中暑、流鼻血、扭伤骨折、割伤出血的现场应对步骤与常见误区。">
+<link rel="stylesheet" href="assets/theme.css">
+<script src="js/theme.js"></script>
+<style>
+  /* 仅本页布局，不改任何主题变量 */
+  .dt-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+  .dt-steps { list-style: none; margin: 0; padding: 0; }
+  .dt-steps li {
+    position: relative; margin-left: 18px; padding: 0 0 24px 46px;
+    border-left: 2px solid var(--line-soft);
+  }
+  .dt-steps li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .dt-num {
+    position: absolute; left: -19px; top: -3px;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--brand-700); color: #fff;
+    font-family: var(--font-num); font-size: 14px; font-weight: 700;
+    box-shadow: 0 0 0 4px var(--brand-50);
+  }
+  .dt-steps h3 { margin-bottom: 4px; }
+  .dt-steps p { color: var(--ink-700); font-size: 14px; line-height: 1.8; }
+
+  .dt-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+  .dt-list li {
+    position: relative; padding-left: 22px;
+    font-size: 14px; color: var(--ink-700); line-height: 1.7;
+  }
+  .dt-list li::before { position: absolute; left: 0; top: 0; font-weight: 700; }
+  .dt-do li::before { content: "✓"; color: var(--success-600); }
+  .dt-dont li::before { content: "✕"; color: var(--urgent-600); }
+
+  .dt-aside .card + .card { margin-top: 16px; }
+
+  @media (max-width: 900px) {
+    .dt-grid { grid-template-columns: 1fr; gap: 28px; }
+  }
+</style>
+</head>
+<body class="page-detail">
+
+<div id="site-topbar"></div>
+
+<main>
+  <section class="section-sm">
+    <div class="container">
+      <p class="small muted">
+        <a href="scenarios.html">场景科普</a>
+        <span aria-hidden="true"> / </span>
+        <span id="crumb">急救应对措施</span>
+      </p>
+      <div id="app" class="mt-4"></div>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="js/site.js"></script>
+<script src="assets/aid-data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var app = document.getElementById('app');
+  var crumb = document.getElementById('crumb');
+  var id = new URLSearchParams(location.search).get('id');
+  var aid = id && window.AID_DATA ? window.AID_DATA[id] : null;
+
+  if (!aid) {
+    crumb.textContent = '未找到';
+    app.innerHTML =
+      '<h1 class="h1">没有找到这条急救知识</h1>' +
+      '<p class="lead mt-4">链接可能已经失效，回到场景科普页重新选择吧。</p>' +
+      '<div class="flex gap-3 wrap mt-6">' +
+        '<a class="btn btn-primary" href="scenarios.html">返回场景科普</a>' +
+      '</div>';
+    return;
+  }
+
+  document.title = aid.title + ' · 怎么处理 · 安护急救通';
+  crumb.textContent = aid.title;
+
+  var steps = aid.steps.map(function (s, i) {
+    return '<li><span class="dt-num">' + (i + 1) + '</span>' +
+           '<h3 class="h3">' + s.t + '</h3><p>' + s.d + '</p></li>';
+  }).join('');
+
+  var dos = aid.dos.map(function (t) { return '<li>' + t + '</li>'; }).join('');
+  var donts = aid.donts.map(function (t) { return '<li>' + t + '</li>'; }).join('');
+  var scenes = aid.scenes.map(function (s) {
+    return '<a class="chip" href="scenarios.html#' + s.id + '">' + s.name + '</a>';
+  }).join('');
+
+  app.innerHTML =
+    '<div class="flex items-center gap-3 wrap">' +
+      '<span class="chip chip-neutral">' + aid.category + '</span>' +
+      '<span class="chip">' + aid.sub + '</span>' +
+    '</div>' +
+    '<h1 class="h1 mt-4">' + aid.title + '</h1>' +
+    '<p class="small muted mt-3">' + aid.aliases + '</p>' +
+    '<div class="alert alert-urgent mt-6">' +
+      '<strong>这些情况立即拨打 120：</strong><span>' + aid.emergency + '</span>' +
+    '</div>' +
+    '<div class="dt-grid mt-8">' +
+      '<div>' +
+        '<h2 class="h2">按顺序这样做</h2>' +
+        '<ol class="dt-steps mt-4">' + steps + '</ol>' +
+        '<div class="alert alert-warn mt-6"><strong>记住：</strong>' + aid.tip + '</div>' +
+      '</div>' +
+      '<aside class="dt-aside">' +
+        '<section class="card"><h3 class="h3">要做到</h3><ul class="dt-list dt-do">' + dos + '</ul></section>' +
+        '<section class="card"><h3 class="h3">千万别</h3><ul class="dt-list dt-dont">' + donts + '</ul></section>' +
+        '<section class="card"><h3 class="h3">相关场景</h3>' +
+          '<div class="flex gap-3 wrap mt-3">' + scenes + '</div></section>' +
+        '<p class="small muted mt-4">资料来源：' + aid.source + '</p>' +
+      '</aside>' +
+    '</div>' +
+    '<div class="flex gap-3 wrap mt-8">' +
+      '<a class="btn btn-ghost btn-lg" href="scenarios.html#' + aid.scenes[0].id + '">返回场景科普</a>' +
+    '</div>';
+})();
+</script>
+
+</body>
+</html>

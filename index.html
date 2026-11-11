@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>安护 · 急救通 — 事前准备与就医导航</title>
+  <meta name="description" content="意外发生时，第一动作是呼叫急救，而非打开网页。安护 · 急救通覆盖日常准备与就医过程：帮助使用者在事前掌握一项处置动作，在就医过程中明确流程与费用。">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="assets/home.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="page-home">
+
+  <!-- 紧急提示：全页第一条，位置高于导航 -->
+  <div class="emergency-strip" role="note" aria-label="紧急提示">
+    <div class="container emergency-strip-inner">
+      <span class="emergency-strip-tag"><span class="strip-dot" aria-hidden="true"></span>正在发生意外</span>
+      <span class="emergency-strip-text">请先拨打 <strong class="num">120</strong></span>
+    </div>
+  </div>
+
+  <!-- 顶栏由 js/site.js 统一注入，五个页面共用一份 -->
+  <div id="site-topbar"></div>
+
+  <main>
+
+    <!-- ================= Hero ================= -->
+    <section class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <svg class="hero-line" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 56 H210 l18 -8 l14 26 l16 -40 l18 62 l16 -34 l14 10 H430 H610 l20 -6 l14 22 l16 -36 l18 54 l16 -30 l14 8 H1200"/>
+      </svg>
+      <div class="container hero-inner">
+
+        <div class="hero-copy">
+          <span class="eyebrow">公益科普 · 不替代专业急救</span>
+          <h1 class="h1 mt-6">急救知识并不稀缺，<br>稀缺的是事前的准备</h1>
+          <p class="lead hero-lead">
+            意外发生时，正确的第一动作是呼叫急救，而不是打开网页。本站不承担事发阶段的处置指导，
+            四个模块只覆盖两段：<strong>事前准备</strong>（场景科普、视频科普）与<strong>事后就医</strong>（就医导航、费用测算）。
+          </p>
+
+        </div>
+
+        <!-- 判据卡：用于日常记忆，不作为事发时的操作台 -->
+        <aside class="emergency-card" aria-labelledby="emg-title">
+          <div class="emergency-head">
+            <span class="emergency-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 9v4M12 17h.01"/>
+                <path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>
+              </svg>
+            </span>
+            <div>
+              <div class="emergency-title" id="emg-title">需要立即呼叫急救的情况</div>
+              <div class="emergency-sub">出现任意一项，不应继续观察</div>
+            </div>
+          </div>
+
+          <ul class="emergency-list">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              意识不清、无呼吸，或仅有濒死喘息
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              大出血经直接按压仍无法控制
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              抽搐持续超过 5 分钟，或反复发作
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              胸痛、呼吸困难、口角歪斜或言语不清
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              大面积烧烫伤、触电、溺水或高处坠落
+            </li>
+          </ul>
+
+          <p class="emergency-foot">通话时先报地点，再报人数与伤情，并遵循调度员指示。</p>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- ================= 适用范围 ================= -->
+    <section class="flow">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div>
+            <span class="eyebrow">适用范围</span>
+            <h2 class="h2 mt-4">覆盖事前与事后，不介入事发处置</h2>
+          </div>
+          <p class="muted">事发阶段请遵循急救调度员的指导。</p>
+        </div>
+
+        <div class="flow-grid">
+
+          <div class="flow-step" data-reveal>
+            <div class="flow-num"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 12 10 5 10-5"/></svg>事前</div>
+            <h3>日常准备</h3>
+            <p>了解何种情况必须呼叫急救，以及烧烫伤、气道异物、出血等场景的第一步处置。</p>
+          </div>
+
+          <div class="flow-step is-out" data-reveal>
+            <div class="flow-num"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>事发</div>
+            <h3>不介入此阶段</h3>
+            <p>此时不应检索网页。呼叫急救并说明地点与伤情；未受训的操作不应尝试。</p>
+          </div>
+
+          <div class="flow-step" data-reveal>
+            <div class="flow-num"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>事后</div>
+            <h3>就医过程</h3>
+            <p>分诊、检查、缴费的先后顺序、大致耗时与费用区间。</p>
+          </div>
+
+        </div>
+
+        <p class="scope-note" data-reveal>本站不提供在线问诊，不推荐药物，也不替代急救呼叫。</p>
+      </div>
+    </section>
+
+    <!-- ================= 四个模块 ================= -->
+    <section class="modules" id="modules">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div>
+            <span class="eyebrow">四个模块</span>
+            <h2 class="h2 mt-4">按所处阶段选择</h2>
+          </div>
+          <p class="muted">意外发生期间请直接呼叫急救，不要在本站检索。</p>
+        </div>
+
+        <div class="grid grid-4">
+
+          <a class="card card-hover module" data-reveal href="scenarios.html">
+            <div class="module-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 2 2 7l10 5 10-5-10-5z"/>
+                  <path d="m2 12 10 5 10-5"/>
+                  <path d="m2 17 10 5 10-5"/>
+                </svg>
+              </span>
+              <span class="chip chip-ok">事前</span>
+            </div>
+            <h3>场景科普</h3>
+            <p>按常见伤害查处置步骤，只留该做的与不要做的，一屏看完。</p>
+            <span class="module-link">
+              查看场景处置
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+
+          <a class="card card-hover module" data-reveal href="media/index.html">
+            <div class="module-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="m10 8 6 4-6 4V8z"/>
+                </svg>
+              </span>
+              <span class="chip chip-ok">事前</span>
+            </div>
+            <h3>视频科普</h3>
+            <p>气道异物解除、心肺复苏等动作，配演示视频，供对照练习。</p>
+            <span class="module-link">
+              观看动作演示
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+
+          <a class="card card-hover module" data-reveal href="navigation.html">
+            <div class="module-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </span>
+              <span class="chip chip-warn">事后</span>
+            </div>
+            <h3>就医导航</h3>
+            <p>从急诊分诊、检查到缴费，标注先后顺序与大致耗时。</p>
+            <span class="module-link">
+              查看院内流程
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+
+          <a class="card card-hover module" data-reveal href="calc/index.html">
+            <div class="module-top">
+              <span class="icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <rect x="4" y="2" width="16" height="20" rx="2"/>
+                  <path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>
+                </svg>
+              </span>
+              <span class="chip chip-warn">事后</span>
+            </div>
+            <h3>费用测算</h3>
+            <p>按医院等级与诊疗项目估算费用区间，便于提前安排。</p>
+            <span class="module-link">
+              估算费用区间
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+          </a>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= 三类常见错误 ================= -->
+    <section class="facts">
+      <div class="container">
+        <div class="section-head" data-reveal>
+          <div>
+            <span class="eyebrow">现场提示</span>
+            <h2 class="h2 mt-4">最常见的三类错误</h2>
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+
+          <div class="fact" data-reveal>
+            <div class="fact-num">01</div>
+            <div>
+              <h3>未评估现场安全性</h3>
+              <p>触电应先断电，火灾应先撤离，道路事故应先设置警示。施救前须确保自身安全，避免成为第二名伤者。</p>
+            </div>
+          </div>
+
+          <div class="fact" data-reveal>
+            <div class="fact-num">02</div>
+            <div>
+              <h3>在无把握时尝试操作</h3>
+              <p>呼叫急救后，使伤者保持静止、保暖并有人陪伴。未受训的搬运与复位操作可能加重损伤。</p>
+            </div>
+          </div>
+
+          <div class="fact" data-reveal>
+            <div class="fact-num">03</div>
+            <div>
+              <h3>喂水、喂食或向口腔塞入物品</h3>
+              <p>意识不清、抽搐或疑似腹部外伤时，喂水喂药、向口腔内塞入物品均可能造成窒息或误吸。</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 页脚由 js/site.js 统一注入 -->
+  <div id="site-footer"></div>
+
+  <script src="js/site.js"></script>
+</body>
+</html>

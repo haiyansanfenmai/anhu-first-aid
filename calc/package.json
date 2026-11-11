@@ -1,0 +1,9 @@
+{
+  "name": "emergency-med-calc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "急救医疗费用与医保报销测算工具 + 试卷拍照评分工具",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

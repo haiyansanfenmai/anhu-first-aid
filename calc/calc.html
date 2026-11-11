@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-site-root="../">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="../js/theme.js"></script>
+<link rel="stylesheet" href="../assets/theme-vars.css">
+<link rel="stylesheet" href="../assets/shell.css">
+<title>急救医疗费用与医保报销测算工具</title>
+<style>
+/* 暖色温馨主题：米白底 / 奶油白卡片 / 浅橙与暖棕层次，统一供全页复用 */
+:root{
+  --bg:#faf6ee; --card:#fffdf8; --ink:#3b2f26; --ink2:#5b4a3b; --muted:#73604e;
+  --line:#e8dac5; --line2:#f2e8d9;
+  --brand:#9a5a31; --brand2:#7d4726; --brand-soft:#f8e9d5;
+  --blue:#9a5a31; --blue-soft:#f8ecd8;
+  --amber:#b07d33; --amber-soft:#fbf0dc;
+  --red:#8f463a; --red-soft:#f9e9e3;
+  --green:#7a552c; --green-soft:#f3e8d4;
+  --shadow:0 1px 2px rgba(112,80,52,.05), 0 10px 28px rgba(112,80,52,.07);
+  --radius:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1420px;margin:0 auto;padding:0 24px 56px}
+button,input,select{font-family:inherit;font-size:inherit}
+button{cursor:pointer}
+a{color:var(--blue);text-decoration:none}
+
+/* ---------- header ---------- */
+.topbar{background:linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%);color:#fff;padding:26px 0 28px;margin-bottom:20px}
+.topbar .wrap{padding-bottom:0}
+.brandline{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+.logo svg{width:22px;height:22px}
+h1{font-size:23px;line-height:1.3;margin:0;font-weight:650;letter-spacing:.2px}
+.subtitle{opacity:.85;font-size:13px;margin-top:4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);padding:4px 11px;border-radius:20px;font-size:12px}
+.chip.tool-chip{background:#fffdf8;color:#8a4f2b;border-color:#fffdf8;font-weight:650;padding:5px 14px;box-shadow:0 2px 8px rgba(90,58,34,.14)}
+.chip.tool-chip:hover{background:var(--blue-soft);color:#7d4726;text-decoration:none}
+.notice{max-width:1420px;margin:18px auto 0;padding:0 24px}
+.notice-in{background:var(--amber-soft);border:1px solid #ecd6ae;border-left:3px solid var(--amber);border-radius:12px;padding:11px 15px;color:#8a5a24;font-size:12.5px;display:flex;gap:9px;align-items:flex-start}
+.notice-in b{color:#7a4a20}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.card:last-child{margin-bottom:0}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.step{width:24px;height:24px;border-radius:7px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.card-h h2{font-size:15.5px;margin:0;font-weight:650}
+.card-desc{color:var(--muted);font-size:12.5px;margin:0 0 16px 34px}
+.sect-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.sect-title::after{content:"";flex:1;height:1px;background:var(--line2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 14px}
+.field{min-width:0}
+.field.full{grid-column:1/-1}
+label.lab{display:block;font-size:12.5px;color:var(--ink2);font-weight:550;margin-bottom:5px}
+label.lab .unit{color:var(--muted);font-weight:400}
+input[type=text],input[type=number],select{
+  width:100%;border:1px solid var(--line);background:#fffaf2;border-radius:10px;padding:8px 10px;color:var(--ink);
+  outline:none;transition:border-color .15s,box-shadow .15s;min-height:37px
+}
+input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(154,90,49,.13);background:var(--card)}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+select{text-align:left}
+.hint{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+.inline-note{background:var(--blue-soft);border:1px solid #ecd9bb;color:#7a4a28;border-radius:11px;padding:10px 12px;font-size:12.5px;margin-top:12px;line-height:1.55}
+.inline-note.warn{background:var(--amber-soft);border-color:#ecd6ae;color:#8a5a24}
+
+/* ---------- rows / tables ---------- */
+.tbl-scroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl-items th:nth-child(1){min-width:150px}
+.tbl-items input[type=text],.tbl-items input[type=number]{padding:6px 8px;min-height:33px;background:var(--card)}
+.tbl-items .type-sel{padding:6px 6px;min-height:33px}
+.tag{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:600}
+.tag.A{background:var(--brand-soft);color:var(--brand)}
+.tag.B{background:var(--blue-soft);color:var(--blue)}
+.tag.C{background:var(--red-soft);color:var(--red)}
+.row-sub{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.icon-btn{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:7px;width:29px;height:29px;display:grid;place-items:center;font-size:16px;line-height:1;padding:0}
+.icon-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:550;transition:.15s}
+.btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand2);color:#fff}
+/* 仅作用于新增的操作按钮，不改动任何既有元素样式 */
+.op-btn:disabled{opacity:.45;cursor:not-allowed;background:#f1e9dd;border-color:var(--line);color:var(--muted)}
+.op-btn.primary:disabled{background:#cbb49c;border-color:#cbb49c;color:#fff}
+.op-btn:disabled:hover{background:#f1e9dd;border-color:var(--line);color:var(--muted)}
+.op-btn.primary:disabled:hover{background:#cbb49c;border-color:#cbb49c;color:#fff}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.total-line{display:flex;justify-content:space-between;align-items:baseline;padding:11px 8px 0;margin-top:4px;border-top:1px solid var(--line);font-size:13px}
+.total-line b{font-size:18px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.switch{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:550;color:var(--ink2);cursor:pointer;user-select:none}
+.switch input{appearance:none;width:36px;height:20px;border-radius:12px;background:#dccbb4;position:relative;transition:.2s;margin:0;flex:none;cursor:pointer}
+.switch input::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:var(--card);top:3px;left:3px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked{background:var(--brand)}
+.switch input:checked::after{left:19px}
+.switch-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+details.adv{border:1px solid var(--line);border-radius:12px;margin-top:14px;background:#fffaf2}
+details.adv summary{padding:10px 13px;cursor:pointer;font-size:12.5px;color:var(--ink2);font-weight:550;list-style:none}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:"▸";margin-right:8px;color:var(--brand);display:inline-block;transition:.2s}
+details.adv[open] summary::before{transform:rotate(90deg)}
+details.adv .adv-body{padding:4px 13px 14px;border-top:1px solid var(--line2)}
+
+/* ---------- result ---------- */
+.result-col{position:sticky;top:18px}
+.result-card{padding:22px}
+.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.result-head .lab{font-size:12.5px;color:var(--muted);font-weight:550;margin:0}
+.big{font-size:36px;font-weight:700;line-height:1.15;letter-spacing:-.5px;font-variant-numeric:tabular-nums;color:var(--ink);margin:6px 0 0}
+.big .cny{font-size:19px;font-weight:600;color:var(--muted);margin-right:3px}
+.pill{background:var(--brand-soft);color:var(--brand);border-radius:20px;padding:4px 11px;font-size:12px;font-weight:650;white-space:nowrap}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:18px 0 20px}
+.metric{background:var(--card);padding:11px 12px}
+.metric .k{font-size:11px;color:var(--muted);white-space:nowrap}
+.metric .v{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:3px}
+.metric .v.g{color:var(--brand)}
+.metric .v.b{color:var(--blue)}
+.metric .v.r{color:var(--red)}
+.viz{display:flex;align-items:center;gap:18px;padding:14px 4px 16px;border-bottom:1px solid var(--line2)}
+.donut{width:118px;height:118px;flex:none;position:relative}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut-c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut-c .n{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.donut-c .t{font-size:10.5px;color:var(--muted);margin-top:2px}
+.legend{flex:1;min-width:0;display:grid;gap:8px}
+.legend .li{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend .dot{width:9px;height:9px;border-radius:3px;flex:none}
+.legend .nm{color:var(--ink2);flex:1}
+.legend .vl{font-variant-numeric:tabular-nums;font-weight:600}
+.stack{height:20px;border-radius:6px;overflow:hidden;display:flex;background:var(--line2);margin:16px 0 9px}
+.stack div{height:100%;transition:width .25s}
+.stack-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--muted)}
+.stack-legend span{display:flex;align-items:center;gap:5px}
+.stack-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.blk{margin-top:20px}
+.blk h3{font-size:13px;margin:0 0 10px;font-weight:650;display:flex;justify-content:space-between;align-items:center}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line2);font-size:12.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--ink2)}
+.kv .k small{display:block;color:var(--muted);font-size:11px}
+.kv .v{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.kv .v.minus{color:var(--brand)}
+.kv.sum{background:var(--brand-soft);margin:8px -10px -4px;padding:10px;border-radius:8px;border:none}
+.kv.sum .k,.kv.sum .v{color:var(--brand2);font-weight:700}
+.tips{display:grid;gap:8px;margin-top:16px}
+.tip{display:flex;gap:9px;padding:9px 11px;border-radius:9px;font-size:12px;line-height:1.55}
+.tip .ico{flex:none;font-weight:700}
+.tip.info{background:var(--blue-soft);color:#7a4a28}
+.tip.warn{background:var(--amber-soft);color:#8a5a24}
+.tip.ok{background:var(--brand-soft);color:#6b4a2c}
+.disclaimer{font-size:11px;color:var(--muted);line-height:1.6;margin-top:16px;padding-top:14px;border-top:1px solid var(--line2)}
+details.proc{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:#fffaf2}
+details.proc summary{padding:10px 13px;font-size:12.5px;cursor:pointer;color:var(--ink2);font-weight:550;list-style:none}
+details.proc summary::-webkit-details-marker{display:none}
+details.proc summary::before{content:"▸";margin-right:8px;color:var(--brand);display:inline-block}
+details.proc[open] summary::before{transform:rotate(90deg)}
+.proc-body{padding:6px 14px 14px;font-size:12px;color:var(--ink2);line-height:1.85;border-top:1px solid var(--line2)}
+.proc-body code{background:#f4eadb;border-radius:4px;padding:1px 5px;font-size:11.5px;font-variant-numeric:tabular-nums}
+.action-row{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.action-row .btn{flex:1;min-width:100px;text-align:center}
+
+/* ---------- explain ---------- */
+.policy-list{font-size:12.5px;color:var(--ink2);line-height:1.75;padding-left:18px;margin:0}
+.policy-list li{margin-bottom:7px}
+.policy-list b{color:var(--ink)}
+.footer{text-align:center;color:var(--muted);font-size:11.5px;padding:26px 0 0;line-height:1.8}
+
+/* ---------- 工具内部：顶部工具条 / 分区导航 / 单分区内容 ---------- */
+.tool-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:12px 18px;margin:0 0 16px}
+.tool-bar .crumb{display:flex;align-items:center;gap:8px;flex:1;min-width:170px;
+  font-size:12.5px;color:var(--muted)}
+.tool-bar .crumb b{color:var(--ink);font-weight:650}
+.tool-bar .side{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nav-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink2);border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;
+  transition:.15s;white-space:nowrap}
+.nav-btn:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.nav-btn.ghost{background:transparent;border-color:transparent;color:var(--blue)}
+.nav-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+
+.step-nav{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:11px 13px;margin:0 0 20px}
+.step-nav .nav-label{align-self:center;font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.5px;padding:0 6px 0 2px;white-space:nowrap}
+.step-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink2);border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;
+  transition:.15s;text-align:left;min-height:40px}
+.step-btn .n{width:20px;height:20px;border-radius:6px;background:var(--brand-soft);color:var(--brand);
+  display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.step-btn:hover{border-color:var(--brand);background:var(--brand-soft)}
+.step-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;
+  box-shadow:0 3px 10px rgba(154,90,49,.22)}
+.step-btn.active .n{background:rgba(255,255,255,.22);color:#fff}
+.step-nav .nav-spacer{flex:1;min-width:8px}
+.step-nav .main-action{align-self:center;flex:none;padding:9px 18px}
+
+.pane{display:none;padding:0 2px}
+.pane.active{display:block;animation:paneIn .18s ease-out}
+@keyframes paneIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.pane > .card{margin-bottom:0}
+.pane-meta{display:flex;align-items:center;gap:9px;margin:0 2px 14px;font-size:11.5px;
+  font-weight:600;color:var(--muted);letter-spacing:.3px}
+.pane-meta::before{content:"";width:16px;height:2px;border-radius:2px;background:var(--brand)}
+.ops-card{margin-top:22px}
+.ops-card .btn-row{margin-top:0;gap:12px}
+.ops-card .btn{min-width:140px;text-align:center}
+.result-quick{margin:0 0 18px}
+.result-quick .btn{width:100%;padding:9px 12px}
+
+/* ---------- 延迟展示：测算结果区与「个人预计支出」弹窗 ---------- */
+/* 测算开始前 / 测算过程中：结果区整体隐藏且不占位，连右侧列宽都不预留 */
+.layout.no-result{grid-template-columns:minmax(0,1fr)}
+.result-col[hidden],.modal-mask[hidden]{display:none!important}
+body.modal-open{overflow:hidden}
+.modal-mask{position:fixed;inset:0;z-index:90;background:rgba(59,47,38,.46);display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{width:min(580px,100%);max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 22px 0;box-shadow:0 22px 60px rgba(90,58,34,.26)}
+.modal-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.modal-h .lab{font-size:12px;color:var(--muted);font-weight:600;margin:0}
+.modal-h h2{font-size:18px;margin:3px 0 0;font-weight:650}
+.modal-x{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:9px;width:32px;height:32px;font-size:19px;line-height:1;flex:none}
+.modal-x:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-soft)}
+.modal-big{margin:16px 0 4px;padding:16px 18px;border-radius:14px;background:var(--brand-soft);border:1px solid var(--line);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand2);line-height:1.2}
+.modal-big .cny{font-size:18px;font-weight:600;margin-right:4px;color:var(--brand)}
+.modal-meta{font-size:11.5px;color:var(--muted);margin:8px 2px 16px;line-height:1.6}
+.modal-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line2);border:1px solid var(--line2);border-radius:11px;overflow:hidden;margin-bottom:18px}
+.modal-metrics .m{background:var(--card);padding:10px 12px}
+.modal-metrics .k{font-size:11px;color:var(--muted);white-space:normal;line-height:1.35}
+.modal-metrics .v{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:3px;color:var(--ink)}
+.modal-sec{margin-top:16px}
+.modal-sec h3{font-size:12.5px;margin:0 0 8px;font-weight:650;color:var(--ink2)}
+.modal-items{font-size:12.5px}
+.modal-items th,.modal-items td{padding:6px 8px}
+.modal-foot{position:sticky;bottom:0;z-index:1;background:var(--card);display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap;margin:20px -22px 0;padding:14px 22px 22px;border-top:1px solid var(--line2)}
+.modal-foot .btn{min-width:104px}
+@media(max-width:560px){
+  .modal{padding:18px 18px 0;max-height:90vh}
+  .modal-big{font-size:29px}
+  .modal-metrics{grid-template-columns:1fr 1fr}
+  .modal-foot{margin:18px -18px 0;padding:12px 18px 18px}
+  .modal-foot .btn{flex:1}
+}
+
+@media(max-width:1100px){
+  /* 单栏小屏：内容区按原顺序完整在上，测算结果统一排到所有内容区块之后 */
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .form-col{min-width:0;order:1}
+  .result-col{position:static;order:2;min-width:0}
+  .result-col::before{
+    content:"测算结果";
+    display:block;margin:0 2px 12px;padding:0 0 9px;
+    border-bottom:1px solid var(--line2);
+    font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--muted);
+  }
+  .result-card{padding:20px}
+}
+@media(max-width:640px){
+  .wrap{padding:0 14px 40px}
+  .notice{padding:0 14px}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .card{padding:16px}
+  .big{font-size:31px}
+  h1{font-size:19px}
+  .viz{gap:10px}
+  .donut{width:96px;height:96px}
+  .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .metric .k{white-space:normal;line-height:1.35}
+  .tool-bar{padding:12px}
+  .tool-bar .crumb{order:-1;flex-basis:100%}
+  .step-btn{flex:1 1 132px}
+  .step-nav .nav-spacer{display:none}
+  .step-nav .main-action{flex:1 1 100%;text-align:center}
+  .layout{row-gap:22px}
+}
+@media print{
+  body{background:#fff}
+  .topbar{background:#93552f!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .notice,.form-col,.action-row,.footer,.tool-bar,.step-nav,#opFeedback,.result-quick{display:none!important}
+  .layout{display:block}
+  .result-col{position:static}
+  .result-col::before{display:none!important}
+  .modal-mask{display:none!important}
+  .card{box-shadow:none;border:1px solid #e2d2bd;break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+
+/* ============================================================
+   接入全站：只接「颜色」变量，不动尺寸、圆角、间距、字体。
+   不注入任何元素级重置，页面自身样式原样生效。
+   ============================================================ */
+:root{
+  --bg: var(--brand-50);
+  --card: color-mix(in srgb, var(--surface) 95%, var(--brand-100));
+  --ink: var(--ink-900);
+  --ink2: var(--ink-700);
+  --muted: var(--ink-500);
+  --line: color-mix(in srgb, var(--line-soft) 62%, var(--brand-100));
+  --line2: var(--line-soft);
+  --brand: var(--brand-700);
+  --brand2: var(--brand-900);
+  --brand-soft: var(--brand-100);
+  --blue: var(--brand-700);
+  --blue-soft: var(--brand-50);
+  --amber: var(--warn-500);
+  --amber-soft: var(--warn-50);
+  --red: var(--urgent-600);
+  --red-soft: var(--urgent-50);
+  --green: var(--success-600);
+  --green-soft: var(--success-50);
+  --shadow: var(--sh-1);
+}
+/* 页面自带横幅：默认主题保持原色，切换后随主题走 */
+:root { --calc-hero: linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%); }
+html[data-theme="clarity"] { --calc-hero: linear-gradient(120deg,#0B3B44 0%,#0E6B75 52%,#0F7C86 100%); }
+html[data-theme="rescue"]  { --calc-hero: linear-gradient(120deg,#102A4C 0%,#1B4B8F 52%,#1D5FA8 100%); }
+.topbar, .top { background: var(--calc-hero); }
+</style>
+</head>
+<body>
+
+<div id="site-topbar"></div>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brandline">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 4 10 2-5h6"/><path d="M12 3v3M12 18v3" opacity=".55"/></svg>
+      </div>
+      <div>
+        <h1>急救医疗费用与医保报销测算工具</h1>
+        <div class="subtitle">按甲 / 乙 / 丙类费用拆分 · 起付线分段报销 · 异地就医 · 大病保险 · 医疗救助</div>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip">纯本地计算，数据不上传</span>
+      <span class="chip">参数全部可编辑</span>
+      <span class="chip">适用职工医保 / 居民医保</span>
+      <span class="chip">含异地急诊抢救规则</span>
+      <span class="chip">内部按分区组织，按钮分散排布</span>
+    </div>
+  </div>
+</div>
+
+<div class="notice wrap">
+  <div class="notice-in">
+    <span style="font-weight:700;font-size:15px;line-height:1.2">!</span>
+    <div><b>请先阅读：</b>医保待遇以各统筹地区医保局公布的口径为准，地区、医院等级、参保年度差异很大。页面内所有费用明细与政策参数<b>均为演示用假设值</b>，不代表任何地区真实标准。请按费用清单和参保地政策修改后再测算，结果仅供估算参考，不能作为结算或报销依据。</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ===== 顶部工具条：导航 / 返回 / 重置，与下方内容区分开 ===== -->
+  <div class="tool-bar">
+    <button class="nav-btn op-btn" id="opBack">返回导航首页</button>
+    <div class="crumb">模块导航 <span>/</span> <b>急救医疗费用与医保报销测算</b></div>
+    <div class="side">
+      <button class="nav-btn danger op-btn" id="opReset">重置测算</button>
+      <a class="nav-btn ghost" href="scan.html">急救费用拍照识别与报销方案 →</a>
+    </div>
+  </div>
+
+  <div id="opFeedback" class="inline-note" style="display:none;margin:0 0 16px"></div>
+
+  <!-- ===== 分区导航：点击按钮只显示对应内容，不再堆叠全部卡片 ===== -->
+  <div class="step-nav" id="opBar">
+    <span class="nav-label">内容分区</span>
+    <button class="step-btn active" data-pane="1"><span class="n">1</span>参保与就医</button>
+    <button class="step-btn" data-pane="2"><span class="n">2</span>费用明细</button>
+    <button class="step-btn" data-pane="3"><span class="n">3</span>政策参数</button>
+    <button class="step-btn" data-pane="4"><span class="n">4</span>大病与救助</button>
+    <button class="step-btn" data-pane="5"><span class="n">5</span>测算口径</button>
+    <button class="step-btn" data-pane="6"><span class="n">6</span>云端记录</button>
+    <span class="nav-spacer"></span>
+    <button class="btn primary op-btn main-action" id="opCalc">开始测算</button>
+  </div>
+
+<div class="layout no-result">
+
+  <!-- ============ LEFT : INPUT（按分区切换，输入与计算逻辑不变） ============ -->
+  <div class="form-col">
+
+    <div class="pane active" data-pane="1">
+    <div class="pane-meta">分区 01 / 06 · 先确认参保身份与就医情形</div>
+    <div class="card">
+      <div class="card-h"><span class="step">1</span><h2>参保与就医情形</h2></div>
+      <p class="card-desc">选择情形后会自动带出建议的比例调整值，仍可手动修改。</p>
+      <div class="grid2">
+        <div class="field">
+          <label class="lab" for="insType">参保类型</label>
+          <select id="insType" data-path="insType">
+            <option value="emp">职工医保 · 在职</option>
+            <option value="retire">职工医保 · 退休</option>
+            <option value="resident">城乡居民医保 · 成人</option>
+            <option value="student">城乡居民医保 · 学生儿童</option>
+            <option value="none">未参保 / 全部自费</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lab" for="scenario">就医情形</label>
+          <select id="scenario" data-path="scenario">
+            <option value="local">参保地本地急诊 / 住院</option>
+            <option value="registered">异地已备案（长期居住等）</option>
+            <option value="emergency">异地急诊抢救（视同已备案）</option>
+            <option value="referral">异地转诊</option>
+            <option value="unregistered">异地非急诊、未备案</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lab" for="visitType">费用所属待遇</label>
+          <select id="visitType" data-path="visitType">
+            <option value="inpatient">住院（含急诊转住院 / 留观合并）</option>
+            <option value="outpatient">急诊门诊 / 门诊统筹</option>
+            <option value="mixed">混合，需分别测算</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lab" for="hospitalLevel">医疗机构等级</label>
+          <select id="hospitalLevel" data-path="hospitalLevel">
+            <option value="3">三级医院</option>
+            <option value="2">二级医院</option>
+            <option value="1">一级及以下 / 基层</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="lab" for="insuredCity">参保地 <span class="unit">（选填）</span></label>
+          <input type="text" id="insuredCity" data-path="insuredCity" placeholder="如：某市 / 某省">
+        </div>
+        <div class="field">
+          <label class="lab" for="treatCity">就医地 <span class="unit">（选填）</span></label>
+          <input type="text" id="treatCity" data-path="treatCity" placeholder="如：外地出差城市">
+        </div>
+      </div>
+      <div class="inline-note" id="scenarioNote"></div>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="2">
+    <div class="pane-meta">分区 02 / 06 · 逐项录入费用并选择甲 / 乙 / 丙类归属</div>
+    <div class="card">
+      <div class="card-h"><span class="step">2</span><h2>急救费用明细</h2></div>
+      <p class="card-desc">按费用清单逐项填写并归类。甲类全额计入报销基数；乙类先自付一部分后计入；丙类全自费。</p>
+      <div class="tbl-scroll">
+        <table class="tbl-items">
+          <thead><tr>
+            <th>费用项目</th><th style="width:126px">类别</th><th class="num" style="width:110px">金额（元）</th>
+            <th class="num" style="width:96px">乙类先自付 %</th><th class="num" style="width:100px">计入基数</th><th style="width:36px"></th>
+          </tr></thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+      <div class="total-line"><span>费用合计</span><b id="itemsTotal">¥ 0.00</b></div>
+      <div class="btn-row">
+        <button class="btn" id="addItem">+ 添加一行</button>
+        <button class="btn" id="loadDemo">载入急救示例清单</button>
+        <button class="btn" id="clearItems">清空明细</button>
+      </div>
+      <div class="hint">乙类「先自付 %」留空则沿用右侧全局比例；可针对单个药品或耗材单独填写。120 救护车费、特需服务、目录外进口药等通常不纳入医保支付范围，示例清单按此标注，请以实际结算单为准。</div>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="3">
+    <div class="pane-meta">分区 03 / 06 · 按参保地政策填写起付线、比例与分段</div>
+    <div class="card">
+      <div class="card-h"><span class="step">3</span><h2>基本医保政策参数</h2></div>
+      <p class="card-desc">请按<b>参保地</b>对应医院等级、对应待遇（住院 / 门诊）的标准填写。跨省异地就医执行「就医地目录、参保地政策」。</p>
+      <div class="grid3">
+        <div class="field"><label class="lab">起付线 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="deductible"></div>
+        <div class="field"><label class="lab">乙类先自付比例 <span class="unit">%</span></label><input type="number" min="0" max="100" step="any" data-path="prepayRate"></div>
+        <div class="field"><label class="lab">年度最高支付限额 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="ceiling" placeholder="留空＝不限"></div>
+        <div class="field"><label class="lab">比例调整 <span class="unit">百分点，负数为下调</span></label><input type="number" step="any" data-path="rateAdjust"></div>
+        <div class="field"><label class="lab">退休 / 身份加成 <span class="unit">百分点</span></label><input type="number" step="any" data-path="retireBonus"></div>
+        <div class="field"><label class="lab">起付线上浮 <span class="unit">%（异地未备案时）</span></label><input type="number" min="0" step="any" data-path="deductibleUplift"></div>
+      </div>
+
+      <div class="sect-title">起付线以上费用 · 分段报销比例</div>
+      <div class="tbl-scroll">
+        <table class="tbl-seg">
+          <thead><tr><th>段上限（累计可报基数，元）</th><th class="num" style="width:130px">报销比例 %</th><th style="width:36px"></th></tr></thead>
+          <tbody id="segBody"></tbody>
+        </table>
+      </div>
+      <div class="btn-row"><button class="btn" id="addSeg">+ 添加分段</button></div>
+      <div class="hint">最后一行的段上限留空表示「以上全部」，系统会自动补齐。若只填一行有限上限，超出部分按该行比例继续计算。分段比例会自动叠加右侧的「比例调整」与「身份加成」。</div>
+
+      <details class="adv">
+        <summary>进阶：本年度累计情况与参数预设</summary>
+        <div class="adv-body">
+          <div class="grid3" style="margin-top:10px">
+            <div class="field"><label class="lab">本年已累计计入起付线的合规费用</label><input type="number" min="0" step="any" data-path="usedDeductible"></div>
+            <div class="field"><label class="lab">本年基本医保已报销</label><input type="number" min="0" step="any" data-path="usedBasicReimburse"></div>
+            <div class="field"><label class="lab">本年大病保险已报销</label><input type="number" min="0" step="any" data-path="critical.used"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn" data-preset="emp">职工医保 · 演示参数</button>
+            <button class="btn" data-preset="resident">居民医保 · 演示参数</button>
+            <button class="btn" data-preset="simple">单档简化 · 演示参数</button>
+          </div>
+          <div class="hint">预设均为便于理解计算过程的假设数值，非任何地区真实政策。加载预设会覆盖本区与大病保险参数。</div>
+        </div>
+      </details>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="4">
+    <div class="pane-meta">分区 04 / 06 · 叠加二次报销与医疗救助</div>
+    <div class="card">
+      <div class="card-h"><span class="step">4</span><h2>大病保险与医疗救助</h2></div>
+      <p class="card-desc">对「经基本医保报销后个人负担的政策范围内费用」再次保障，各地名称与口径不一（大额补助、二次报销、职工大额等）。</p>
+
+      <div class="switch-wrap">
+        <label class="switch"><input type="checkbox" data-path="critical.enabled"><span>启用大病保险 / 大额补助</span></label>
+        <span class="tag B" id="critState">未启用</span>
+      </div>
+      <div class="grid3" id="critFields">
+        <div class="field"><label class="lab">大病起付线 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="critical.deductible"></div>
+        <div class="field"><label class="lab">基础段比例 <span class="unit">%</span></label><input type="number" min="0" max="100" step="any" data-path="critical.rate"></div>
+        <div class="field"><label class="lab">高额段起点 <span class="unit">元，留空＝不分档</span></label><input type="number" min="0" step="any" data-path="critical.highStart" placeholder="留空"></div>
+        <div class="field"><label class="lab">高额段比例 <span class="unit">%</span></label><input type="number" min="0" max="100" step="any" data-path="critical.highRate" placeholder="留空＝同基础段"></div>
+        <div class="field"><label class="lab">年度支付限额 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="critical.ceiling" placeholder="留空＝不限"></div>
+      </div>
+
+      <div class="sect-title">医疗救助</div>
+      <div class="switch-wrap">
+        <label class="switch"><input type="checkbox" data-path="rescue.enabled"><span>启用医疗救助（特困 / 低保 / 返贫致贫等）</span></label>
+        <span class="tag B" id="rescueState">未启用</span>
+      </div>
+      <div class="grid3" id="rescueFields">
+        <div class="field"><label class="lab">救助比例 <span class="unit">%</span></label><input type="number" min="0" max="100" step="any" data-path="rescue.rate"></div>
+        <div class="field"><label class="lab">年度救助限额 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="rescue.ceiling" placeholder="留空＝不限"></div>
+        <div class="field"><label class="lab">本年已获救助 <span class="unit">元</span></label><input type="number" min="0" step="any" data-path="rescue.used"></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="5">
+    <div class="pane-meta">分区 05 / 06 · 了解公式与异地就医规则</div>
+    <div class="card">
+      <div class="card-h"><span class="step">5</span><h2>测算口径与政策要点</h2></div>
+      <p class="card-desc">了解公式，才能改对参数。</p>
+      <ul class="policy-list">
+        <li><b>报销基数</b> = 甲类费用 × 100% + 乙类费用 ×（1 − 先自付比例）− 剩余起付线。丙类（目录外）费用全额自费，不参与任何报销。</li>
+        <li><b>基本医保报销</b> = 报销基数按分段比例逐段计算之和，再受「年度最高支付限额 − 本年已报销」约束；退休人员等身份加成、异地降比例均作用于分段比例。</li>
+        <li><b>大病保险基数</b> = 政策范围内费用 − 基本医保报销额（即个人负担的合规费用，含起付线、比例自付、超封顶部分），超过大病起付线的部分按比例再次报销。</li>
+        <li><b>医疗救助</b> = 经基本医保、大病保险报销后剩余的政策范围内个人负担 × 救助比例，受年度限额约束。</li>
+        <li><b>跨省异地就医</b>：执行「就医地目录、参保地政策、就医地管理」。依据医保发〔2022〕22号，异地急诊抢救人员<b>视同已备案</b>，无需额外提交备案材料；异地转诊与急诊抢救支付比例降幅原则上不超过 10 个百分点，非急诊且未转诊的其他临时外出就医降幅原则上不超过 20 个百分点，具体以参保地政策为准。</li>
+        <li><b>来不及备案</b>：可在出院结算前补办异地就医备案直接结算；已自费结算出院的，可补办备案后按参保地规定申请手工报销。</li>
+        <li><b>急救常见不支付情形</b>：应由工伤保险基金支付、应由第三人负担（交通事故、伤害等）、应由公共卫生负担、境外就医、体育健身与养生保健、健康体检等，医保基金不予支付；120 救护车费、特需病房、超标准服务设施、部分血液制品与进口耗材多数地区需自费。</li>
+        <li><b>门诊与住院</b>：急诊门诊、急诊留观、住院的起付线、比例、封顶线常不相同；部分地区急诊留观费用可并入本次住院费用结算。若一次急救同时产生多类待遇，建议分开测算。</li>
+      </ul>
+    </div>
+    </div>
+
+    <div class="pane" data-pane="6">
+    <div class="pane-meta">分区 06 / 06 · 查看按钮规则与云端测算记录</div>
+    <details class="adv" style="margin:0 0 18px">
+      <summary>按钮说明：名称 / 位置 / 默认状态 / 禁用条件 / 点击反馈</summary>
+      <div class="adv-body">
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>按钮</th><th>位置</th><th>默认状态</th><th>禁用条件</th><th>点击反馈与校验</th></tr></thead>
+            <tbody>
+              <tr><td>开始测算</td><td>分区导航条最右侧（蓝色主按钮）</td><td>可用（已载入演示明细）</td><td>费用明细为空 / 测算进行中</td><td>测算前与测算中结果区始终隐藏；按现有规则计算并校验有效性；通过后弹出「个人预计支出」弹窗，失败或总额为 0 时不弹窗并给出提示</td></tr>
+              <tr><td>保存本次结果</td><td>左侧「结果处理」卡片</td><td>本次有效结果生成且云数据库就绪后可用</td><td>未确认结果 / 结果已作废 / 云服务未就绪</td><td>仅保存本次弹窗所展示的结果快照并读回，提示记录编号；失败提示具体原因</td></tr>
+              <tr><td>查看结果与明细</td><td>右侧结果卡指标区下方</td><td>本次有效结果生成后可用</td><td>无测算结果 / 结果已作废</td><td>定位到结果区并展开「逐步计算过程」</td></tr>
+              <tr><td>导出明细</td><td>左侧「结果处理」卡片</td><td>本次有效结果生成后可用</td><td>无测算结果 / 结果已作废</td><td>下载与本次结果一致的 CSV，提示已导出</td></tr>
+              <tr><td>重置测算</td><td>顶部工具条右侧</td><td>始终可用</td><td>无</td><td>二次确认后恢复演示数据与默认参数，刷新后提示「已重置」</td></tr>
+              <tr><td>返回导航首页</td><td>顶部工具条左侧</td><td>始终可用</td><td>无</td><td>返回模块导航页，放弃当前编辑</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="hint">工具内部按「顶部工具条 → 分区导航 → 单个内容分区 → 结果区」分层，按钮分散在工具条、导航条、结果卡与「结果处理」卡片四处。「个人预计支出」采用延迟展示：测算开始前与测算过程中结果区隐藏且不占位，仅当点击「开始测算」并生成有效结果后才以弹窗呈现最终金额与明细；测算失败、结果未生成，或费用明细 / 政策参数发生变化导致结果作废时，弹窗自动关闭并清空内容，不残留过期数据。计算规则与数据结构保持不变。</div>
+      </div>
+    </details>
+    <div id="cloudPanel"></div>
+    </div>
+
+    <div class="card ops-card">
+      <div class="card-h"><h2>结果处理</h2></div>
+      <p class="card-desc" style="margin-left:0">基于右侧当前测算结果保存与导出，与费用录入分区分开排布。</p>
+      <div class="btn-row">
+        <button class="btn op-btn" id="opSave">保存本次结果</button>
+        <button class="btn op-btn" id="opExport">导出明细</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RIGHT : RESULT（测算完成前整体隐藏，不占位） ============ -->
+  <aside class="result-col" hidden>
+    <div class="card result-card">
+      <div class="result-head">
+        <div>
+          <p class="lab">预计个人需支付（现金自付）</p>
+          <div class="big"><span class="cny">¥</span><span id="rSelf">0.00</span></div>
+        </div>
+        <span class="pill" id="rRatePill">报销率 0%</span>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="k">费用总额</div><div class="v" id="rTotal">¥0</div></div>
+        <div class="metric"><div class="k">医保合计报销</div><div class="v g" id="rReimb">¥0</div></div>
+        <div class="metric"><div class="k">政策范围内费用</div><div class="v b" id="rCompliant">¥0</div></div>
+      </div>
+
+      <div class="result-quick">
+        <button class="btn op-btn" id="opView">查看结果与明细</button>
+      </div>
+
+      <div class="viz">
+        <div class="donut">
+          <svg viewBox="0 0 118 118" width="118" height="118">
+            <circle cx="59" cy="59" r="48" fill="none" stroke="#f1e5d3" stroke-width="14"></circle>
+            <circle id="donutArc" cx="59" cy="59" r="48" fill="none" stroke="#9a5a31" stroke-width="14" stroke-linecap="round" stroke-dasharray="0 301.6"></circle>
+          </svg>
+          <div class="donut-c"><div class="n" id="donutNum">0%</div><div class="t">综合报销率</div></div>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+
+      <div class="stack" id="stack"></div>
+      <div class="stack-legend">
+        <span><i style="background:#9a5a31"></i>医保报销</span>
+        <span><i style="background:#c98a5c"></i>目录外自费</span>
+        <span><i style="background:#e6c48f"></i>目录内自付</span>
+      </div>
+
+      <div class="blk">
+        <h3>个人自付构成 <span style="font-weight:400;color:var(--muted);font-size:11px">单位：元</span></h3>
+        <div id="breakdown"></div>
+      </div>
+
+      <div class="blk">
+        <h3>基金支付明细 <span style="font-weight:400;color:var(--muted);font-size:11px">单位：元</span></h3>
+        <div id="fundRows"></div>
+      </div>
+
+      <div class="tips" id="tips"></div>
+
+      <details class="proc" id="procDetails">
+        <summary>查看逐步计算过程</summary>
+        <div class="proc-body" id="proc"></div>
+      </details>
+
+      <div class="action-row">
+        <button class="btn primary" id="printBtn">打印 / 存为 PDF</button>
+        <button class="btn" id="csvBtn">导出测算明细</button>
+        <button class="btn" id="resetBtn">重置全部</button>
+      </div>
+
+      <div class="disclaimer">
+        本工具按简化口径估算，未纳入：医保个人账户支付、公务员补助 / 企业补充医保、商业保险、DRG/DIP 结算差异、单项限额支付、医院等级间的比例差异、异地手工报销审核扣减、起付线按次或按年累计的地方差异等。<b>实际结算以医保经办机构与医院结算单为准。</b>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div class="footer">
+  急救医疗费用与医保报销测算工具 · 纯前端本地运算，所有输入仅保存在当前浏览器页面，不会上传或写入任何服务器<br>
+  相关工具：<a href="scan.html">急救费用拍照识别与报销方案</a> · 图片识别功能会将所选图片发送至混元接口 · <a href="index.html">返回导航首页</a><br>
+  政策依据参考：国家医保局 财政部《关于进一步做好基本医疗保险跨省异地就医直接结算工作的通知》（医保发〔2022〕22号）及公开政策解读；各地具体待遇以参保地医保部门发布为准
+</div>
+</div>
+
+<!-- ===== 个人预计支出弹窗：仅在显式测算成功且结果有效后呈现；关闭后清空内容 ===== -->
+<div class="modal-mask" id="payModal" hidden role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+  <div class="modal">
+    <div class="modal-h">
+      <div>
+        <p class="lab">本次测算已完成 · 个人预计支出</p>
+        <h2 id="pmTitle">测算结果明细</h2>
+      </div>
+      <button class="modal-x" id="pmCloseX" type="button" aria-label="关闭弹窗">×</button>
+    </div>
+
+    <div class="modal-big"><span class="cny">¥</span><span id="pmSelf">0.00</span></div>
+    <div class="modal-meta" id="pmMeta"></div>
+
+    <div class="modal-metrics">
+      <div class="m"><div class="k">费用总额</div><div class="v" id="pmTotal">¥0</div></div>
+      <div class="m"><div class="k">医保合计报销</div><div class="v" id="pmReimb">¥0</div></div>
+      <div class="m"><div class="k">综合报销率</div><div class="v" id="pmRate">0%</div></div>
+    </div>
+
+    <div class="modal-sec">
+      <h3>个人自付构成</h3>
+      <div id="pmBreakdown"></div>
+    </div>
+    <div class="modal-sec">
+      <h3>基金支付明细</h3>
+      <div id="pmFund"></div>
+    </div>
+    <div class="modal-sec">
+      <h3>费用明细（共 <span id="pmCount">0</span> 项）</h3>
+      <div class="tbl-scroll">
+        <table class="modal-items">
+          <thead><tr><th>项目</th><th>类别</th><th class="num">金额</th><th class="num">计入报销基数</th></tr></thead>
+          <tbody id="pmItems"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn" id="pmViewDetail" type="button">查看完整明细</button>
+      <button class="btn primary" id="pmClose" type="button">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CALCULATION ENGINE (pure, DOM-free) ==================== -->
+<script src="engine.js"></script>
+
+<!-- ==================== UI ==================== -->
+<script>
+(function(){
+'use strict';
+var E = globalThis.__MED_ENGINE__;
+var $ = function(s,root){ return (root||document).querySelector(s); };
+var $$ = function(s,root){ return Array.prototype.slice.call((root||document).querySelectorAll(s)); };
+var money = function(v){ return '¥' + E.round2(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+var money0 = function(v){ return '¥' + Math.round(v).toLocaleString('zh-CN'); };
+var esc = function(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+
+var DEMO_ITEMS = [
+  {name:'120 院前急救出车 / 救护车费', amount:120,  type:'C', prepay:''},
+  {name:'救护车转运里程费',             amount:80,   type:'C', prepay:''},
+  {name:'急诊诊查费 + 抢救费',          amount:660,  type:'A', prepay:''},
+  {name:'心电监护 / 吸氧 / 心电图',      amount:220,  type:'A', prepay:''},
+  {name:'血常规、急诊生化、凝血',        amount:360,  type:'A', prepay:''},
+  {name:'CT / 影像检查',                amount:520,  type:'B', prepay:''},
+  {name:'气管插管、呼吸机、ICU 监护',    amount:2400, type:'B', prepay:''},
+  {name:'目录内急救药品',               amount:980,  type:'A', prepay:''},
+  {name:'乙类药品',                     amount:1350, type:'B', prepay:''},
+  {name:'进口耗材 / 自费药',            amount:1600, type:'C', prepay:''},
+  {name:'血液制品 / 特需服务',          amount:760,  type:'C', prepay:''}
+];
+
+var PRESETS = {
+  emp: {
+    deductible:800, prepayRate:10, ceiling:300000, rateAdjust:0, retireBonus:0, deductibleUplift:0,
+    usedDeductible:0, usedBasicReimburse:0,
+    segments:[{cap:30000,rate:85},{cap:60000,rate:90},{cap:'',rate:92}],
+    critical:{enabled:true,deductible:15000,rate:60,highStart:50000,highRate:70,ceiling:400000,used:0}
+  },
+  resident: {
+    deductible:1200, prepayRate:10, ceiling:200000, rateAdjust:0, retireBonus:0, deductibleUplift:0,
+    usedDeductible:0, usedBasicReimburse:0,
+    segments:[{cap:30000,rate:60},{cap:60000,rate:65},{cap:'',rate:70}],
+    critical:{enabled:true,deductible:12000,rate:60,highStart:50000,highRate:70,ceiling:300000,used:0}
+  },
+  simple: {
+    deductible:700, prepayRate:10, ceiling:200000, rateAdjust:0, retireBonus:0, deductibleUplift:0,
+    usedDeductible:0, usedBasicReimburse:0,
+    segments:[{cap:'',rate:85}],
+    critical:{enabled:false,deductible:15000,rate:60,highStart:'',highRate:'',ceiling:300000,used:0}
+  }
+};
+
+var SCENARIO = {
+  local:        {adjust:0,  uplift:0, note:'在参保地定点医疗机构就医，按本地待遇标准结算。急诊抢救费用请在结算单中确认是否已按住院 / 急诊留观待遇合并计算。'},
+  registered:   {adjust:0,  uplift:0, note:'已备案的异地长期居住人员，起付线、支付比例、最高支付限额原则上执行参保地本地就医标准；报销范围按就医地目录执行。'},
+  emergency:    {adjust:0,  uplift:0, note:'依据医保发〔2022〕22号，异地急诊抢救人员视同已备案，无需额外提交备案材料，可直接结算门诊与住院费用。部分地区急诊抢救支付比例降幅不超过 10 个百分点，本工具默认不降低，若参保地有下调请在「比例调整」中填写负值。'},
+  referral:     {adjust:-10,uplift:0, note:'异地转诊支付比例降幅原则上不超过 10 个百分点。此处预填 −10，请按参保地实际规定修改。'},
+  unregistered: {adjust:-20,uplift:0, note:'非急诊且未转诊的其他跨省临时外出就医，支付比例降幅原则上不超过 20 个百分点，此处预填 −20。建议在出院结算前补办异地就医备案，可明显提高报销水平；已自费结算的可补办备案后申请手工报销。'}
+};
+
+var state = {
+  insType:'emp', scenario:'local', visitType:'inpatient', hospitalLevel:'3',
+  insuredCity:'', treatCity:'',
+  items: DEMO_ITEMS.map(function(x){ return Object.assign({},x); }),
+  deductible:800, prepayRate:10, ceiling:300000,
+  rateAdjust:0, retireBonus:0, deductibleUplift:0,
+  usedDeductible:0, usedBasicReimburse:0,
+  segments:[{cap:30000,rate:85},{cap:60000,rate:90},{cap:'',rate:92}],
+  critical:{enabled:true,deductible:15000,rate:60,highStart:50000,highRate:70,ceiling:400000,used:0},
+  rescue:{enabled:false,rate:70,ceiling:'',used:0}
+};
+
+function getPath(obj,path){
+  return path.split('.').reduce(function(o,k){ return o==null?undefined:o[k]; },obj);
+}
+function setPath(obj,path,val){
+  var ks=path.split('.'), last=ks.pop();
+  var t=ks.reduce(function(o,k){ return o[k]; },obj);
+  t[last]=val;
+}
+
+/* ---------- render items ---------- */
+function renderItems(){
+  var html = state.items.map(function(it,i){
+    var isB = it.type==='B';
+    return '<tr data-i="'+i+'">'+
+      '<td><input type="text" data-f="name" value="'+esc(it.name)+'" placeholder="费用项目"></td>'+
+      '<td><select class="type-sel" data-f="type">'+
+        '<option value="A"'+(it.type==='A'?' selected':'')+'>甲类 · 全额</option>'+
+        '<option value="B"'+(isB?' selected':'')+'>乙类 · 先付</option>'+
+        '<option value="C"'+(it.type==='C'?' selected':'')+'>丙类 · 自费</option>'+
+      '</select></td>'+
+      '<td><input type="number" min="0" step="any" data-f="amount" value="'+esc(it.amount)+'"></td>'+
+      '<td><input type="number" min="0" max="100" step="any" data-f="prepay" value="'+esc(it.prepay)+'" placeholder="继承"'+(isB?'':' disabled')+'></td>'+
+      '<td class="num row-sub" data-cell="compliant">—</td>'+
+      '<td><button class="icon-btn" data-del="'+i+'" title="删除该行">×</button></td>'+
+    '</tr>';
+  }).join('');
+  $('#itemsBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:22px">暂无费用明细，点击「添加一行」或「载入急救示例清单」</td></tr>';
+}
+
+function renderSegments(){
+  $('#segBody').innerHTML = state.segments.map(function(s,i){
+    return '<tr data-i="'+i+'">'+
+      '<td><input type="number" min="0" step="any" data-f="cap" value="'+esc(s.cap)+'" placeholder="留空＝以上全部"></td>'+
+      '<td><input type="number" min="0" max="100" step="any" data-f="rate" value="'+esc(s.rate)+'"></td>'+
+      '<td><button class="icon-btn" data-delseg="'+i+'" title="删除分段">×</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+function syncInputs(){
+  $$('[data-path]').forEach(function(el){
+    var v = getPath(state, el.getAttribute('data-path'));
+    if (el.type === 'checkbox') el.checked = !!v;
+    else el.value = (v === null || v === undefined) ? '' : v;
+  });
+}
+
+function applyScenarioDefaults(){
+  var s = SCENARIO[state.scenario] || SCENARIO.local;
+  state.rateAdjust = s.adjust;
+  state.deductibleUplift = s.uplift;
+  $$('[data-path="rateAdjust"],[data-path="deductibleUplift"]').forEach(function(el){
+    el.value = getPath(state, el.getAttribute('data-path'));
+  });
+  var n = $('#scenarioNote');
+  var cls = (state.scenario==='unregistered'||state.scenario==='referral') ? 'inline-note warn' : 'inline-note';
+  n.className = cls;
+  n.textContent = s.note;
+}
+
+function policyForEngine(){
+  return {
+    insured: state.insType !== 'none',
+    prepayRate:state.prepayRate, deductible:state.deductible,
+    deductibleUplift:state.deductibleUplift, ceiling:state.ceiling,
+    rateAdjust:state.rateAdjust, retireBonus:state.retireBonus,
+    usedDeductible:state.usedDeductible, usedBasicReimburse:state.usedBasicReimburse,
+    segments:state.segments, critical:state.critical, rescue:state.rescue
+  };
+}
+
+/* ---------- results ---------- */
+var lastResult = null;
+
+function renderResult(r){
+  $('#rSelf').textContent = E.round2(r.finalSelf).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  $('#rRatePill').textContent = '报销率 ' + E.round2(r.rate) + '%';
+  $('#rTotal').textContent = money0(r.total);
+  $('#rReimb').textContent = money0(r.totalReimburse);
+  $('#rCompliant').textContent = money0(r.compliant);
+  $('#donutNum').textContent = E.round2(r.rate)+'%';
+  var C = 2*Math.PI*48;
+  $('#donutArc').setAttribute('stroke-dasharray', (C*clampRatio(r.rate/100)).toFixed(2)+' '+C.toFixed(2));
+
+  var rows = [
+    {n:'医保基金报销',v:r.totalReimburse,c:'#9a5a31'},
+    {n:'目录外全自费',v:r.outOfScope,c:'#c98a5c'},
+    {n:'目录内自付',v:Math.max(0,r.compliant-r.basic-r.critical-r.rescue),c:'#e6c48f'}
+  ];
+  $('#legend').innerHTML = rows.map(function(x){
+    var pc = r.total>0 ? (x.v/r.total*100) : 0;
+    return '<div class="li"><span class="dot" style="background:'+x.c+'"></span><span class="nm">'+x.n+'</span><span class="vl">'+E.round2(pc)+'%</span></div>'+
+           '<div class="li" style="margin-top:-7px;color:var(--muted);font-size:11px"><span class="dot" style="background:transparent"></span><span class="nm">'+money(x.v)+'</span></div>';
+  }).join('');
+
+  $('#stack').innerHTML = rows.map(function(x){
+    var w = r.total>0 ? clampRatio(x.v/r.total)*100 : 0;
+    return '<div style="width:'+w.toFixed(3)+'%;background:'+x.c+'"></div>';
+  }).join('');
+
+  var bk = [
+    ['目录外全自费','丙类费用 + 乙类先自付部分，不参与任何报销',r.outOfScope,''],
+    ['起付线自付','起付线内由个人先承担的政策范围内费用',r.deductibleSelf,''],
+    ['按比例自付','分段报销后按比例自付的部分',r.copaySelf,''],
+    ['超封顶线自付','超出基本医保年度支付限额、未获报销的部分',r.overCeilingSelf,''],
+    ['大病保险 / 大额补助报销','对个人负担的合规费用再次报销',-r.critical,'minus'],
+    ['医疗救助','对剩余合规个人负担按比例救助',-r.rescue,'minus']
+  ].filter(function(x){ return Math.abs(x[2])>0.004; });
+  if (!bk.length) bk.push(['无需个人支付','',0,'']);
+  $('#breakdown').innerHTML = bk.map(function(x){
+    return '<div class="kv"><div class="k">'+x[0]+'<small>'+x[1]+'</small></div><div class="v '+x[3]+'">'+(x[2]<0?'− ':'')+money(Math.abs(x[2]))+'</div></div>';
+  }).join('') + '<div class="kv sum"><div class="k">合计个人需支付</div><div class="v">'+money(r.finalSelf)+'</div></div>';
+
+  $('#fundRows').innerHTML =
+    kv('基本医保统筹基金', money(r.basic), '分段计算：'+money(r.theoretical)+'，年度剩余额度 '+ (r.ceiling===Infinity?'不限':money(r.ceilingRemain))) +
+    kv('大病保险 / 大额补助', money(r.critical), '合规个人负担 '+money(r.personalBurden)+'，超起付线基数 '+money(r.critBase)) +
+    kv('医疗救助', money(r.rescue), r.rescue>0?('救助基数 '+money(r.rescueBase)):'未启用或未达到条件') +
+    '<div class="kv sum"><div class="k">合计报销</div><div class="v">'+money(r.totalReimburse)+'</div></div>';
+
+  // item rows: show covered amount
+  $$('#itemsBody tr[data-i]').forEach(function(tr){
+    var i = +tr.getAttribute('data-i');
+    var row = r.rows[i];
+    var cell = $('[data-cell="compliant"]',tr);
+    if (cell && row) cell.textContent = money(row.compliant);
+    var pre = $('[data-f="prepay"]',tr);
+    if (pre) pre.disabled = !(state.items[i] && state.items[i].type==='B');
+  });
+
+  var eff = r.segDetail.length ? Math.max.apply(null,r.segDetail.map(function(s){return s.rate;})) : 0;
+  $('#proc').innerHTML =
+    step(1,'费用拆分','甲类 '+money(r.classA)+' + 乙类 '+money(r.classB)+'（先自付 '+money(r.bPrepay)+'）+ 丙类 '+money(r.classC)+' = 总额 '+money(r.total)+'；<b>政策范围内费用 '+money(r.compliant)+'</b>，目录外 '+money(r.outOfScope)+'。') +
+    step(2,'扣除起付线','起付线 '+money(r.deductible)+'，扣除本年已累计后剩余 '+money(r.deductibleRemain)+'；起付线自付 '+money(r.deductibleSelf)+'，<b>进入分段计算的基数 '+money(r.base)+'</b>。') +
+    step(3,'分段报销', (r.segDetail.length ? r.segDetail.map(function(s){ return money(s.from)+'～'+money(s.to)+' × '+E.round2(s.rate)+'% = '+money(s.pay); }).join('<br>') : '无可报基数') + '<br>理论报销合计 <b>'+money(r.theoretical)+'</b>（含比例调整 '+E.round2(r.adjust)+' 个百分点）。') +
+    step(4,'年度封顶','年度限额 '+(r.ceiling===Infinity?'不限':money(r.ceiling))+'，本年已报销后剩余 '+(r.ceiling===Infinity?'不限':money(r.ceilingRemain))+'；<b>基本医保实际报销 '+money(r.basic)+'</b>，超封顶自付 '+money(r.overCeilingSelf)+'。') +
+    step(5,'大病保险','个人负担的合规费用 = '+money(r.compliant)+' − '+money(r.basic)+' = <b>'+money(r.personalBurden)+'</b>；超起付线基数 '+money(r.critBase)+'，按 '+E.round2(r.critRateLow)+'% / '+E.round2(r.critRateHigh)+'% 计算 → <b>'+money(r.critical)+'</b>。') +
+    step(6,'医疗救助与结果','救助基数 '+money(r.rescueBase)+' → 救助 '+money(r.rescue)+'；总报销 '+money(r.totalReimburse)+'，<b>个人需支付 '+money(r.finalSelf)+'</b>，综合报销率 '+E.round2(r.rate)+'%。');
+  $('#itemsTotal').textContent = money(r.total);
+  renderTips(r);
+  $('#critState').textContent = state.critical.enabled?'已启用':'未启用';
+  $('#critState').className = 'tag '+(state.critical.enabled?'A':'B');
+  $('#rescueState').textContent = state.rescue.enabled?'已启用':'未启用';
+  $('#rescueState').className = 'tag '+(state.rescue.enabled?'A':'B');
+  toggleFields();
+}
+function clampRatio(x){ return Math.min(1,Math.max(0,x)); }
+function kv(k,v,sub){ return '<div class="kv"><div class="k">'+k+'<small>'+sub+'</small></div><div class="v">'+v+'</div></div>'; }
+function step(n,t,b){ return '<div style="margin:9px 0"><b>'+n+'. '+t+'</b><br>'+b+'</div>'; }
+
+function toggleFields(){
+  $$('#critFields input').forEach(function(el){ el.disabled = !state.critical.enabled; el.style.opacity = state.critical.enabled?'1':'.5'; });
+  $$('#rescueFields input').forEach(function(el){ el.disabled = !state.rescue.enabled; el.style.opacity = state.rescue.enabled?'1':'.5'; });
+}
+
+function renderTips(r){
+  var t = [];
+  if (r.flags.notInsured) t.push(['warn','!','当前选择「未参保 / 全部自费」，所有费用由个人承担。若为突发急救后补参保或可追溯待遇，请另行核对参保地政策。']);
+  if (!r.flags.notInsured && r.flags.noCoverage) t.push(['warn','!','本次测算未产生医保报销：可能是政策范围内费用未超过起付线，或年度支付额度已用尽。']);
+  if (state.scenario==='emergency') t.push(['info','i','异地急诊抢救视同已备案，可直接结算；请确认医院已按「急诊抢救」标识录入，否则可能被按未备案处理。']);
+  if (state.scenario==='unregistered') t.push(['warn','!','建议在出院结算前补办异地就医备案，或保留材料申请手工报销，可显著减少个人负担。']);
+  if (r.flags.hitCeiling) t.push(['warn','!','本次费用已触及基本医保年度最高支付限额，超出部分需由大病保险或个人承担。']);
+  if (r.flags.hitCritical) t.push(['ok','✓','已触发大病保险 / 大额补助报销 '+money(r.critical)+'，注意其起付线按「个人负担的合规费用」计算。']);
+  if (r.flags.hitRescue) t.push(['ok','✓','已计入医疗救助 '+money(r.rescue)+'，实际金额需经民政 / 医保部门身份认定。']);
+  if (r.flags.heavyOutOfScope) t.push(['warn','!','目录外自费占比 '+E.round2(r.total>0?r.outOfScope/r.total*100:0)+'%，建议逐项核对费用清单中的自费药、进口耗材与救护车费。']);
+  if (state.visitType==='mixed') t.push(['info','i','急诊门诊与住院待遇通常不同，建议按结算单分开测算后再相加。']);
+  if (!t.length) t.push(['ok','✓','已按当前参数完成测算。请对照医院结算单核对每一项费用的甲 / 乙 / 丙类归属。']);
+  $('#tips').innerHTML = t.map(function(x){ return '<div class="tip '+x[0]+'"><span class="ico">'+x[1]+'</span><span>'+x[2]+'</span></div>'; }).join('');
+}
+
+/* ---------- 「个人预计支出」延迟展示状态机 ----------
+   idle    未测算 / 结果已作废：结果区隐藏且不占位，弹窗关闭且内容清空
+   running 测算过程中：结果区仍隐藏，弹窗关闭，按钮显示「测算中…」
+   done    显式测算成功且结果有效：结果区显示，弹窗呈现本次结果快照
+   calcRunId 用于作废进行中的测算，避免数据变化后旧结果晚到误弹          */
+var calcPhase = 'idle';
+var confirmedResult = null;
+var calcRunId = 0;
+var suppressInvalidate = false;
+
+function setResultVisible(on){
+  var layout = $('.layout'), col = $('.result-col');
+  if (layout) layout.classList.toggle('no-result', !on);
+  if (col) col.hidden = !on;
+}
+function clearModal(){
+  $('#pmSelf').textContent = '0.00';
+  $('#pmTotal').textContent = '¥0';
+  $('#pmReimb').textContent = '¥0';
+  $('#pmRate').textContent = '0%';
+  $('#pmMeta').textContent = '';
+  $('#pmCount').textContent = '0';
+  $('#pmBreakdown').innerHTML = '';
+  $('#pmFund').innerHTML = '';
+  $('#pmItems').innerHTML = '';
+}
+function closeModal(){
+  var m = $('#payModal');
+  if (m) m.hidden = true;
+  clearModal();
+  document.body.classList.remove('modal-open');
+}
+function fillModal(r){
+  $('#pmSelf').textContent = E.round2(r.finalSelf).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  $('#pmTotal').textContent = money(r.total);
+  $('#pmReimb').textContent = money(r.totalReimburse);
+  $('#pmRate').textContent = E.round2(r.rate) + '%';
+  $('#pmMeta').textContent = '参保类型：' + $('#insType').selectedOptions[0].text
+    + ' · 就医情形：' + $('#scenario').selectedOptions[0].text
+    + ' · 费用项目 ' + r.rows.length + ' 项'
+    + ' · 本次测算时间 ' + new Date().toLocaleTimeString('zh-CN');
+  var bk = [
+    ['目录外全自费','丙类费用 + 乙类先自付部分，不参与报销',r.outOfScope,''],
+    ['起付线自付','起付线内由个人先承担的政策范围内费用',r.deductibleSelf,''],
+    ['按比例自付','分段报销后按比例自付的部分',r.copaySelf,''],
+    ['超封顶线自付','超出基本医保年度支付限额的部分',r.overCeilingSelf,''],
+    ['大病保险 / 大额补助报销','对个人负担的合规费用再次报销',-r.critical,'minus'],
+    ['医疗救助','对剩余合规个人负担按比例救助',-r.rescue,'minus']
+  ].filter(function(x){ return Math.abs(x[2])>0.004; });
+  if (!bk.length) bk.push(['无需个人支付','',0,'']);
+  $('#pmBreakdown').innerHTML = bk.map(function(x){
+    return '<div class="kv"><div class="k">'+x[0]+'<small>'+x[1]+'</small></div><div class="v '+x[3]+'">'+(x[2]<0?'− ':'')+money(Math.abs(x[2]))+'</div></div>';
+  }).join('') + '<div class="kv sum"><div class="k">合计个人预计支出</div><div class="v">'+money(r.finalSelf)+'</div></div>';
+  $('#pmFund').innerHTML =
+    kv('基本医保统筹基金', money(r.basic), '理论报销 '+money(r.theoretical)) +
+    kv('大病保险 / 大额补助', money(r.critical), '合规个人负担 '+money(r.personalBurden)) +
+    kv('医疗救助', money(r.rescue), r.rescue>0?('救助基数 '+money(r.rescueBase)):'未启用或未达到条件') +
+    '<div class="kv sum"><div class="k">合计报销</div><div class="v">'+money(r.totalReimburse)+'</div></div>';
+  $('#pmCount').textContent = String(r.rows.length);
+  $('#pmItems').innerHTML = r.rows.map(function(x){
+    return '<tr><td>'+esc(x.name)+'</td><td>'+(x.type==='A'?'甲类':x.type==='B'?'乙类':'丙类')+'</td><td class="num">'+money(x.amount)+'</td><td class="num">'+money(x.compliant)+'</td></tr>';
+  }).join('') + '<tr><td colspan="2"><b>合计</b></td><td class="num"><b>'+money(r.total)+'</b></td><td class="num"><b>'+money(r.compliant)+'</b></td></tr>';
+}
+function openModal(){
+  var m = $('#payModal');
+  m.hidden = false;
+  document.body.classList.add('modal-open');
+  var x = $('#pmCloseX'); if (x && x.focus) x.focus();
+}
+function invalidateResult(){
+  calcRunId++;                        // 作废进行中的测算，避免旧结果晚到误弹
+  calcPhase = 'idle';
+  confirmedResult = null;
+  closeModal();                       // 关闭并清空，不残留过期数据
+  setResultVisible(false);
+  updateActionButtons();
+}
+function isValidResult(r){
+  if (!r || !Array.isArray(r.rows)) return false;
+  var keys = ['total','finalSelf','totalReimburse','compliant','rate','basic','outOfScope'];
+  for (var i=0;i<keys.length;i++){
+    if (typeof r[keys[i]] !== 'number' || !isFinite(r[keys[i]])) return false;
+  }
+  return r.total > 0 && r.finalSelf >= 0 && r.totalReimburse >= 0
+    && Math.abs((r.totalReimburse + r.finalSelf) - r.total) < 0.02;
+}
+function recalc(){
+  lastResult = E.calculate({items:state.items, policy:policyForEngine()});
+  renderResult(lastResult);
+  // 供云端记录面板读取；未确认或已作废的结果一律不提供快照，避免保存过期数据
+  window.AppSnapshot = { get: function(){
+    if (calcPhase !== 'done' || !confirmedResult) return null;
+    var r = confirmedResult;
+    return {
+      kind: 'calc',
+      scenario: $('#scenario').selectedOptions[0].text,
+      insuredType: $('#insType').selectedOptions[0].text,
+      total: r.total, compliant: r.compliant, reimbursed: r.totalReimburse,
+      selfPay: r.finalSelf, rate: r.rate, note: state.insuredCity || ''
+    };
+  }};
+  // 任何输入 / 参数变化都会使已确认结果作废；显式测算用 suppressInvalidate 跳过
+  if (!suppressInvalidate){
+    var interrupted = (calcPhase === 'running');
+    var hadConfirmed = (calcPhase === 'done');
+    invalidateResult();
+    if (interrupted) feedback('测算过程中参数发生变化，本次测算已取消，请重新点击「开始测算」。', true);
+    else if (hadConfirmed) feedback('输入已变化，上次测算结果已作废，请重新点击「开始测算」生成最新结果。', true);
+  }
+  else updateActionButtons();
+}
+
+/* ---------- 统一操作按钮 ---------- */
+var opFeedback = $('#opFeedback');
+function feedback(msg, isWarn){
+  opFeedback.className = 'inline-note' + (isWarn ? ' warn' : '');
+  opFeedback.textContent = msg;
+  opFeedback.style.display = 'block';
+  if (feedback._timer) clearTimeout(feedback._timer);
+  feedback._timer = setTimeout(function(){ opFeedback.style.display = 'none'; }, 7000);
+}
+function updateActionButtons(){
+  // 只有「用户触发且完成、结果有效」的本次测算才算 ready，自动重算不算
+  var ready = !!(calcPhase === 'done' && confirmedResult && confirmedResult.total > 0);
+  var running = (calcPhase === 'running');
+  var cloudOk = !!(window.AppCloud && window.AppCloud.ready);
+  var hasItems = !!(state.items && state.items.length);
+  $('#opCalc').disabled = !hasItems || running;
+  $('#opSave').disabled = !ready || !cloudOk;
+  $('#opView').disabled = !ready;
+  $('#opExport').disabled = !ready;
+  $('#opReset').disabled = false;
+  $('#opBack').disabled = false;
+  $('#opSave').title = cloudOk ? (ready ? '保存本次测算结果到云数据库' : '请先完成一次有效测算') : '云数据库未就绪，暂不可保存';
+  $('#opCalc').title = running ? '正在测算…' : hasItems ? '按当前明细与政策参数重新测算' : '请先录入费用明细';
+  $('#opView').title = ready ? '定位结果区并展开逐步计算过程' : '请先完成一次有效测算';
+  $('#opExport').title = ready ? '下载本次测算明细 CSV' : '请先完成一次有效测算';
+  var c = $('#opCalc'); if (c) c.textContent = running ? '测算中…' : '开始测算';
+}
+$('#opCalc').addEventListener('click', function(){
+  if (!state.items.length){ invalidateResult(); feedback('请先录入费用明细再测算。', true); return; }
+  if (calcPhase === 'running') return;
+  var run = ++calcRunId;
+  calcPhase = 'running';
+  confirmedResult = null;
+  closeModal();
+  setResultVisible(false);            // 测算过程中持续隐藏，不提前展示、不占位
+  updateActionButtons();
+  feedback('正在测算，请稍候…结果生成并通过有效性校验后，将以弹窗呈现个人预计支出。', false);
+  setTimeout(function(){
+    if (run !== calcRunId) return;   // 期间数据变化，本次测算作废，不弹窗
+    try {
+      suppressInvalidate = true;
+      recalc();
+    } catch (e) {
+      suppressInvalidate = false;
+      lastResult = null; calcPhase = 'idle'; confirmedResult = null;
+      closeModal(); setResultVisible(false); updateActionButtons();
+      feedback('测算失败：' + (e && e.message ? e.message : '计算异常') + '，未生成结果，请检查费用明细与政策参数后重试。', true);
+      return;
+    }
+    suppressInvalidate = false;
+    if (run !== calcRunId) return;
+    var r = lastResult;
+    if (!isValidResult(r)) {
+      calcPhase = 'idle'; confirmedResult = null;
+      closeModal(); setResultVisible(false); updateActionButtons();
+      if (!r || r.total <= 0){ feedback('费用总额为 0，请填写有效金额后再测算。', true); }
+      else { feedback('测算结果未通过有效性校验，未生成个人预计支出，请重试。', true); }
+      return;
+    }
+    confirmedResult = r;             // 本次确认的结果快照，弹窗与导出均以此为准
+    calcPhase = 'done';
+    setResultVisible(true);
+    updateActionButtons();
+    fillModal(r);
+    openModal();
+    feedback('测算已完成，个人预计支出与完整明细已在弹窗中展示；关闭弹窗后可点「查看结果与明细」查看右侧结果区。', false);
+  }, 120);
+});
+$('#opSave').addEventListener('click', function(){
+  if (!window.AppCloud || !window.AppCloud.ready){ feedback('云数据库未就绪，暂不可保存。', true); return; }
+  if (calcPhase !== 'done' || !confirmedResult || confirmedResult.total <= 0 || !window.AppSnapshot){ feedback('暂无可保存的测算结果，请先测算。', true); return; }
+  var btn = this;
+  btn.disabled = true;
+  feedback('正在保存本次测算结果…', false);
+  Promise.resolve()
+    .then(function(){ return window.AppCloud.save(window.AppSnapshot.get()); })
+    .then(function(row){
+      feedback('已保存到云端（记录 #' + (row && row.id != null ? row.id : '—') + '），可在「云端记录」中查看。', false);
+      var refresh = $('#wbcRefresh'); if (refresh) refresh.click();
+    })
+    .catch(function(e){
+      feedback('保存失败：' + (e && e.message ? e.message : e), true);
+    })
+    .then(function(){ updateActionButtons(); });
+});
+$('#opView').addEventListener('click', function(){
+  if (calcPhase !== 'done' || !confirmedResult || confirmedResult.total <= 0){ feedback('暂无测算结果，请先测算。', true); return; }
+  var d = $('#procDetails'); if (d) d.open = true;
+  var rc = document.querySelector('.result-col');
+  if (rc && rc.scrollIntoView) rc.scrollIntoView({ behavior:'smooth', block:'start' });
+  feedback('已定位到结果区并展开「逐步计算过程」，可查看自付构成与基金支付明细。', false);
+});
+$('#opExport').addEventListener('click', function(){
+  if (calcPhase !== 'done' || !confirmedResult || confirmedResult.total <= 0){ feedback('暂无可导出的测算结果。', true); return; }
+  exportCSV();
+  feedback('测算明细 CSV 已导出。', false);
+});
+$('#opReset').addEventListener('click', function(){
+  if (!confirm('确定重置全部输入与参数？将恢复为演示数据与默认政策参数。')) return;
+  try { sessionStorage.setItem('wb_calc_flash', '已重置：输入与参数已恢复为演示数据。'); } catch(e){}
+  location.reload();
+});
+$('#opBack').addEventListener('click', function(){ location.href = 'index.html'; });
+
+/* ---------- 弹窗关闭：按钮 / 遮罩 / ESC，关闭即清空内容 ---------- */
+function dismissPayModal(){ closeModal(); }
+$('#pmCloseX').addEventListener('click', dismissPayModal);
+$('#pmClose').addEventListener('click', dismissPayModal);
+$('#payModal').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' && !$('#payModal').hidden) closeModal();
+});
+$('#pmViewDetail').addEventListener('click', function(){
+  closeModal();
+  $('#opView').click();              // 复用既有「查看结果与明细」逻辑
+});
+
+// 重置会刷新页面，刷新后展示一次性反馈
+try {
+  var flash = sessionStorage.getItem('wb_calc_flash');
+  if (flash){ sessionStorage.removeItem('wb_calc_flash'); feedback(flash, false); }
+} catch(e){}
+
+// 云数据库脚本在本段之后加载，就绪后补一次按钮状态刷新
+function syncCloudButton(){ updateActionButtons(); }
+document.addEventListener('DOMContentLoaded', syncCloudButton);
+window.addEventListener('load', syncCloudButton);
+if (!window.AppCloud){
+  var cloudTries = 0;
+  var cloudTimer = setInterval(function(){
+    cloudTries++;
+    if (window.AppCloud || cloudTries > 20){ clearInterval(cloudTimer); syncCloudButton(); }
+  }, 200);
+}
+
+/* ---------- 分区导航：只切换可见内容，输入值与计算状态完全不变 ---------- */
+var PANES = $$('.pane[data-pane]');
+function showPane(n){
+  PANES.forEach(function(p){ p.classList.toggle('active', p.getAttribute('data-pane') === String(n)); });
+  $$('.step-btn[data-pane]').forEach(function(b){
+    var on = b.getAttribute('data-pane') === String(n);
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-current', on ? 'step' : 'false');
+  });
+}
+$$('.step-btn[data-pane]').forEach(function(b){
+  b.addEventListener('click', function(){ showPane(b.getAttribute('data-pane')); });
+});
+
+/* ---------- events ---------- */
+document.addEventListener('input', onField);
+document.addEventListener('change', onField);
+function onField(e){
+  var el = e.target;
+  var path = el.getAttribute('data-path');
+  if (path){
+    var val = el.type==='checkbox' ? el.checked : el.value;
+    if (el.type==='number' && val!=='') val = Number(val);
+    setPath(state,path,val);
+    if (path==='scenario') applyScenarioDefaults();
+    if (path==='insType'){
+      state.retireBonus = (val==='retire') ? 2 : 0;
+      var rb = $('[data-path="retireBonus"]'); if (rb) rb.value = state.retireBonus;
+    }
+    recalc(); return;
+  }
+  var f = el.getAttribute('data-f');
+  if (f){
+    var tr = el.closest('tr'); if (!tr) return;
+    var i = +tr.getAttribute('data-i');
+    if (tr.parentNode.id === 'itemsBody'){
+      var v = (f==='amount'||f==='prepay') ? el.value : el.value;
+      state.items[i][f] = v;
+      if (f==='type'){
+        var pre = $('[data-f="prepay"]',tr);
+        if (pre) pre.disabled = (v!=='B');
+      }
+    } else if (tr.parentNode.id === 'segBody'){
+      state.segments[i][f] = el.value;
+    }
+    recalc();
+  }
+}
+
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('button'); if (!btn) return;
+  if (btn.hasAttribute('data-del')){ state.items.splice(+btn.getAttribute('data-del'),1); renderItems(); recalc(); }
+  else if (btn.hasAttribute('data-delseg')){ state.segments.splice(+btn.getAttribute('data-delseg'),1); renderSegments(); recalc(); }
+  else if (btn.id==='addItem'){ state.items.push({name:'新费用项目',amount:0,type:'A',prepay:''}); renderItems(); recalc(); }
+  else if (btn.id==='addSeg'){ state.segments.push({cap:'',rate:80}); renderSegments(); recalc(); }
+  else if (btn.id==='loadDemo'){ state.items = DEMO_ITEMS.map(function(x){return Object.assign({},x);}); renderItems(); recalc(); }
+  else if (btn.id==='clearItems'){ state.items = []; renderItems(); recalc(); }
+  else if (btn.hasAttribute('data-preset')){
+    var p = PRESETS[btn.getAttribute('data-preset')];
+    Object.keys(p).forEach(function(k){ state[k] = (k==='segments'||k==='critical') ? JSON.parse(JSON.stringify(p[k])) : p[k]; });
+    syncInputs(); recalc();
+    btn.textContent = '已载入 ✓'; setTimeout(function(){ btn.textContent = btn.getAttribute('data-preset')==='emp'?'职工医保 · 演示参数':btn.getAttribute('data-preset')==='resident'?'居民医保 · 演示参数':'单档简化 · 演示参数'; },1400);
+  }
+  else if (btn.id==='resetBtn'){ if (confirm('确定重置所有输入为初始值？')) location.reload(); }
+  else if (btn.id==='printBtn'){ $$('details').forEach(function(d){d.open=true;}); setTimeout(function(){window.print();},80); }
+  else if (btn.id==='csvBtn'){ exportCSV(); }
+});
+
+function exportCSV(){
+  var r = (calcPhase === 'done' && confirmedResult) ? confirmedResult : null;
+  if (!r) return;
+  var L = [];
+  L.push(['急救医疗费用与医保报销测算表']);
+  L.push(['生成时间',new Date().toLocaleString('zh-CN')]);
+  L.push(['注意','所有参数为演示假设值，结果仅供估算参考，实际以医保结算单为准']);
+  L.push([]);
+  L.push(['参保类型',$('#insType').selectedOptions[0].text],['就医情形',$('#scenario').selectedOptions[0].text]);
+  L.push(['参保地',state.insuredCity||'未填写'],['就医地',state.treatCity||'未填写']);
+  L.push([]);
+  L.push(['费用明细']);
+  L.push(['项目','类别','金额(元)','先自付/全自费(元)','计入报销基数(元)']);
+  r.rows.forEach(function(x){ L.push([x.name, x.type==='A'?'甲类':x.type==='B'?'乙类':'丙类', E.round2(x.amount), E.round2(x.outOfScope), E.round2(x.compliant)]); });
+  L.push(['合计','',E.round2(r.total),E.round2(r.outOfScope),E.round2(r.compliant)]);
+  L.push([]);
+  L.push(['测算结果']);
+  L.push(['费用总额',E.round2(r.total)],['政策范围内费用',E.round2(r.compliant)],['目录外自费',E.round2(r.outOfScope)]);
+  L.push(['起付线自付',E.round2(r.deductibleSelf)],['按比例自付',E.round2(r.copaySelf)],['超封顶线自付',E.round2(r.overCeilingSelf)]);
+  L.push(['基本医保报销',E.round2(r.basic)],['大病保险报销',E.round2(r.critical)],['医疗救助',E.round2(r.rescue)]);
+  L.push(['医保合计报销',E.round2(r.totalReimburse)],['个人需支付',E.round2(r.finalSelf)],['综合报销率(%)',E.round2(r.rate)]);
+  var csv = '\ufeff' + L.map(function(row){ return row.map(function(c){ return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'; }).join(','); }).join('\r\n');
+  var blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '急救医保报销测算_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+}
+
+/* ---------- boot ---------- */
+renderItems();
+renderSegments();
+syncInputs();
+applyScenarioDefaults();
+// 从「急救费用拍照识别」模块带入费用明细
+try {
+  var transferred = localStorage.getItem('wb_transfer_items');
+  if (transferred) {
+    var parsed = JSON.parse(transferred);
+    if (Array.isArray(parsed) && parsed.length) {
+      state.items = parsed.map(function(x){
+        return { name:String(x.name || '费用项目'), amount:Number(x.amount) || 0,
+          type:(x.type === 'A' || x.type === 'B') ? x.type : 'C', prepay:'' };
+      });
+      localStorage.removeItem('wb_transfer_items');
+      renderItems();
+      var tip = document.createElement('div');
+      tip.className = 'inline-note';
+      tip.style.marginTop = '12px';
+      tip.textContent = '已从「急救费用拍照识别」带入 ' + state.items.length + ' 项费用明细，请核对分类后再测算。';
+      var firstCard = document.querySelector('.pane[data-pane="2"] .card');
+      if (firstCard) firstCard.appendChild(tip);
+      showPane('2');
+    }
+  }
+} catch (e) { /* 忽略损坏的暂存数据 */ }
+recalc();
+})();
+</script>
+<script src="cloud-sdk.js"></script>
+<script src="cloud.js"></script>
+<div id="site-footer"></div>
+<script src="../js/site.js"></script>
+
+</body>
+</html>

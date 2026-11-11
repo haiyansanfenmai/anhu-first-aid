@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="warm">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>智能定位 · 就医导航 | 安护急救通</title>
+<meta name="description" content="现在在哪、什么情况、该去哪一家、怎么去要多久，以及到了之后怎么走。">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="nav/assets/theme.css">
+<style>
+/* ============================================================
+   navigation.html 本页私有布局
+   遵守组规：引用统一 theme.css；不新建样式表、不覆盖任何变量、
+             不重定义全站类、不写私有媒体查询（用 auto-fit / clamp 自适应）
+   全部类名以 nav- 开头；建议组长评审后决定哪些沉淀回 theme.css
+   ============================================================ */
+
+.nav-page-head { padding: var(--sp-8) 0 var(--sp-4); }
+.nav-page-head h1 { margin: 0 0 var(--sp-3); letter-spacing: .01em; }
+.nav-page-head .eyebrow { display: block; margin-bottom: var(--sp-2); }
+.nav-page-head .alert { margin-top: 0; }
+.nav-urgent { color: var(--urgent-600); font-weight: 700; }
+
+/* ---------- 地图（页面第一个功能块） ---------- */
+.nav-map-card { border-radius: var(--r-lg); overflow: hidden; }
+.nav-map-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; padding: var(--sp-4) var(--sp-6) var(--sp-4); }
+.nav-map-title { font-size: 15px; font-weight: 600; margin: 0; }
+.nav-map-sub { font-size: 12.5px; color: var(--ink-700); margin-top: 3px; }
+.nav-map-view { position: relative; width: 100%; height: clamp(210px, 27vw, 320px); background: var(--brand-50); overflow: hidden; }
+.nav-map-view img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.nav-map-open { position: absolute; right: 14px; bottom: 14px; z-index: 2; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 8px 15px; font-size: 12.5px; font-weight: 600; color: var(--ink-700); box-shadow: var(--sh-2); display: inline-flex; align-items: center; gap: 7px; }
+.nav-map-open:hover { border-color: var(--brand-500); color: var(--brand-700); }
+.nav-map-foot { padding: var(--sp-3) var(--sp-6) var(--sp-4); }
+.nav-map-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.nav-map-lg { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-700); }
+.nav-map-lg i { width: 19px; height: 19px; border-radius: 50%; background: #2A6B5E; color: #fff; font-style: normal; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.nav-map-lg.is-me i { background: var(--brand-600); }
+.nav-map-status { font-size: 12px; color: var(--ink-700); line-height: 1.7; margin-top: 10px; }
+
+/* ---------- 左右两栏 ---------- */
+.nav-stage { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: var(--sp-4); align-items: start; }
+.nav-col { display: grid; gap: var(--sp-4); min-width: 0; }
+.nav-panel-h { display: flex; align-items: center; gap: 10px; margin-bottom: var(--sp-4); }
+.nav-idx { font-family: var(--font-num); font-size: 12px; font-weight: 700; color: var(--brand-700); background: var(--brand-50); border: 1px solid var(--brand-100); padding: 3px 10px; border-radius: var(--r-pill); flex: none; }
+
+.nav-loc { display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; padding: var(--sp-4); background: var(--bg); border: 1px solid var(--line-soft); border-radius: var(--r); }
+.nav-loc-main { flex: 1 1 200px; min-width: 0; }
+.nav-loc-name { font-size: 15px; font-weight: 600; }
+.nav-loc-sub { font-size: 12.5px; color: var(--ink-700); }
+.nav-loc-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-700); white-space: nowrap; }
+.nav-loc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success-600); flex: none; }
+.nav-loc-dot.is-warn { background: var(--warn-500); }
+.nav-note { font-size: 12px; color: var(--ink-700); line-height: 1.7; }
+
+.nav-loc-addr { font-size: 14px; font-weight: 600; color: var(--ink-700); word-break: break-word; margin-bottom: 4px; }
+.nav-loc-meta { font-size: 12px; color: var(--ink-700); line-height: 1.7; }
+.nav-loc-msg { margin-top: 6px; font-size: 12px; color: var(--ink-700); line-height: 1.7; }
+.nav-loc-msg:empty { display: none; }
+.nav-loc-src { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; font-size: 11.5px; color: var(--ink-700); }
+.nav-loc-tag { padding: 1px 8px; border-radius: var(--r-pill); background: var(--brand-50); border: 1px solid var(--brand-100); color: var(--brand-700); font-size: 11.5px; }
+
+.nav-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); gap: var(--sp-3); }
+.nav-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; text-align: left; padding: 13px 14px; min-height: 84px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); transition: border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease), transform .18s var(--ease); }
+.nav-choice:hover { border-color: var(--brand-200); background: var(--brand-50); transform: translateY(-2px); }
+.nav-choice.is-on { border-color: var(--brand-600); background: var(--brand-50); box-shadow: 0 0 0 3px var(--brand-100); }
+.nav-choice svg { width: 20px; height: 20px; stroke: var(--brand-700); stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.nav-choice b { font-size: 14px; font-weight: 600; line-height: 1.4; }
+.nav-choice span { font-size: 11.5px; color: var(--ink-700); line-height: 1.5; }
+
+/* ---------- 推荐结果（常驻） ---------- */
+.nav-result { margin-top: var(--sp-4); }
+.nav-route-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+.nav-li-t { font-size: 14px; font-weight: 600; }
+.nav-li-d { font-size: 12.5px; color: var(--ink-700); line-height: 1.65; }
+.nav-travel-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-2); }
+.nav-travel { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 11px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: var(--r-sm); transition: all .16s var(--ease); }
+.nav-travel:hover { border-color: var(--brand-200); background: var(--brand-50); }
+.nav-travel.is-on { border-color: var(--brand-600); background: var(--brand-50); box-shadow: 0 0 0 2px var(--brand-100); }
+.nav-travel-n { font-size: 12.5px; color: var(--ink-700); }
+.nav-travel-t { font-family: var(--font-num); font-size: 17px; font-weight: 700; color: var(--brand-700); }
+.nav-travel-s { font-size: 11px; color: var(--ink-700); }
+
+.nav-rank { display: flex; align-items: center; gap: 9px; margin: var(--sp-6) 0 var(--sp-3); font-size: 13px; font-weight: 700; color: var(--ink-700); }
+.nav-rank-bar { width: 3px; height: 15px; border-radius: var(--r-pill); background: var(--brand-500); flex: none; }
+.nav-rank-n { font-family: var(--font-num); font-size: 11.5px; font-weight: 600; color: var(--ink-700); }
+.nav-hosp { padding: var(--sp-4); border: 1px solid var(--line-soft); border-radius: var(--r); background: var(--surface); }
+.nav-hosp + .nav-hosp { margin-top: var(--sp-3); }
+.nav-hosp.is-first { border-color: var(--brand-200); background: var(--brand-50); }
+.nav-hosp.is-no { background: var(--bg); border-style: dashed; }
+.nav-hosp-top { display: flex; justify-content: space-between; gap: var(--sp-3); align-items: flex-start; flex-wrap: wrap; }
+.nav-hosp-name { font-size: 15.5px; font-weight: 600; line-height: 1.45; }
+.nav-hosp-dist { font-family: var(--font-num); font-size: 12.5px; color: var(--ink-700); white-space: nowrap; }
+.nav-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.nav-why { margin-top: 10px; font-size: 13px; color: var(--ink-700); line-height: 1.7; background: var(--bg); border-radius: var(--r-xs); padding: 9px 12px; }
+.nav-why b { color: var(--brand-700); font-weight: 600; }
+.nav-hosp-act { margin-top: 12px; display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+/* ---------- 子标签 ---------- */
+.nav-tabs { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin: var(--sp-8) 0 var(--sp-4); padding: 6px; background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-pill); width: fit-content; max-width: 100%; }
+.nav-tab { padding: 9px 22px; border-radius: var(--r-pill); font-size: 13.5px; font-weight: 600; color: var(--ink-700); white-space: nowrap; transition: background .18s var(--ease), color .18s var(--ease); }
+.nav-tab:hover { color: var(--brand-700); }
+.nav-tab.is-on { background: var(--surface); color: var(--brand-700); box-shadow: var(--sh-1); }
+.nav-tab-panel[hidden] { display: none; }
+
+.nav-guide-map { position: relative; width: 100%; height: clamp(200px, 24vw, 300px); border-radius: var(--r); overflow: hidden; background: var(--brand-50); margin-top: var(--sp-4); }
+.nav-guide-map img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.nav-guide-h { font-size: 13px; font-weight: 700; color: var(--ink-700); margin: var(--sp-4) 0 var(--sp-2); }
+.nav-guide-step { display: flex; gap: 11px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: 13px; color: var(--ink-700); line-height: 1.65; }
+.nav-guide-step:last-of-type { border-bottom: 0; }
+.nav-guide-n { width: 21px; height: 21px; border-radius: 50%; background: var(--brand-100); color: var(--brand-700); font-family: var(--font-num); font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: none; }
+.nav-route { margin-top: var(--sp-3); }
+.nav-route-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px dashed var(--line); }
+.nav-route-item:last-child { border-bottom: 0; }
+.nav-route-ic { width: 30px; height: 30px; border-radius: var(--r-xs); background: var(--brand-50); color: var(--brand-700); display: grid; place-items: center; flex: none; font-size: 11px; font-weight: 700; }
+.nav-route-item b { font-size: 13.5px; font-weight: 600; }
+.nav-route-item p { font-size: 13px; color: var(--ink-700); line-height: 1.65; }
+.nav-jump { margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--line-soft); display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+
+/* ---------- 流程 ---------- */
+.nav-flow-list { margin-top: var(--sp-4); }
+.nav-flow-item { display: flex; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line-soft); width: 100%; text-align: left; }
+.nav-flow-item:first-child { border-top: 0; }
+.nav-flow-item.is-custom { background: var(--brand-50); border-left: 3px solid var(--brand-500); border-radius: var(--r-xs); padding-left: 10px; padding-right: 10px; }
+.nav-flow-body { min-width: 0; flex: 1; }
+.nav-flow-t, .nav-flow-d, .nav-flow-pit, .nav-flow-bring { display: block; }
+.nav-flow-t { font-size: 14.5px; font-weight: 600; line-height: 1.5; }
+.nav-flow-t em { font-style: normal; font-size: 11px; font-weight: 600; color: var(--brand-700); background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r-pill); padding: 1px 8px; margin-left: 8px; vertical-align: 2px; }
+.nav-flow-d { font-size: 13.5px; color: var(--ink-700); line-height: 1.7; }
+.nav-flow-pit { margin-top: 7px; font-size: 12.5px; background: var(--warn-50); color: #96631A; padding: 8px 11px; border-radius: var(--r-xs); line-height: 1.65; }
+.nav-flow-bring { margin-top: 7px; font-size: 12.5px; color: var(--ink-700); line-height: 1.65; }
+.nav-flow-check { width: 22px; height: 22px; border-radius: var(--r-xs); border: 2px solid var(--line); flex: none; margin-top: 2px; display: grid; place-items: center; font-size: 12px; color: transparent; }
+.nav-flow-check svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.nav-flow-item.is-done .nav-flow-check { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
+.nav-flow-item.is-done .nav-flow-t { color: var(--ink-700); }
+.nav-progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-700); margin-bottom: 7px; }
+.nav-copy { width: 100%; min-height: 156px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--ink-700); font-family: var(--font); font-size: 13px; line-height: 1.85; resize: vertical; }
+.nav-empty { padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--ink-700); font-size: 14px; line-height: 1.8; }
+
+/* ---------- 放大后的完整地图浮层 ---------- */
+#mapBig { position: fixed; inset: 0; z-index: 90; background: rgba(30, 26, 22, .72); display: flex; align-items: center; justify-content: center; padding: clamp(12px, 3vw, 36px); }
+#mapBig[hidden] { display: none; }
+.nav-big-box { width: min(1100px, 100%); height: min(760px, 100%); background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--sh-2); display: flex; flex-direction: column; overflow: hidden; }
+.nav-big-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-4) var(--sp-4); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.nav-big-title { font-size: 15px; font-weight: 600; }
+.nav-big-sub { font-size: 12px; color: var(--ink-700); margin-top: 2px; }
+.nav-big-body { flex: 1; min-height: 0; position: relative; background: var(--brand-50); overflow: hidden; }
+.nav-big-body > svg, .nav-big-body > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nav-big-tip { position: absolute; left: 14px; bottom: 14px; right: 14px; background: rgba(255, 255, 255, .94); border-radius: var(--r-sm); padding: 9px 13px; font-size: 12px; color: var(--ink-700); line-height: 1.6; }
+.nav-big-foot { padding: var(--sp-3) var(--sp-4); font-size: 12px; color: var(--ink-700); border-top: 1px solid var(--line); line-height: 1.65; }
+
+/* ---------- 地址输入（精确到街道） ---------- */
+.nav-addr-box { padding: var(--sp-4); background: var(--bg); border: 1px solid var(--line-soft); border-radius: var(--r); }
+.nav-addr-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); flex-wrap: wrap; }
+.nav-addr-input { flex: 1 1 190px; min-width: 0; padding: 10px 13px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); font-family: var(--font); font-size: 13.5px; color: var(--ink-900); outline: none; }
+.nav-addr-input:focus { border-color: var(--brand-600); }
+.nav-addr-tips { margin-top: var(--sp-2); display: grid; gap: 6px; }
+.nav-addr-tips[hidden] { display: none; }
+.nav-addr-tip { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; padding: 9px 12px; border: 1px solid var(--line-soft); border-radius: var(--r-xs); background: var(--surface); }
+.nav-addr-tip:hover { border-color: var(--brand-200); background: var(--brand-50); }
+.nav-addr-tip b { font-size: 13px; font-weight: 600; }
+.nav-addr-tip span { font-size: 11.5px; color: var(--ink-700); }
+.nav-addr-tip.is-msg { font-size: 12.5px; color: var(--ink-700); cursor: default; }
+.nav-hosp-addr { font-size: 12.5px; color: var(--ink-700); line-height: 1.6; margin-top: 4px; word-break: break-word; }
+.nav-hosp-addr a { color: var(--brand-700); text-decoration: underline; }
+
+/* ---------- 可拖拽大地图 ---------- */
+.nav-big-actions { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+.nav-big-zoom { display: flex; gap: 4px; }
+.nav-big-zoom button { width: 34px; height: 34px; border-radius: var(--r-xs); border: 1px solid var(--line); background: var(--surface); font-size: 16px; font-weight: 600; color: var(--ink-700); }
+.nav-big-zoom #btnZoomReset { width: auto; padding: 0 11px; font-size: 12px; }
+.nav-big-zoom button:hover { border-color: var(--brand-200); background: var(--brand-50); }
+.nav-big-stage { position: absolute; inset: 0; overflow: hidden; cursor: grab; touch-action: none; background: var(--brand-50); }
+.nav-big-stage.is-dragging { cursor: grabbing; }
+.nav-big-stage img { position: absolute; left: 50%; top: 50%; width: 2048px; height: 1536px; max-width: none; max-height: none;
+  display: block; user-select: none; -webkit-user-drag: none; pointer-events: none;
+  transform: translate(-50%,-50%); will-change: transform; }
+.nav-big-tip { pointer-events: none; }
+
+.nav-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 14px); z-index: 100; background: var(--ink-900); color: #fff; padding: 11px 20px; border-radius: var(--r-pill); font-size: 13.5px; box-shadow: var(--sh-2); opacity: 0; pointer-events: none; transition: opacity .2s var(--ease), transform .2s var(--ease); max-width: calc(100% - 32px); text-align: center; }
+.nav-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+/* ---------- 医院现场照片（高德 POI photos） ---------- */
+.nav-photos { margin-top: 14px; }
+.nav-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.nav-photo-item { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; padding: 0;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); }
+.nav-photo-item:hover { border-color: var(--brand-200); }
+.nav-photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nav-photo-note { font-size: 11.5px; color: var(--ink-700); line-height: 1.6; margin-top: 8px; }
+.nav-photo-empty { padding: 14px 16px; border: 1px dashed var(--line); border-radius: var(--r-sm);
+  font-size: 12.5px; color: var(--ink-700); background: var(--bg); line-height: 1.65; }
+.nav-photo-big { position: fixed; inset: 0; z-index: 110; background: rgba(26,29,33,.9);
+  display: grid; place-items: center; padding: 24px; }
+.nav-photo-big[hidden] { display: none; }
+.nav-photo-big img { max-width: min(90vw, 1000px); max-height: 80vh; border-radius: var(--r); object-fit: contain; }
+.nav-photo-close { position: absolute; top: 18px; right: 20px; padding: 8px 14px;
+  border-radius: var(--r-sm); background: #fff; color: var(--ink-900); font-size: 13px; }
+.nav-photo-cap { position: absolute; bottom: 16px; font-size: 12px; color: #fff; opacity: .85; }
+
+/* ---------- 定位诊断（默认折叠，不打扰正常浏览） ---------- */
+.nav-diag { margin-top: var(--sp-3); border: 1px solid var(--line-soft); border-radius: var(--r-sm); background: var(--bg); padding: 0 var(--sp-4); }
+.nav-diag summary { cursor: pointer; padding: 10px 0; font-size: 12.5px; font-weight: 600; color: var(--brand-700); list-style: none; }
+.nav-diag summary::-webkit-details-marker { display: none; }
+.nav-diag summary::before { content: '▸ '; }
+.nav-diag[open] summary::before { content: '▾ '; }
+.nav-diag-list { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 var(--sp-4); font-size: 12px; }
+.nav-diag-list dt { color: var(--ink-700); }
+.nav-diag-list dd { margin: 0; color: var(--ink-900); }
+.nav-diag-tips { border-top: 1px solid var(--line-soft); padding: var(--sp-3) 0 var(--sp-4); font-size: 12px; color: var(--ink-700); line-height: 1.75; }
+.nav-diag-tips ul { margin: 6px 0 0; padding-left: 18px; }
+.nav-diag-tips code { background: var(--surface); padding: 1px 5px; border-radius: 4px; font-size: 11.5px; }
+
+/* ---------- 手机精确定位 ---------- */
+.nav-phone-box { padding: var(--sp-4); background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r); }
+.nav-phone-t { font-size: 13.5px; font-weight: 600; color: var(--brand-700); }
+.nav-phone-url { margin-top: var(--sp-2); padding: 9px 12px; background: var(--surface); border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm); font-size: 12.5px; color: var(--ink-900); word-break: break-all; line-height: 1.7; }
+.nav-phone-alt { margin-top: 4px; color: var(--ink-700); font-size: 12px; }
+
+#locDetail { display: none; }
+/* 已核对认证标签（真实数据，不再写「推断」） */
+.chip-verified { background: var(--brand-50); border-color: var(--brand-200); color: var(--brand-700); font-weight: 600; }
+.chip-listed { background: var(--bg); border-color: var(--line-soft); }
+.nav-evidence { font-size: 11.5px; color: var(--ink-700); line-height: 1.55; margin-top: 7px; }
+.nav-link-mini { display: inline; padding: 0; border: 0; background: none; font-size: inherit; color: var(--brand-700); text-decoration: underline; cursor: pointer; }
+.nav-link-mini:hover { color: var(--brand-600); }
+.nav-link-mini[hidden] { display: none; }
+.nav-field-hint { font-size: 11.5px; font-weight: 400; color: var(--ink-700); margin-left: 6px; }
+.nav-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- 手机端：手指缩放 / 分步导航 / 精简定位工具 ----------
+   不写私有媒体查询：是否启用由 nav-app.js 的 matchMedia 判定后给 body 加 class。
+   缩放全部走 CSS transform，不重新请求静态图，因此没有等待图片的延迟。 */
+.nav-map-view { touch-action: pan-y; }
+.nav-map-view img { will-change: transform; transform-origin: center center; }
+.nav-big-stage img { transform-origin: center center; }
+
+body.nav-steps-on { padding-bottom: 78px; }
+body.nav-steps-on [data-nav-step]:not(.is-current) { display: none !important; }
+.nav-stepbar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--sp-4); padding: 6px;
+  background: var(--brand-50); border: 1px solid var(--brand-100); border-radius: var(--r); }
+.nav-stepbar[hidden], .nav-stepnav[hidden] { display: none; }
+.nav-stepbar button { flex: 1 1 68px; min-width: 0; padding: 9px 5px; border-radius: var(--r-sm);
+  font-size: 11.5px; font-weight: 600; color: var(--ink-700); background: transparent; white-space: nowrap; }
+.nav-stepbar button.is-on { background: var(--surface); color: var(--brand-700); box-shadow: var(--sh-1); }
+.nav-stepnav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center;
+  gap: var(--sp-2); padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--surface);
+  border-top: 1px solid var(--line); box-shadow: 0 -4px 18px rgba(30, 26, 22, .08); }
+.nav-stepnav-t { flex: 1; min-width: 0; font-size: 12px; color: var(--ink-700); text-align: center; }
+.nav-stepnav .btn { flex: none; }
+.nav-stepnav .btn:disabled { opacity: .45; }
+
+body.nav-m-precise:not(.nav-m-tools) [data-loc-tool] { display: none !important; }
+body.nav-m-precise:not(.nav-m-tools) #travelField { grid-column: 1 / -1; }
+#locToolsRow { display: none; }
+body.nav-m-precise #locToolsRow { display: block; }
+
+/* 手机首屏再压一层：只收重复信息和装饰，功能入口一个不少 */
+body.nav-steps-on #btnMapExpand { display: none; }
+body.nav-steps-on .nav-page-head { padding-top: var(--sp-4); padding-bottom: var(--sp-2); }
+body.nav-steps-on .nav-page-head .eyebrow { display: none; }
+body.nav-steps-on .footer { display: none; }
+body.nav-steps-on .nav-map-status { font-size: 11.5px; margin-top: 6px; }
+body.nav-steps-on .nav-stepbar button { flex-basis: 52px; font-size: 11px; padding: 8px 2px; }
+body.nav-m-precise #locDiag { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ===== 全站统一标签栏（由 js/site.js 注入，不属于本页原有内容） ===== -->
+<div id="site-topbar"></div>
+<style>
+  /* 本页自带的顶栏隐藏（代码原样保留，只是不显示）：它 5 项里有 4 项是 href="#" 空链接 */
+  body > header.topbar:not(:first-of-type) { display: none; }
+  /* 只作用于全站这层顶栏：≤900px 时 keep 可见并可横滑（本页 theme.css 该断点会隐藏 .nav） */
+  @media (max-width: 900px) {
+    body > header.topbar:first-of-type .topbar-inner { gap: 10px; }
+    body > header.topbar:first-of-type .nav {
+      display: flex; margin-left: 0; gap: 2px; overflow-x: auto; scrollbar-width: none;
+    }
+    body > header.topbar:first-of-type .nav::-webkit-scrollbar { display: none; }
+    body > header.topbar:first-of-type .nav a { white-space: nowrap; }
+  }
+</style>
+<!-- ===== 以上为新增，页面原有内容从下面开始，未做任何改动 ===== -->
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#" data-page="home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+      安护 · 急救通
+    </a>
+    <!-- 整合提示：下方 4 个 href="#" 请组长统一替换为组员页面实际文件名；当前页保留 is-active -->
+    <nav class="nav" aria-label="主导航">
+      <a href="#" data-page="home">首页</a>
+      <a href="#" data-page="science">急救科普</a>
+      <a href="navigation.html" data-page="navigation" class="is-active" aria-current="page">智能导航</a>
+      <a href="#" data-page="records">就医档案</a>
+      <a href="#" data-page="about">关于项目</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn btn-urgent btn-sm" href="tel:120">拨打 120</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 标题 + 红字安全提示（原大段 hero 与四步指示器已删除） -->
+  <div class="container nav-page-head">
+    <span class="eyebrow">安护 · 急救通</span>
+    <h1 class="h2">智能定位 · 就医导航</h1>
+    <div class="alert alert-urgent" role="note">
+      <span class="nav-urgent">紧急情况请立即拨打 120 求助！</span>
+    </div>
+  </div>
+
+  <div class="container section-sm">
+
+    <!-- 手机端分步导航占位：桌面端始终隐藏，由 nav-app.js 判定后填充 -->
+    <div class="nav-stepbar" id="navStepBar" hidden aria-label="就医步骤"></div>
+
+    <!-- ① 地图：放在最前面 -->
+    <section class="card nav-map-card" data-nav-step="1" aria-labelledby="mapH">
+      <div class="nav-map-head">
+        <div>
+          <h2 class="nav-map-title" id="mapTitle">你在哪 · 附近医院在哪</h2>
+          <div class="nav-map-sub">双指可放大缩小、单指可拖动；点右下角打开完整地图。</div>
+        </div>
+        <button class="btn btn-soft btn-sm" id="btnMapExpand" type="button">放大地图</button>
+      </div>
+      <div class="nav-map-view" id="mapMini">
+        <!-- 由 nav-app.js 注入：高德静态图 / 位置关系示意图 -->
+      </div>
+      <button class="nav-map-open" id="btnMapExpand2" type="button" aria-label="放大地图">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 2H2v4M10 14h4v-4M2 2l5 5M14 14l-5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        放大查看
+      </button>
+      <div class="nav-map-foot">
+        <div class="nav-map-legend" id="mapLegend"></div>
+        <div class="nav-map-status" id="mapStatus"></div>
+      </div>
+    </section>
+
+    <!-- ② 左：现在在哪　右：现在什么情况 -->
+    <div class="nav-stage mt-6">
+      <div class="nav-col" data-nav-step="1">
+        <section class="card" aria-labelledby="locH">
+          <div class="nav-panel-h"><span class="nav-idx">01</span><h2 class="h3" id="locH">现在在哪</h2></div>
+          <div class="nav-loc">
+            <div class="nav-loc-main">
+              <div class="nav-loc-name" id="locName">正在确认位置…</div>
+              <div class="nav-loc-sub" id="locSub">可以先往下看，位置随时能改</div>
+            </div>
+            <span class="nav-loc-state"><i class="nav-loc-dot" id="locDot"></i><span id="locState">准备中</span></span>
+            <button class="btn btn-primary btn-sm" id="btnLocate" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              获取我的精确位置
+            </button>
+          </div>
+          <!-- 技术来源信息不呈现给用户；保留隐藏节点供程序与测试读取 -->
+          <div class="nav-sr" id="locDetail">
+            <span id="locAddress"></span><span id="locMeta"></span>
+            <span id="locMsg"></span><span id="locSrc"></span>
+          </div>
+          <p class="nav-note mt-3" id="locHint">正在确认你所在的位置…</p>
+          <p class="nav-note" id="locWrongRow"><button type="button" class="nav-link-mini" id="btnLocWrong" hidden>这不是我的位置，重新选</button></p>
+          <p class="nav-note" id="locToolsRow"><button type="button" class="nav-link-mini" id="btnLocTools">位置不对？手动改位置</button></p>
+          <details class="nav-diag" id="locDiag">
+            <summary>为什么还没精确到街道？查看定位诊断</summary>
+            <div id="diagBody"></div>
+          </details>
+          <div class="grid grid-2 mt-4">
+            <label class="field" id="districtField" data-loc-tool>
+              <span class="field-label">你在哪个区？<span class="nav-field-hint">选了才能找到附近医院</span></span>
+              <select class="select" id="originSel" aria-label="选择所在区"></select>
+            </label>
+            <label class="field" id="travelField">
+              <span class="field-label">打算怎么去</span>
+              <select class="select" id="travelSel" aria-label="选择出行方式">
+                <option value="car">自己开车 / 打车</option>
+                <option value="ambulance">救护车</option>
+                <option value="walk">步行 / 公交</option>
+              </select>
+            </label>
+          </div>
+          <div class="nav-addr-box mt-4" id="addrBox" data-loc-tool>
+            <label class="field-label" for="addrInput">精确到街道 / 小区 / 路口</label>
+            <div class="nav-addr-row">
+              <input class="nav-addr-input" id="addrInput" type="search" placeholder="例如：科技园、海岸城、某某路" autocomplete="off">
+              <button class="btn btn-soft btn-sm" id="btnAddrSearch" type="button">搜索</button>
+            </div>
+            <div class="nav-addr-tips" id="addrTips" hidden></div>
+            <p class="nav-note mt-3">输入地点后，附近医院、路线和地图都会按新位置重算，下次打开会直接恢复到这个位置。位置只存在你本机浏览器，不上传；<button type="button" class="nav-link-mini" id="btnForget" hidden>清除记住的位置</button></p>
+          </div>
+          <div class="nav-phone-box mt-4" id="phoneBox" data-loc-tool>
+            <div class="nav-phone-t">用手机精确定位（推荐）</div>
+            <p class="nav-note mt-2">笔记本的 WiFi / IP 混合定位可能偏几公里；手机 GPS 通常 5–50 米。用手机打开下面的网址（在线链接用 4G/5G 或任意 WiFi 都行，局域网地址需与电脑连同一个 WiFi），定位成功后点「复制带我位置的链接」，再用电脑打开这个链接，电脑就能用这个精确坐标。</p>
+            <div class="nav-phone-url" id="phoneUrl">正在准备手机访问网址…</div>
+            <div class="nav-addr-row">
+              <button class="btn btn-soft btn-sm" id="btnCopyPhone" type="button">复制手机访问网址</button>
+              <button class="btn btn-soft btn-sm" id="btnCopyMyLoc" type="button">复制带我位置的链接</button>
+            </div>
+            <p class="nav-note mt-3" id="phoneHint"></p>
+          </div>
+        </section>
+      </div>
+
+      <div class="nav-col" data-nav-step="2">
+        <section class="card" aria-labelledby="sitH">
+          <div class="nav-panel-h"><span class="nav-idx">02</span><h2 class="h3" id="sitH">现在什么情况</h2></div>
+          <p class="small muted mb-4">挑一个最接近的就行，后面随时能改。</p>
+          <div class="nav-choice-grid" id="choiceGrid"></div>
+          <div class="alert alert-warn mt-4" id="sitTip" role="note">
+            <span aria-hidden="true"><strong>小提醒：</strong></span><span id="sitTipText">先选一个情况，我们再帮你找医院。</span>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ③ 综合推荐结果（常驻）：该去哪一家 + 怎么去 + 多久 -->
+    <section class="card nav-result" data-nav-step="3" aria-labelledby="resH">
+      <div class="nav-panel-h"><span class="nav-idx">03</span><h2 class="h3" id="resH">综合建议：该去哪一家、怎么去、要多久</h2></div>
+      <div id="routeOverview"></div>
+      <p class="small muted mb-4 mt-6" id="resSub">选好情况后，这里会按「能不能接得住」排序，而不只是按距离。</p>
+      <div id="hospList"></div>
+      <p class="nav-note mt-4" id="dataNote">医院与能力标签为课程演示数据，请以当地卫健委公布名单和医院实际公告为准。</p>
+    </section>
+
+    <!-- ④ 两个子标签 -->
+    <div class="nav-tabs" id="navTabs" data-nav-step="4" role="tablist" aria-label="到院指引与就医流程">
+      <button class="nav-tab is-on" type="button" role="tab" id="tabBtn-guide" data-tab="guide" aria-selected="true" aria-controls="tab-guide">到院指引</button>
+      <button class="nav-tab" type="button" role="tab" id="tabBtn-flow" data-tab="flow" aria-selected="false" aria-controls="tab-flow">就医流程</button>
+    </div>
+
+    <!-- 子标签 A：地图图片指引 + 路上怎么走 + 到院动线 -->
+    <section class="card nav-tab-panel" id="tab-guide" data-nav-step="4" role="tabpanel" aria-labelledby="tabBtn-guide">
+      <div class="flex items-center justify-between gap-3 wrap">
+        <div>
+          <div class="nav-panel-h" style="margin-bottom:6px"><span class="nav-idx">04</span><h2 class="h3" id="guideH">到了先找对门 · 现场照片</h2></div>
+          <p class="small muted" id="routeSub">先看医院现场照片认门，再看下面的路线地图怎么走。</p>
+        </div>
+        <button class="btn btn-soft btn-sm" id="btnGuideExpand" type="button">放大路线地图</button>
+      </div>
+      <div class="nav-photos" id="guidePhotos"></div>
+      <div class="nav-guide-h">路线地图 · 从你现在的位置过去</div>
+      <div class="nav-guide-map" id="guideMap"></div>
+      <div id="guideSteps"></div>
+      <div class="nav-guide-h">到了之后，认准这四处</div>
+      <div class="nav-route" id="routeList"></div>
+      <div class="nav-jump">
+        <div><div class="nav-li-t">门认清了，接下来怎么走流程？</div><div class="nav-li-d">会照你选的情况配好步骤，不是固定一套。</div></div>
+        <button class="btn btn-primary btn-sm" id="btnFlowJump" type="button">看就医流程</button>
+      </div>
+    </section>
+
+    <!-- 子标签 B：按情况动态生成的流程 -->
+    <section class="card nav-tab-panel" id="tab-flow" data-nav-step="4" role="tabpanel" aria-labelledby="tabBtn-flow" hidden>
+      <div class="nav-panel-h"><span class="nav-idx">05</span><h2 class="h3" id="flowH">接下来怎么走</h2></div>
+      <div class="nav-flow-head flex items-center justify-between gap-3 wrap">
+        <p class="small muted" id="flowSub">按你选的情况，配好了这一套流程。</p>
+        <div class="flex gap-3 wrap">
+          <button class="btn btn-ghost btn-sm" id="btnFlowEmergency" type="button">急诊流程</button>
+          <button class="btn btn-ghost btn-sm" id="btnFlowOutpatient" type="button">门诊流程</button>
+          <button class="btn btn-ghost btn-sm" id="btnFlowInpatient" type="button">住院流程</button>
+        </div>
+      </div>
+      <div class="nav-flow-list" id="flowList"></div>
+      <div class="nav-progress-wrap mt-4">
+        <div class="nav-progress-label"><span>已经走到</span><span id="flowPct">0%</span></div>
+        <div class="progress"><span id="flowBar" style="width:0%"></span></div>
+      </div>
+      <p class="nav-note mt-3">带「按情况」标记的步骤是照你选的情况加进来的。勾掉的步骤只记在这一页里，刷新会清空，不会留下任何个人信息。</p>
+    </section>
+
+    <!-- 分享 -->
+    <section class="card mt-6" data-nav-step="5" aria-labelledby="shareH">
+      <div class="nav-panel-h"><span class="nav-idx">06</span><h2 class="h3" id="shareH">把这段发给家人</h2></div>
+      <div class="flex items-center justify-between gap-3 wrap mb-4">
+        <p class="small muted">纯文字，对方不用装任何应用，截图也能看。</p>
+        <button class="btn btn-soft btn-sm" id="btnCopy" type="button">复制文字</button>
+      </div>
+      <label class="nav-sr" for="shareText">可复制的就医信息</label>
+      <textarea class="nav-copy" id="shareText" readonly></textarea>
+    </section>
+
+    <!-- 手机端分步导航底部操作条：桌面端隐藏 -->
+    <div class="nav-stepnav" id="navStepNav" hidden>
+      <button class="btn btn-soft btn-sm" id="btnStepPrev" type="button">上一步</button>
+      <div class="nav-stepnav-t" id="stepNavText">第 1 / 4 步</div>
+      <button class="btn btn-primary btn-sm" id="btnStepNext" type="button">下一步</button>
+    </div>
+
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span>安护 · 急救通　｜　智能定位与就医流程导航（模块页）</span>
+    <span>内容用于日常科普与流程指引，不能替代专业急救培训与医疗救治</span>
+  </div>
+</footer>
+
+<!-- 放大后的完整地图：有 JS API Key 时可缩放拖拽，否则高清静态路线图；始终可退出 -->
+<div id="mapBig" hidden role="dialog" aria-modal="true" aria-labelledby="mapBigTitle">
+  <div class="nav-big-box">
+    <div class="nav-big-head">
+      <div>
+        <div class="nav-big-title" id="mapBigTitle">完整地图</div>
+        <div class="nav-big-sub" id="mapBigTip">S 是你在这里，A / B / C 是推荐医院。</div>
+      </div>
+      <div class="nav-big-actions">
+        <div class="nav-big-zoom" aria-label="地图缩放">
+          <button id="btnZoomOut" type="button" aria-label="缩小">−</button>
+          <button id="btnZoomIn" type="button" aria-label="放大">+</button>
+          <button id="btnZoomReset" type="button" aria-label="复位">复位</button>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btnMapClose" type="button">退出大地图</button>
+      </div>
+    </div>
+    <div class="nav-big-body" id="mapBigBody"></div>
+    <div class="nav-big-foot">地图数据来自高德地图。未配置 Key 时显示的是位置关系示意图，不是地图。路线与时间为估算或路径规划结果，实际请以现场标志与导航为准。</div>
+  </div>
+</div>
+
+<div class="nav-toast" id="navToast" role="status" aria-live="polite"></div>
+
+<div id="photoBig" class="nav-photo-big" hidden role="dialog" aria-label="医院现场照片">
+  <button class="nav-photo-close" id="btnPhotoClose" type="button">关闭照片</button>
+  <img id="photoBigImg" alt="医院现场照片">
+  <div class="nav-photo-cap" id="photoCap">照片来自高德地图 POI 收录</div>
+</div>
+<script src="nav/assets/network.local.js"></script>
+<script src="nav/assets/key.local.js"></script>
+<script src="nav/assets/location.js"></script>
+<script src="nav/assets/amap.js"></script>
+<script src="nav/assets/capabilities.js"></script>
+<script src="nav/assets/nav-app.js"></script>
+<script>
+  /* 放大按钮有两个（卡片内 + 地图上），统一绑定 */
+  document.getElementById('btnMapExpand2').addEventListener('click', function () {
+    document.getElementById('btnMapExpand').click();
+  });
+</script>
+<script src="js/site.js"></script>
+</body>
+</html>

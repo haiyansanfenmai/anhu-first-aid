@@ -1,0 +1,238 @@
+/* ============================================================
+   home.css — 仅首页引入，全部作用域限定在 body.page-home
+   约定：页面级样式一律加 body.page-xxx 前缀，避免五个人互相污染
+   ============================================================ */
+
+/* ---------------- 顶部紧急条 ---------------- */
+.page-home .emergency-strip { background: var(--urgent-600); color: #fff; }
+.page-home .emergency-strip-inner {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  min-height: 48px; padding-block: 8px;
+}
+.page-home .emergency-strip-tag {
+  flex: none; padding: 3px 9px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  background: rgba(255, 255, 255, .18);
+}
+.page-home .emergency-strip-text { font-size: 15px; }
+.page-home .emergency-strip-text strong {
+  font-family: var(--font-num); font-size: 19px; font-weight: 800; margin: 0 2px;
+}
+
+/* ---------------- Hero ---------------- */
+.page-home .hero {
+  position: relative; padding: var(--sp-12) 0 var(--sp-12); overflow: hidden;
+  background: linear-gradient(180deg, var(--brand-50) 0%, transparent 82%);
+}
+.page-home .hero-glow {
+  position: absolute; top: -240px; right: -160px; width: 720px; height: 720px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--brand-100), transparent 62%);
+  pointer-events: none;
+}
+/* 首屏背景层：点阵纹理 + 左下柔光 */
+.page-home .hero::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(circle, var(--ink-300) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  opacity: .28;
+  -webkit-mask-image: radial-gradient(ellipse 78% 68% at 32% 34%, #000 6%, transparent 70%);
+  mask-image: radial-gradient(ellipse 78% 68% at 32% 34%, #000 6%, transparent 70%);
+}
+.page-home .hero::after {
+  content: ""; position: absolute; left: -200px; bottom: -240px; z-index: 0; pointer-events: none;
+  width: 640px; height: 640px; border-radius: 50%;
+  background: radial-gradient(circle, var(--brand-100), transparent 62%);
+}
+/* 心电走线：低透明度，压在内容之下 */
+.page-home .hero-line {
+  position: absolute; left: 0; right: 0; bottom: -4px; width: 100%; height: 92px;
+  z-index: 0; pointer-events: none; opacity: .22; color: var(--brand-600);
+}
+.page-home .hero-line path {
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.page-home .hero-inner {
+  position: relative; z-index: 1; display: grid; align-items: center;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--sp-12);
+}
+.page-home .hero-lead { margin-top: var(--sp-4); max-width: 34em; }
+
+/* ---------------- 急救判据卡 ---------------- */
+.page-home .emergency-card {
+  position: relative; background: var(--surface); border: 1px solid var(--urgent-100);
+  border-radius: var(--r-lg); padding: var(--sp-6); box-shadow: var(--sh-2);
+}
+.page-home .emergency-head { display: flex; align-items: center; gap: 12px; }
+.page-home .emergency-badge {
+  width: 46px; height: 46px; border-radius: 14px; flex: none;
+  display: grid; place-items: center; background: var(--urgent-50); color: var(--urgent-600);
+}
+.page-home .emergency-badge svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.page-home .emergency-title { font-size: 17px; font-weight: 700; color: var(--urgent-600); line-height: 1.4; }
+.page-home .emergency-sub { font-size: 14px; color: var(--ink-500); }
+
+.page-home .emergency-list { margin-top: var(--sp-4); display: grid; gap: 11px; }
+.page-home .emergency-list li { display: flex; gap: 9px; font-size: 15px; color: var(--ink-700); line-height: 1.6; }
+.page-home .emergency-list svg {
+  width: 17px; height: 17px; flex: none; margin-top: 4px;
+  stroke: var(--urgent-600); fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.page-home .emergency-foot {
+  margin-top: var(--sp-4); padding-top: var(--sp-4);
+  border-top: 1px dashed var(--line);
+  font-size: 14px; color: var(--ink-700); line-height: 1.65;
+}
+
+/* ---------------- 模块入口 ---------------- */
+.page-home .modules { padding: var(--sp-16) 0; }
+.page-home .section-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--sp-4); margin-bottom: var(--sp-6); flex-wrap: wrap;
+}
+.page-home .section-head > p { max-width: 30em; }
+
+.page-home .module { display: flex; flex-direction: column; gap: var(--sp-3); height: 100%; }
+.page-home .module-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); }
+.page-home .module h3 { font-size: 17px; font-weight: 700; }
+.page-home .module p { font-size: 15px; color: var(--ink-500); line-height: 1.7; flex: 1; }
+.page-home .module-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 14px; font-weight: 600; color: var(--brand-700);
+}
+.page-home .module-link svg {
+  width: 15px; height: 15px; stroke: currentColor; fill: none;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .18s var(--ease);
+}
+.page-home .card-hover:hover .module-link svg { transform: translateX(3px); }
+
+/* ---------------- 模块分组 ---------------- */
+.page-home .module-group + .module-group { margin-top: var(--sp-12); }
+.page-home .module-group-head {
+  display: flex; align-items: center; gap: var(--sp-3);
+  margin-bottom: var(--sp-4); flex-wrap: wrap;
+}
+.page-home .module-group-head h3 { font-size: 16px; font-weight: 600; color: var(--ink-700); }
+
+/* ---------------- 三阶段 ---------------- */
+.page-home .flow {
+  padding: var(--sp-12) 0;
+  background: linear-gradient(180deg, var(--brand-50), rgba(252, 246, 240, 0) 72%);
+  border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft);
+}
+.page-home .flow-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+.page-home .flow-step {
+  position: relative; padding: var(--sp-4); border-radius: var(--r);
+  transition: background .22s var(--ease), transform .22s var(--ease);
+}
+.page-home .flow-step:hover { background: var(--brand-50); transform: translateY(-2px); }
+.page-home .flow-step:hover .flow-num { color: var(--brand-700); }
+.page-home .flow-step.is-out .flow-num { color: var(--urgent-600); }
+.page-home .flow-step.is-out:hover { background: var(--urgent-50); }
+.page-home .flow-num svg { transition: transform .22s var(--ease); }
+.page-home .flow-step:hover .flow-num svg { transform: scale(1.12); }
+.page-home .flow-num {
+  font-family: var(--font-num); font-size: 14px; font-weight: 800;
+  color: var(--brand-600); letter-spacing: .08em;
+}
+.page-home .flow-step h3 { margin-top: 6px; font-size: 17px; }
+.page-home .flow-step p { margin-top: 6px; font-size: 15px; color: var(--ink-500); line-height: 1.7; }
+.page-home .scope-note {
+  margin-top: var(--sp-6); padding-top: var(--sp-4);
+  border-top: 1px dashed var(--line);
+  font-size: 14px; color: var(--ink-500);
+}
+
+/* ---------------- 三类错误 ---------------- */
+.page-home .facts { padding: var(--sp-16) 0; }
+.page-home .fact { display: flex; gap: var(--sp-4); }
+.page-home .fact-num {
+  flex: none; width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center; font-family: var(--font-num); font-weight: 800;
+  background: var(--brand-100); color: var(--brand-900);
+}
+.page-home .fact h3 { font-size: 17px; }
+.page-home .fact p { margin-top: 4px; font-size: 15px; color: var(--ink-500); line-height: 1.7; }
+
+/* ---------------- 响应式 ---------------- */
+@media (max-width: 900px) {
+  .page-home .hero { padding: var(--sp-12) 0 var(--sp-8); }
+  .page-home .hero-inner { grid-template-columns: 1fr; gap: var(--sp-8); }
+  .page-home .flow-grid { grid-template-columns: 1fr; gap: var(--sp-2); }
+}
+
+/* ============================================================
+   动效与微交互
+   ============================================================ */
+
+/* 首屏入场：只做位移，不做透明度，避免动画未执行时内容不可见 */
+@keyframes fa-rise {
+  from { translate: 0 18px; }
+  to   { translate: 0 0; }
+}
+.page-home .hero-copy > * { animation: fa-rise .7s var(--ease) both; }
+.page-home .hero-copy > *:nth-child(1) { animation-delay: .04s; }
+.page-home .hero-copy > *:nth-child(2) { animation-delay: .12s; }
+.page-home .hero-copy > *:nth-child(3) { animation-delay: .20s; }
+.page-home .emergency-card { animation: fa-rise .8s var(--ease) .26s both; }
+
+/* 背景光晕缓慢漂移 */
+@keyframes fa-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-26px, 20px, 0) scale(1.06); }
+}
+.page-home .hero-glow { animation: fa-drift 18s ease-in-out infinite alternate; }
+
+/* 紧急条脉冲点 */
+@keyframes fa-ping {
+  0%   { transform: scale(.55); opacity: .9; }
+  100% { transform: scale(1.9);  opacity: 0; }
+}
+.page-home .emergency-strip-tag { display: inline-flex; align-items: center; gap: 7px; }
+.page-home .strip-dot {
+  position: relative; flex: none; width: 7px; height: 7px;
+  border-radius: 50%; background: #fff;
+}
+.page-home .strip-dot::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .75);
+  animation: fa-ping 2.1s var(--ease) infinite;
+}
+
+/* 适用范围的小图标 */
+.page-home .flow-num { display: inline-flex; align-items: center; gap: 6px; }
+.page-home .flow-num svg {
+  width: 15px; height: 15px; flex: none;
+  stroke: currentColor; fill: none; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* 悬停微交互 */
+.page-home .icon-box { transition: background .22s var(--ease), transform .22s var(--ease); }
+.page-home .module:hover .icon-box { background: var(--brand-100); transform: translateY(-2px); }
+.page-home .fact-num { transition: background .22s var(--ease), transform .22s var(--ease); }
+.page-home .fact:hover .fact-num { background: var(--brand-200); transform: translateY(-2px); }
+
+/* 滚动入场：纯 CSS 滚动驱动动画。支持则动，不支持则正常显示，不会留白 */
+@keyframes fa-reveal {
+  from { opacity: 0; translate: 0 16px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .page-home [data-reveal] {
+      animation: fa-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 26%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-home .hero-copy > *,
+  .page-home .emergency-card,
+  .page-home .hero-glow { animation: none; }
+}

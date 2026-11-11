@@ -1,0 +1,67 @@
+/* ============================================================
+   全站外壳样式（仅顶栏 + 页脚）
+   为什么单独一份：theme.css 里含全局元素重置（h1~h4/p/ul{margin:0}、
+   ul{list-style:none}、img{display:block}、button{border:none}…）。
+   子模块页面自带完整设计，被那些重置扫到就会「变形」。
+   因此这里只给外壳，且每条规则都限定在 header.topbar / footer.footer 内。
+   依赖：assets/theme-vars.css（只提供变量，无任何组件样式）
+   ============================================================ */
+
+header.topbar {
+  position: sticky; top: 0; z-index: 50;
+  margin: 0; padding: 0;
+  color: var(--ink-900);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
+  border-bottom: 1px solid var(--line-soft);
+}
+header.topbar .container { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+header.topbar .topbar-inner { display: flex; align-items: center; gap: var(--sp-8); height: 68px; }
+
+header.topbar .brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 17px; letter-spacing: -.01em;
+  color: var(--ink-900); text-decoration: none;
+}
+header.topbar .brand-mark {
+  width: 34px; height: 34px; border-radius: 11px;
+  background: var(--brand-600); display: grid; place-items: center; flex: none;
+}
+header.topbar .brand-mark svg {
+  width: 20px; height: 20px; stroke: #fff; stroke-width: 2.4;
+  fill: none; stroke-linecap: round;
+}
+
+header.topbar .nav { display: flex; gap: 4px; margin-left: auto; }
+header.topbar .nav a {
+  padding: 8px 14px; border-radius: var(--r-pill);
+  font-size: 14px; color: var(--ink-700); text-decoration: none;
+  transition: background .18s var(--ease), color .18s var(--ease);
+}
+header.topbar .nav a:hover { background: var(--brand-50); color: var(--brand-700); }
+header.topbar .nav a.is-active { background: var(--brand-100); color: var(--brand-900); font-weight: 600; }
+
+footer.footer {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding: var(--sp-8) 0;
+  color: var(--ink-500); font-size: 13px;
+  background: var(--surface);
+}
+footer.footer .container { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+footer.footer .footer-inner { display: flex; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; }
+footer.footer strong { color: var(--ink-900); }
+footer.footer .footer-note { font-size: 14px; line-height: 1.7; }
+footer.footer .mt-2 { margin-top: var(--sp-2); }
+
+@media (max-width: 900px) {
+  header.topbar .topbar-inner { flex-wrap: wrap; height: auto; gap: 8px; padding: 10px 0 0; }
+  header.topbar .nav {
+    order: 3; width: 100%; margin-left: 0;
+    overflow-x: auto; padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  header.topbar .nav::-webkit-scrollbar { display: none; }
+  header.topbar .nav a { white-space: nowrap; }
+}
