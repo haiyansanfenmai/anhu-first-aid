@@ -1725,6 +1725,9 @@
     return out;
   }
   var params = readParams();
+  /* 链接里带了坐标（比如手机「复制带我位置的链接」发到电脑打开），这个位置的优先级最高：
+     不能再被本机上次记住的位置覆盖，也不该再跑一遍 IP 定位——那正是「链接是南山、打开变福田」的原因。 */
+  var hasUrlLoc = !!(params.lat && params.lng && !isNaN(+params.lat) && !isNaN(+params.lng));
   if (params.offline === '1') {
     if (window.NavMap) window.NavMap.configure({ provider: 'offline' });
     if (window.NavLocation) window.NavLocation.configure({ provider: 'offline' });
@@ -1780,8 +1783,8 @@
     var label = loc.shortLabel;
     if (loc.city) state.cityName = [loc.province, loc.city].filter(Boolean).join(' · ') || state.cityName;
     setOrigin(compute, mode, label, loc);
-    if (loc.adcode && (loc.locationLevel === 'city' || loc.source === 'amap-ip') &&
-        loc.adcode !== state.cityAdcode) {
+    if (loc.adcode && loc.adcode !== state.cityAdcode &&
+        (loc.locationLevel === 'city' || loc.source === 'amap-ip' || !state.cityAdcode)) {
       state.cityAdcode = loc.adcode;
       loadDistricts(loc.adcode, loc.city);
     }
@@ -1789,8 +1792,8 @@
   }
   window.NavLocation.onChange(applyLocation);
 
-  if (params.lat && params.lng && !isNaN(+params.lat) && !isNaN(+params.lng)) {
-    window.NavLocation.setManual(+params.lat, +params.lng, params.label || '组员模块传来的位置');
+  if (hasUrlLoc) {
+    window.NavLocation.setManual(+params.lat, +params.lng, params.label || '链接带入的位置');
   }
   if (params.situation) setSituation(params.situation);
   if (params.hospital) { state.hospital = params.hospital; }
@@ -1806,8 +1809,10 @@
   // 打开页面就自动做 IP 定位（不弹权限框、国内可靠），拿到真实城市后拉真实医院。
   // GPS 只在用户点「重新定位」时才请求。
   if (window.NavMap && window.NavMap.webKey() && window.NavLocation && params.offline !== '1') {
-    var saved = window.NavLocation.recall();
-    if (saved) {
+    var saved = hasUrlLoc ? null : window.NavLocation.recall();
+    if (hasUrlLoc) {
+      // 以链接里的坐标为准，不做 IP 定位；等 regeo 回来后会自动补地址与区列表
+    } else if (saved) {
       // 第二次打开：0 秒恢复到上次选的区 / 街道，不再等任何定位
       window.NavLocation.restoreSaved();
       if (saved.adcode && saved.adcode !== state.cityAdcode) {
