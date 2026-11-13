@@ -271,6 +271,11 @@ body.nav-m-precise #locDiag { display: none; }
 <style>
   /* 本页自带的顶栏隐藏（代码原样保留，只是不显示）：它 5 项里有 4 项是 href="#" 空链接 */
   body > header.topbar:not(:first-of-type) { display: none; }
+  /* 未定位时的「选所在区」按钮组（只作用于本模块结果区） */
+  .nav-dist-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+  .nav-dist-pick .chip { cursor: pointer; border: 1px solid var(--line, #E4D8CB); background: #FFFDF8; padding: 7px 14px; border-radius: 999px; }
+  .nav-dist-pick .chip:hover { border-color: var(--brand-500, #C47A48); color: var(--brand-700, #98562F); }
+  .nav-dist-pick .chip.is-on { background: var(--brand-500, #C47A48); border-color: var(--brand-500, #C47A48); color: #fff; }
   /* 只作用于全站这层顶栏：≤900px 时 keep 可见并可横滑（本页 theme.css 该断点会隐藏 .nav） */
   @media (max-width: 900px) {
     body > header.topbar:first-of-type .topbar-inner { gap: 10px; }
