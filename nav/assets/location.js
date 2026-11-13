@@ -219,7 +219,8 @@
         province: ip.province, adcode: ip.adcode,
         mode: 'ip', source: 'amap-ip', coordSys: 'WGS-84',
         locationLevel: 'city',
-        message: '位置来自网络出口 IP，精度到城市级。想精确到街道，在下面输入地址或小区名即可。',
+        message: '网络位置只能确认到城市（' + (ip.city || ip.province || '') +
+                 '），坐标用的是城市范围的中心点，不代表你的实际位置。选一下所在区或输入小区名，距离和用时才算得准。',
         provider: 'amap'
       });
       if (!opts.silent) emit(loc, opts.force);
@@ -268,7 +269,7 @@
   }
 
   /* 用户所在区：行政区中心是 GCJ-02，转回 WGS-84 后作为精确起点 */
-  function setByDistrict(d, city) {
+  function setByDistrict(d, city, message) {
     var ll = String(d.center || '').split(',');
     var lng = parseFloat(ll[0]), lat = parseFloat(ll[1]);
     if (!isFinite(lat) || !isFinite(lng)) return Promise.resolve(state.current);
@@ -282,7 +283,7 @@
       districtCode: d.adcode || '',
       mode: 'district', source: 'amap-district', coordSys: 'WGS-84',
       locationLevel: 'district',
-      message: '已按你选的区重新找附近医院。想更精确，再输入小区或街道名。',
+      message: message || '已按你选的区重新找附近医院。想更精确，再输入小区或街道名。',
       provider: 'amap'
     });
     emit(loc);

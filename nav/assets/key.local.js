@@ -8,7 +8,7 @@
    · 正式上线应由后端代理保管 Key，不要在前端明文放置。
    ========================================================================== */
 window.NavKeys = {
-  webKey: ''
+  webKey: '5a239c3bc77fbc864200194bba99e63a'
   // 若要 Web端(JS API) 的可缩放交互地图，再补 jsKey 与 jscode：
   // jsKey: '你的Web端JS API Key',
   // jscode: '对应的安全密钥 jscode'

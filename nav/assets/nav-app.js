@@ -474,7 +474,7 @@
       var d = hospitalKm(h).toFixed(1);
       return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="13" fill="#22845F"/>' +
              '<text x="' + p.x.toFixed(1) + '" y="' + (p.y + 4).toFixed(1) + '" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">' + String.fromCharCode(65 + i) + '</text>' +
-             '<text x="' + (p.x + 20).toFixed(1) + '" y="' + (p.y + 4).toFixed(1) + '" fill="#5A483A" font-size="' + (large ? 15 : 13) + 'px">' + esc(h.name.slice(0, 16)) + ' · ' + d + ' km</text>';
+             '<text x="' + (p.x + 20).toFixed(1) + '" y="' + (p.y + 4).toFixed(1) + '" fill="#5A483A" font-size="' + (large ? 15 : 13) + 'px">' + esc(h.name.slice(0, 16)) + (hasPrecise() ? (' · ' + d + ' km') : '') + '</text>';
     }).join('');
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="位置关系示意图，非地图" style="width:100%;height:100%;display:block">' +
       '<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="22" fill="#FCF6F0"/>' +
@@ -483,7 +483,7 @@
       lines +
       '<circle cx="' + o.x.toFixed(1) + '" cy="' + o.y.toFixed(1) + '" r="16" fill="#C47A48"/>' +
       '<text x="' + o.x.toFixed(1) + '" y="' + (o.y + 4).toFixed(1) + '" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">S</text>' +
-      '<text x="' + (o.x + 22).toFixed(1) + '" y="' + (o.y + 4).toFixed(1) + '" fill="#98562F" font-size="' + (large ? 15 : 13) + 'px" font-weight="600">你在这里</text>' +
+      '<text x="' + (o.x + 22).toFixed(1) + '" y="' + (o.y + 4).toFixed(1) + '" fill="#98562F" font-size="' + (large ? 15 : 13) + 'px" font-weight="600">' + (hasPrecise() ? '你在这里' : '城市中心（不是你的位置）') + '</text>' +
       dots +
       '<text x="' + (W - 16) + '" y="' + (H - 16) + '" text-anchor="end" fill="#5A483A" font-size="12px">位置关系示意图 · 非地图</text>' +
       '</svg>';
@@ -563,7 +563,7 @@
     if (!box) return;
     var hs = mapHospitals();
     var shown = isMobileView() ? hs.slice(0, 2) : hs;
-    $('mapLegend').innerHTML = '<span class="nav-map-lg is-me"><i>S</i>你在这里</span>' + shown.map(function (h, i) {
+    $('mapLegend').innerHTML = '<span class="nav-map-lg is-me"><i>S</i>' + (hasPrecise() ? '你在这里' : '待定位') + '</span>' + shown.map(function (h, i) {
       return '<span class="nav-map-lg"><i>' + String.fromCharCode(65 + i) + '</i>' + esc(h.name.slice(0, 14)) + '</span>';
     }).join('') + (hs.length > shown.length
       ? '<span class="nav-map-lg">等 ' + hs.length + ' 家</span>' : '');
@@ -573,7 +573,8 @@
       : '你在哪 · 附近医院在哪';
     if (window.NavMap && window.NavMap.webKey()) {
       mountStatic(box, {
-        center: centerOfMap(), size: '900*340', origin: state.origin, destinations: hs,
+        center: centerOfMap(), size: '900*340',
+        origin: hasPrecise() ? state.origin : null, destinations: hs,
         path: state.routeInfo ? state.routeInfo.path : null
       }, 'mapMiniImg', function () {
         box.innerHTML = schematic(false);
@@ -665,7 +666,7 @@
   function bigMapOptions(z) {
     return {
       center: bigView.center, zoom: z, size: BIG_SIZE,
-      origin: state.origin, destinations: mapHospitals(),
+      origin: hasPrecise() ? state.origin : null, destinations: mapHospitals(),
       path: state.routeInfo ? state.routeInfo.path : null
     };
   }
@@ -870,6 +871,15 @@
     var h = byId(state.hospitals, state.hospital);
     if (!h) {
       box.innerHTML = '<div class="nav-empty">选好情况并点一家医院，这里会给出「怎么去、大概多久」。</div>';
+      return;
+    }
+    if (!hasPrecise()) {
+      /* 城市级 / 未定位：城市中心不是用户的位置，任何公里数和分钟数都是编的，一律不给 */
+      box.innerHTML = '<div class="nav-route-head"><div><div class="nav-li-t">去 ' + esc(h.name) + '</div>' +
+        '<div class="nav-li-d">先确认你在哪个区，才会算距离和用时</div></div>' +
+        '<span class="chip">位置未确认</span></div>' +
+        '<p class="nav-note mt-3">现在只知道你在' + esc(state.cityName || '这个城市') +
+        '。城市中心不代表你的位置，所以这里先不给公里数和分钟数。选一下「所在区」或点「获取我的精确位置」，马上就有真实结果。</p>';
       return;
     }
     var baseMin = state.routeInfo ? state.routeInfo.min : minutes(hospitalKm(h), TRAVELS[0]);
@@ -1127,9 +1137,34 @@
         (picked ? 'btn-primary' : 'btn-soft') + ' btn-sm" data-pick="' + esc(r.h.id) + '">' +
         (picked ? '正在看这一家' : '看到院指引') + '</button></div></div>';
   }
+  /* 未定位时先让用户选区：城市中心不能代表任何人，列一堆市中心医院等于误导 */
+  function districtPickerHtml() {
+    var cur = (state.locInfo && state.locInfo.district) || '';
+    var btns = (state.districts || []).map(function (d) {
+      var on = d.name === cur;
+      return '<button type="button" class="chip' + (on ? ' is-on' : '') +
+             '" data-district="' + esc(d.adcode) + '"' + (on ? ' aria-pressed="true"' : '') +
+             '>' + esc(d.name) + '</button>';
+    }).join('');
+    return '<div class="nav-rank"><i class="nav-rank-bar"></i>你在哪个区？' +
+      '<span class="nav-rank-n">选一个，立刻显示这个区的真实医院</span></div>' +
+      '<div class="alert alert-warn mb-4">现在只知道你在' + esc(state.cityName || '这个城市') +
+      '。网络位置只到城市一级，城市范围的中心点不代表你的位置，所以先不排医院、不算距离。</div>' +
+      '<div class="nav-dist-pick">' + btns + '</div>' +
+      '<p class="nav-note">点上面的区，或用「获取我的精确位置」、下面输入小区 / 路口名。' +
+      '选过一次会记住，下次打开直接是这个区。</p>';
+  }
+
   function renderHosp() {
     var sit = byId(NAV_SITUATIONS, state.situation);
     var real = state.dataSource === 'real';
+    if (!hasPrecise() && state.districts && state.districts.length) {
+      $('resSub').textContent = '还没有你的精确位置。先选你在哪个区，再按「' +
+        (sit ? sit.label : '情况') + '」帮你排医院。';
+      $('dataNote').textContent = '医院名称、地址、电话、距离与类型来自高德地图；急症请以 120 调度与医院急诊公告为准。';
+      $('hospList').innerHTML = districtPickerHtml();
+      return;
+    }
     if (!hasPrecise()) {
       $('resSub').textContent = '还没有你的精确位置。下面是' + (state.cityName || '这个城市') +
         '的医院，不是按你的位置排的；距离、路程时间都先不算。';
@@ -1400,7 +1435,8 @@
     if (!window.NavMap || !window.NavMap.webKey()) return;
     var token = ++hospSeq;
     var adcode = state.cityAdcode || (state.locInfo && state.locInfo.adcode) || '';
-    window.NavMap.hospitals({ lat: state.origin.lat, lng: state.origin.lng, adcode: adcode })
+    window.NavMap.hospitals({ lat: state.origin.lat, lng: state.origin.lng, adcode: adcode,
+                              cityOnly: !hasPrecise() })
       .then(function (list) {
         if (token !== hospSeq || !list || !list.length) return;
         state.hospitals = list;
@@ -1515,6 +1551,16 @@
     var b = e.target.closest('[data-sit]'); if (b) setSituation(b.getAttribute('data-sit'));
   });
   $('hospList').addEventListener('click', function (e) {
+    var d = e.target.closest ? e.target.closest('[data-district]') : null;
+    if (d) {
+      var code = d.getAttribute('data-district');
+      var pick = (state.districts || []).filter(function (x) { return x.adcode === code; })[0];
+      if (pick && window.NavLocation) {
+        window.NavLocation.setByDistrict(pick, (state.locInfo && state.locInfo.city) || state.cityName);
+        toast('已按「' + pick.name + '」显示附近医院');
+      }
+      return;
+    }
     var b = e.target.closest('[data-pick]'); if (b) setHospital(b.getAttribute('data-pick'));
   });
   $('routeOverview').addEventListener('click', function (e) {
@@ -1679,12 +1725,44 @@
   /* 医院名单现在按「当前真实坐标」从高德 place/around 实时拉取，全国通用。
      早期「演示数据只在杭州」的远距离回落会把用户的真实坐标偷偷换成杭州假起点，
      再算出看似合理的假距离 —— 必须去掉，否则就是在骗用户。 */
+  /* 粗略定位吸附：设备给的是 WiFi/IP 混合定位（误差几公里）时，落到最近的行政区中心。
+     这样「获取我的精确位置」在笔记本上也有可用结果，而不是把某栋楼当用户家。 */
+  function nearestDistrict(lat, lng) {
+    var best = null, bestKm = Infinity;
+    (state.districts || []).forEach(function (d) {
+      var ll = String(d.center || '').split(',');
+      var dlng = parseFloat(ll[0]), dlat = parseFloat(ll[1]);
+      if (!isFinite(dlat) || !isFinite(dlng)) return;
+      var km = haversineKm(lat, lng, dlat, dlng);
+      if (km < bestKm) { bestKm = km; best = d; }
+    });
+    return best;
+  }
+  function haversineKm(a1, o1, a2, o2) {
+    var R = 6371, rad = Math.PI / 180;
+    var dLat = (a2 - a1) * rad, dLng = (o2 - o1) * rad;
+    var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(a1 * rad) * Math.cos(a2 * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+
   function applyLocation(loc) {
     // 已有精确位置时，不被随后返回的城市级 IP 结果覆盖
     if (state.locInfo && (state.locInfo.locationLevel === 'address' ||
         state.locInfo.locationLevel === 'district') && loc.locationLevel === 'city') return;
     var mode = loc.mode === 'fail' ? 'fail' : loc.mode;
     state.farNote = '';
+    // 粗略 GPS（>2km）先吸附到最近的区，再算医院与距离
+    if (loc.mode === 'gps' && loc.accuracy != null && loc.accuracy > GPS_MAX_ACCURACY_M &&
+        state.districts && state.districts.length) {
+      var near = nearestDistrict(loc.lat, loc.lng);
+      if (near) {
+        window.NavLocation.setByDistrict(near, loc.city || state.cityName,
+          '设备只给到约 ±' + (Math.round(loc.accuracy / 100) / 10) + ' 公里的粗略位置，已按最近的「' +
+          near.name + '」匹配医院。不对的话，直接在上面换一个区或输入小区名。');
+        return;
+      }
+    }
     var compute = { lat: loc.lat, lng: loc.lng };
     var label = loc.shortLabel;
     if (loc.city) state.cityName = [loc.province, loc.city].filter(Boolean).join(' · ') || state.cityName;

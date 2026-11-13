@@ -376,6 +376,23 @@
     if (!key) return Promise.reject(new Error('未配置 Web服务 Key'));
     o = o || {};
     var loc = pair(o.lat, o.lng);
+    /* 未定位（只有城市级 IP）时不能以城市中心做「周边检索」：深圳的框中心在福田，
+       会把南山用户全指到福田。改为按整个城市检索，距离一律不显示。 */
+    if (o.cityOnly) {
+      var t0 = 'https://restapi.amap.com/v3/place/text' +
+               '?keywords=' + encodeURIComponent('医院') +
+               '&city=' + encodeURIComponent(o.adcode || '') +
+               '&citylimit=true&offset=25&page=1&extensions=all&output=JSON' +
+               '&key=' + encodeURIComponent(key);
+      return jsonp(t0).then(function (d) {
+        if (!d || String(d.status) !== '1') throw new Error((d && d.info) || '城市检索失败');
+        var ls = (d.pois || []).map(normalizePoi).filter(Boolean);
+        ls.forEach(function (h) { h.distanceM = null; });
+        ls = mainHospitals(ls);
+        decorate(ls, o.adcode);
+        return ls;
+      });
+    }
     var url = 'https://restapi.amap.com/v3/place/around' +
               '?location=' + loc +
               '&keywords=' + encodeURIComponent('医院') +
