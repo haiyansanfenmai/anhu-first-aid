@@ -262,6 +262,15 @@ body.nav-steps-on .footer { display: none; }
 body.nav-steps-on .nav-map-status { font-size: 11.5px; margin-top: 6px; }
 body.nav-steps-on .nav-stepbar button { flex-basis: 52px; font-size: 11px; padding: 8px 2px; }
 body.nav-m-precise #locDiag { display: none; }
+
+/* 手机上拿到位置后，「复制带我位置的链接」必须留着 —— 这正是把手机坐标带到电脑的入口。
+   隐藏规则对所有 [data-loc-tool] 生效，这里用 ID 选择器把它单独放回来，并压成一行。 */
+body.nav-m-precise #phoneBox { display: block !important; }
+body.nav-m-precise #phoneBox .nav-phone-url,
+body.nav-m-precise #phoneBox #btnCopyPhone { display: none; }
+body.nav-m-precise #phoneBox > .nav-note:first-of-type { display: none; }
+body.nav-m-precise #phoneBox .nav-addr-row { margin-top: 8px; }
+body.nav-m-precise #phoneBox #btnCopyMyLoc { width: 100%; }
 </style>
 </head>
 <body>
