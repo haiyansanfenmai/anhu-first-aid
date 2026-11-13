@@ -910,6 +910,9 @@
       : (info && info.locationLevel === 'address' ? '精度：地址级' : '精度未知（外部传入或手动选择）');
   }
   function sourceText(info) {
+    // 链接带坐标进来的，明确写出来——用户能一眼确认「页面用的就是手机上那个点」
+    if (hasUrlLoc && info && (info.mode === 'manual' || info.mode === 'gps' || info.mode === 'district')
+        && !state.userLocated) return '链接带入的坐标';
     return {
       'amap-regeo': '高德逆地理编码', 'amap-ip': '网络位置 · 城市级',
       'amap-geocode': '高德地址检索', 'amap-district': '所在区 · 区级', 'saved': '上次记住的位置',
@@ -1634,6 +1637,7 @@
     else if (!$('mapBig').hidden) closeBigMap();
   });
   $('btnLocate').addEventListener('click', function () {
+    state.userLocated = true;
     var btn = this, html = btn.innerHTML, settled = false;
     btn.disabled = true; btn.textContent = '定位中…';
     state.locating = true; renderLoc();
@@ -1824,9 +1828,12 @@
       window.NavLocation.ipLocate().catch(function () { /* 断网时保持演示数据 */ });
     }
     // 后台静默持续监听精确坐标，拿到就自动升级到街道级；失败完全不打扰
-    window.NavLocation.permissionState().then(function (perm) {
-      if (perm === 'granted') return window.NavLocation.watchPrecise();
-    }).catch(function () {});
+    // 但链接已经带了坐标时不再监听：笔记本的 WiFi 定位会把它又盖回去（这正是「链接南山、打开福田」的第二个原因）
+    if (!hasUrlLoc) {
+      window.NavLocation.permissionState().then(function (perm) {
+        if (perm === 'granted') return window.NavLocation.watchPrecise();
+      }).catch(function () {});
+    }
   }
 
   /* ---------- 对外接口 ---------- */
