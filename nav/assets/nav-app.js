@@ -1041,12 +1041,25 @@
       }).join('');
       $('btnCopyPhone').disabled = false;
       $('phoneHint').textContent = online
-        ? '这是在线地址（含分享码，别删），手机用 4G/5G 或任意 WiFi 都能直接打开；不需要和电脑连同一个网络。'
+        ? '这是在线地址，手机用 4G/5G 或任意 WiFi 都能直接打开，不需要和电脑连同一个网络。'
         : ((urls.length > 1 ? '有多个网卡地址，手机逐个试哪个能打开。' : '') +
            '手机需与电脑连同一个 WiFi；若打不开，多半是电脑防火墙或校园网隔离。');
-      $('phoneHint').textContent += hasPrecise()
-        ? ' 当前已有精确位置，点「复制带我位置的链接」可把坐标带到另一台设备。'
-        : ' 手机打开网址并允许定位后，点「复制带我位置的链接」发回电脑即可。';
+      var preciseNow = hasPrecise() && state.locInfo &&
+        (state.locInfo.locationLevel === 'address' || state.locInfo.mode === 'gps');
+      var mobile = isMobileView();
+      if (preciseNow) {
+        $('phoneHint').textContent += mobile
+          ? ' 已拿到这台手机的位置。点下面的按钮复制带坐标的链接，发到电脑打开，电脑端就用这个精确位置。'
+          : ' 当前已是精确位置，点「复制带我位置的链接」可把坐标带到另一台设备。';
+      } else if (hasPrecise()) {
+        $('phoneHint').textContent += mobile
+          ? ' 当前是区级位置。想要精确到街道，点上面的「获取我的精确位置」并允许授权。'
+          : ' 当前是区级位置（落在区政府附近，可能差一两公里）。想更准，用手机定位后点「复制带我位置的链接」发回电脑。';
+      } else {
+        $('phoneHint').textContent += mobile
+          ? ' 先点上面的「获取我的精确位置」并允许授权，拿到位置后这里就能复制带坐标的链接。'
+          : ' 手机打开网址并允许定位后，点「复制带我位置的链接」发回电脑即可。';
+      }
     }
   }
 
