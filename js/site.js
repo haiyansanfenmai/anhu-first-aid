@@ -14,7 +14,7 @@
     { href: 'index.html',       label: '首页' },
     { href: 'navigation.html',  label: '就医导航' },
     { href: 'scenarios.html',   label: '场景科普' },
-    { href: 'https://emergency-med-calc.app.workbuddy.host/?sharecode=OXMKYNFLIT&shareId=0441919a1cc94482b4a4f58395ef1926', label: '费用测算' },
+    { href: 'calc/index.html', label: '费用测算' },
     { href: 'media/index.html', label: '视频科普' }
   ];
 
