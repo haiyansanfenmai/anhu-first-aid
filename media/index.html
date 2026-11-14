@@ -726,7 +726,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
   <section class="container hero">
     <span class="eyebrow">多媒体交互 · Media Interaction</span>
     <h1 class="h1">先看清伤情，再动手施救。</h1>
-    <p class="lead">观看标准操作视频，或用手机拍下现场照片——混元视觉模型识别图片内容，返回文字结论与评分。</p>
+    <p class="lead">观看标准操作视频，或用手机拍下现场照片——视觉模型识别图片内容，返回文字结论与评分。</p>
     <div class="hero-chips">
       <span class="chip chip-ok">已校对</span>
       <span class="chip">建议全屏观看</span>
@@ -927,7 +927,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
         <span class="flow-no">02</span>
         <div>
           <p class="flow-t">智能识别</p>
-          <p class="flow-d">提交混元视觉模型，返回识别文字与得分。</p>
+          <p class="flow-d">提交视觉模型，返回识别文字与得分。</p>
         </div>
       </div>
       <div class="flow-item">
@@ -997,7 +997,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
 
 <script>
 /* ============================================================
-   页面逻辑：拍照 / 上传 → 混元视觉识别 → 文字结果与打分
+   页面逻辑：拍照 / 上传 → 视觉模型识别 → 文字结果与打分
    依赖 hunyuan.js（独立实现模块，接口与 Token 与指定文件一致）
    ============================================================ */
 (function () {
@@ -1087,7 +1087,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
   }
 
   /* ---------------- 进度文案 ---------------- */
-  var PHASES = ['压缩图片…', '上传至混元…', '模型识别中…', '解析识别结果…'];
+  var PHASES = ['压缩图片…', '上传图片…', '模型识别中…', '解析识别结果…'];
   var phaseIdx = 0;
 
   function startTicker() {
@@ -1154,7 +1154,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
     runRecognize();
   }
 
-  /* ---------------- 调用混元 ---------------- */
+  /* ---------------- 调用视觉模型 ---------------- */
   /* 读取环形轮播当前选中的场景，作为识别提示 */
   function activeSceneKey() {
     var c = document.querySelector('#sceneRing .scene.is-active');
@@ -1219,7 +1219,7 @@ window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
     el.result.hidden = false;
 
     var structured = !!res.structured;
-    el.rMeta.textContent = (res.model || '视觉模型') + ' · ' +
+    el.rMeta.textContent = '视觉模型' + ' · ' +
       (((res.elapsed || 0) / 1000).toFixed(1)) + 's';
 
     /* 伤情类型 + 等级 */
