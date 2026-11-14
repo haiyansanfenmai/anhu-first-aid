@@ -14,7 +14,7 @@
     { href: 'index.html',       label: '首页' },
     { href: 'navigation.html',  label: '就医导航' },
     { href: 'scenarios.html',   label: '场景科普' },
-    { href: 'calc/index.html',  label: '费用测算' },
+    { href: 'https://emergency-med-calc.app.workbuddy.host/?sharecode=OXMKYNFLIT&shareId=0441919a1cc94482b4a4f58395ef1926', label: '费用测算' },
     { href: 'media/index.html', label: '视频科普' }
   ];
 
@@ -60,8 +60,12 @@
     try { sc = new URLSearchParams(location.search).get('sharecode') || ''; } catch (e) {}
     var QS = sc ? '?sharecode=' + encodeURIComponent(sc) : '';
     var links = NAV.map(function (item) {
-      var active = item.href === cur ? ' class="is-active" aria-current="page"' : '';
-      return '<a href="' + ROOT + item.href + QS + '"' + active + '>' + item.label + '</a>';
+      /* 外链（如独立部署的费用测算模块）原样输出：不加 ROOT，也不追加 sharecode，
+         否则会拼成 ...&shareId=xxx?sharecode=... 这种坏地址 */
+      var abs = /^https?:/i.test(item.href);
+      var href = abs ? item.href : (ROOT + item.href + QS);
+      var active = (!abs && item.href === cur) ? ' class="is-active" aria-current="page"' : '';
+      return '<a href="' + href + '"' + (abs ? ' target="_blank" rel="noopener"' : '') + active + '>' + item.label + '</a>';
     }).join('');
 
     mount.outerHTML =
