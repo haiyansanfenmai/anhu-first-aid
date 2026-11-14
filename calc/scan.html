@@ -170,7 +170,7 @@ details.cfg[open] summary::before{transform:rotate(90deg)}
       <a class="back" href="index.html">← 返回导航首页</a>
     </div>
     <div class="chips">
-      <span class="chip">拍照 / 上传单据</span><span class="chip">混元视觉识别</span>
+      <span class="chip">拍照 / 上传单据</span><span class="chip">视觉模型识别</span>
       <span class="chip">自动生成报销方案</span><span class="chip">明细可带入测算模块</span>
     </div>
   </div>
@@ -252,7 +252,7 @@ details.cfg[open] summary::before{transform:rotate(90deg)}
           <label class="switch"><input type="checkbox" id="cfgProxy"><span>本地开发模式：直连 <code>http://127.0.0.1:8787/vision</code>（需先执行 node proxy.js）</span></label>
         </div>
         <div style="margin-top:10px;color:var(--muted)">
-          线上由同源 <code>/api/vision</code> 转发到上游混元接口，无跨域问题；上游地址与 Bearer Token 保存在服务端 <code>cloud-env.cjs</code>，与指定 js 文件一致。
+          线上由同源 <code>/api/vision</code> 转发到视觉模型接口，无跨域问题；上游地址与 Bearer Token 保存在服务端 <code>cloud-env.cjs</code>，与指定 js 文件一致。
         </div>
       </div>
     </details>
@@ -311,7 +311,7 @@ function handleFile(file){
     $('preview').classList.remove('hidden');
     $('btnRecognize').disabled = false;
     $('resultState').textContent = '待识别';
-    $('resultBody').innerHTML = '<div class="placeholder">单据已就绪，点击「识别费用并生成报销方案」提交给混元视觉模型。</div>';
+    $('resultBody').innerHTML = '<div class="placeholder">单据已就绪，点击「识别费用并生成报销方案」提交给视觉模型。</div>';
     updateMeta();
   }).catch(function(e){
     $('resultBody').innerHTML = '<div class="err"><b>图片处理失败</b>'+esc(e.message||e)+'</div>';
@@ -400,7 +400,7 @@ function setLoading(on){
 }
 function renderLoading(){
   $('resultBody').innerHTML='<div class="loading-box"><div class="dots"><i></i><i></i><i></i></div>'+
-    '<div>正在调用混元视觉模型识别急救费用项目与金额…</div></div>';
+    '<div>正在调用视觉模型识别急救费用项目与金额…</div></div>';
 }
 function renderError(e){
   var code=e&&e.code||'UNKNOWN';
