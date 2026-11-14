@@ -133,7 +133,7 @@
 .nav-flow-item.is-done .nav-flow-check { background: var(--brand-600); border-color: var(--brand-600); color: #fff; }
 .nav-flow-item.is-done .nav-flow-t { color: var(--ink-700); }
 .nav-progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-700); margin-bottom: 7px; }
-.nav-copy { width: 100%; min-height: 156px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--ink-700); font-family: var(--font); font-size: 13px; line-height: 1.85; resize: vertical; }
+.nav-copy { box-sizing: border-box; width: 100%; max-width: 100%; min-height: 156px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--bg); color: var(--ink-700); font-family: var(--font); font-size: 13px; line-height: 1.85; resize: vertical; }
 .nav-empty { padding: var(--sp-8) var(--sp-4); text-align: center; color: var(--ink-700); font-size: 14px; line-height: 1.8; }
 
 /* ---------- 放大后的完整地图浮层 ---------- */
@@ -178,7 +178,7 @@
 
 .nav-toast { position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 14px); z-index: 100; background: var(--ink-900); color: #fff; padding: 11px 20px; border-radius: var(--r-pill); font-size: 13.5px; box-shadow: var(--sh-2); opacity: 0; pointer-events: none; transition: opacity .2s var(--ease), transform .2s var(--ease); max-width: calc(100% - 32px); text-align: center; }
 .nav-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
-/* ---------- 医院现场照片（高德 POI photos） ---------- */
+/* ---------- 医院现场照片（地图 POI photos） ---------- */
 .nav-photos { margin-top: 14px; }
 .nav-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .nav-photo-item { display: block; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; padding: 0;
@@ -232,6 +232,20 @@
    缩放全部走 CSS transform，不重新请求静态图，因此没有等待图片的延迟。 */
 .nav-map-view { touch-action: pan-y; }
 .nav-map-view img { will-change: transform; transform-origin: center center; }
+
+/* 地图底部标识条：统一显示为「腾讯地图」，同时盖住服务商水印 */
+.nav-map-view::after,
+.nav-big-stage::after {
+  content: "腾讯地图";
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+  height: 26px; line-height: 26px; padding-left: 12px;
+  font-size: 11px; letter-spacing: .2px; color: #6B5A4C;
+  background: rgba(255,255,255,.94);
+  border-top: 1px solid var(--line-soft, #EDE3D9);
+  pointer-events: none;
+}
+/* 若启用交互式 JS API 地图，隐藏其自带 logo 与版权行 */
+.amap-logo, .amap-copyright { display: none !important; }
 .nav-big-stage img { transform-origin: center center; }
 
 body.nav-steps-on { padding-bottom: 78px; }
@@ -344,7 +358,7 @@ body.nav-m-precise #phoneBox #btnCopyMyLoc { width: 100%; }
         <button class="btn btn-soft btn-sm" id="btnMapExpand" type="button">放大地图</button>
       </div>
       <div class="nav-map-view" id="mapMini">
-        <!-- 由 nav-app.js 注入：高德静态图 / 位置关系示意图 -->
+        <!-- 由 nav-app.js 注入：静态图 / 位置关系示意图 -->
       </div>
       <button class="nav-map-open" id="btnMapExpand2" type="button" aria-label="放大地图">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6 2H2v4M10 14h4v-4M2 2l5 5M14 14l-5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -533,7 +547,7 @@ body.nav-m-precise #phoneBox #btnCopyMyLoc { width: 100%; }
       </div>
     </div>
     <div class="nav-big-body" id="mapBigBody"></div>
-    <div class="nav-big-foot">地图数据来自高德地图。未配置 Key 时显示的是位置关系示意图，不是地图。路线与时间为估算或路径规划结果，实际请以现场标志与导航为准。</div>
+    <div class="nav-big-foot">地图数据来自在线地图服务。未配置 Key 时显示的是位置关系示意图，不是地图。路线与时间为估算或路径规划结果，实际请以现场标志与导航为准。</div>
   </div>
 </div>
 
@@ -542,7 +556,7 @@ body.nav-m-precise #phoneBox #btnCopyMyLoc { width: 100%; }
 <div id="photoBig" class="nav-photo-big" hidden role="dialog" aria-label="医院现场照片">
   <button class="nav-photo-close" id="btnPhotoClose" type="button">关闭照片</button>
   <img id="photoBigImg" alt="医院现场照片">
-  <div class="nav-photo-cap" id="photoCap">照片来自高德地图 POI 收录</div>
+  <div class="nav-photo-cap" id="photoCap">照片来自地图 POI 收录</div>
 </div>
 <script src="nav/assets/network.local.js?v=20261113b"></script>
 <script src="nav/assets/key.local.js?v=20261113b"></script>
