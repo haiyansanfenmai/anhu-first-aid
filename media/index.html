@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-site-root="../">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,6 @@
 <title>安护急救通 · 急救视频与拍照识别</title>
 
 <!-- 全站统一视觉规范：温柔科普 Warm Care · 陶土橙 -->
-<script src="../js/theme.js"></script>
 <link rel="stylesheet" href="assets/theme.css">
 
 <style>
@@ -321,6 +320,101 @@ p{ text-wrap: pretty; }
 .score-bar{ flex: 1 1 100%; height: 6px; margin-top: 12px; border-radius: var(--r-pill); background: var(--brand-100); overflow: hidden; }
 .score-bar i{ display: block; height: 100%; width: 0; border-radius: inherit; background: var(--brand-600); transition: width .62s var(--ease); }
 
+
+/* 分数档位说明 */
+.score-band{
+  font-size: 13px; font-weight: 700; color: var(--brand-700);
+  padding-bottom: 6px; margin-left: 4px;
+}
+.band-legend{
+  list-style: none; margin: 12px 0 0; padding: 0; width: 100%;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.band-legend li{
+  font-size: 11.5px; line-height: 1.5; color: var(--ink-300);
+  padding: 7px 9px; border-radius: 9px;
+  background: var(--bg); border: 1px solid transparent;
+  transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+}
+.band-legend li b{
+  display: block; margin-bottom: 1px;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  color: var(--ink-500); font-variant-numeric: tabular-nums;
+}
+.band-legend li.is-on{
+  background: var(--brand-100); border-color: var(--brand-200); color: var(--brand-700);
+}
+.band-legend li.is-on b{ color: var(--brand-700); }
+
+
+.play-video{
+  width: 100%; margin-top: 16px; justify-content: center;
+  min-height: 46px; font-size: 14.5px;
+}
+.play-video svg{ width: 15px; height: 15px; }
+
+
+.backend-down{
+  margin-top: 8px; padding: 8px 10px;
+  font-size: 12px; line-height: 1.7;
+  color: var(--urgent-600);
+  background: var(--urgent-50);
+  border: 1px solid var(--urgent-100);
+  border-radius: var(--r-sm);
+}
+
+/* 命中信号标签 */
+.reason-chips{
+  list-style: none; margin: 14px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.reason-chips li{
+  font-size: 12px; padding: 4px 10px; border-radius: var(--r-pill);
+  background: var(--urgent-50); color: var(--urgent-600);
+  border: 1px solid var(--urgent-100);
+}
+@media (max-width: 620px){
+  .band-legend{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 识别诊断结果 */
+.diag{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.call120{
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--urgent-50);
+  border: 1px solid var(--urgent-100);
+  border-left: 3px solid var(--urgent-600);
+  border-radius: var(--r-sm);
+  font-size: 13.5px; font-weight: 600; line-height: 1.7;
+  color: var(--urgent-600);
+}
+.advice{ list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 9px; }
+.advice li{ display: flex; gap: 10px; align-items: flex-start;
+  font-size: 14px; line-height: 1.75; color: var(--ink-900); }
+.advice b{
+  flex: none; width: 20px; height: 20px; margin-top: 3px;
+  border-radius: 50%; background: var(--brand-100); color: var(--brand-700);
+  font-size: 11px; font-weight: 700;
+  display: grid; place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.diag-note{ margin-top: 10px; font-size: 12.5px; color: var(--ink-500); line-height: 1.8; }
+
+
+/* 识别结果：独立整宽卡片（与上方两栏同宽） */
+.result.result-panel{
+  margin-top: clamp(16px, 2.4vw, 24px);
+  padding: clamp(20px, 2.4vw, 28px);
+  border-top: 0;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+}
+.result.result-panel .advice{ max-width: 780px; }
+.result.result-panel .result-text{ max-height: 220px; }
+
 .result-text{
   margin-top: 12px; padding: 14px 16px;
   background: var(--bg);
@@ -349,6 +443,14 @@ p{ text-wrap: pretty; }
 }
 
 /* 顶栏：单页展示，仅保留品牌标识 */
+
+/* 性能：吸顶栏关闭背景模糊。
+   模糊 + sticky 会在每次滚动时重算整条通栏，是桌面端卡顿的主因。 */
+.topbar{
+  background: var(--bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
 
 /* ---------- 04 流程条 ---------- */
 .flow{ display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 1.6vw, 20px); margin-top: clamp(20px, 3vw, 28px); }
@@ -413,7 +515,7 @@ p{ text-wrap: pretty; }
               box-shadow .5s var(--ease);
 }
 .ring .scene.is-active{
-  box-shadow: 0 20px 48px -20px rgba(120, 80, 50, .44), var(--sh-2);
+  box-shadow: 0 12px 28px -14px rgba(120, 80, 50, .34);
 }
 
 .scene-icon{
@@ -585,22 +687,38 @@ body{ font-size: 16px; line-height: 1.8; }
 .chip{ font-size: 13px; }
 .eyebrow{ font-size: 12.5px; }
 .footer{ font-size: 14px; }
-
-/* 接入全站：小屏保留导航（原 theme.css 在 ≤900px 会把 .nav 隐藏） */
-@media (max-width: 900px) {
-  .topbar-inner { flex-wrap: wrap; height: auto; gap: 8px; padding: 10px 0; }
-  .nav { display: flex; order: 3; width: 100%; margin-left: 0; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-  .nav::-webkit-scrollbar { display: none; }
-  .nav a { white-space: nowrap; }
-}
 </style>
+<script>
+/* 识图接口地址：由页面作者提供，已预填，通常不用改 */
+window.ANHU_API = 'https://astounding-pony-fc20be.netlify.app';
+</script>
+  <script src="../js/theme.js"></script>
 </head>
 
 <body id="top">
 <a class="skip" href="#main">跳到主要内容</a>
 
-<!-- 全站导航（由 ../js/site.js 注入） -->
-<div id="site-topbar"></div>
+<!-- ==================== 顶栏 ==================== -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#top" aria-label="安护急救通 首页">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3l7 3v5.5c0 4.2-2.9 7.6-7 9.5-4.1-1.9-7-5.3-7-9.5V6l7-3z"/>
+          <path d="M12 9v5M9.5 11.5h5"/>
+        </svg>
+      </span>
+      <span>安护急救通</span>
+    </a>
+    <nav class="quicknav" aria-label="站点导航">
+      <a href="../index.html">首页</a>
+      <a href="../scenarios.html">场景科普</a>
+      <a href="index.html" aria-current="page">视频科普</a>
+      <a href="../navigation.html">就医导航</a>
+      <a href="https://emergency-med-calc.app.workbuddy.host/?sharecode=OXMKYNFLIT&amp;shareId=0441919a1cc94482b4a4f58395ef1926" target="_blank" rel="noopener">费用测算</a>
+    </nav>
+  </div>
+</header>
 
 <main id="main">
 
@@ -744,29 +862,57 @@ body{ font-size: 16px; line-height: 1.8; }
           <p class="analysis-phase" id="analysisPhase">准备中…</p>
         </div>
 
-        <div class="result" id="result" hidden>
-          <div class="result-head">
-            <span class="result-label">识别结果</span>
-            <span class="result-meta" id="rMeta">hunyuan-vision</span>
-          </div>
-
-          <div class="score" id="scoreBox" hidden>
-            <span class="score-num" id="scoreNum">0</span>
-            <span class="score-unit">分</span>
-            <div class="score-bar"><i id="scoreFill"></i></div>
-          </div>
-
-          <pre class="result-text" id="rText"></pre>
-
-          <div class="result-actions">
-            <button class="btn btn-blue btn-sm" id="retryBtn" type="button">重新识别</button>
-            <button class="btn btn-ghost btn-sm" id="clearBtn" type="button">更换图片</button>
-          </div>
-        </div>
-
         <div class="err" id="errorBox" role="alert" hidden></div>
       </aside>
 
+    </div>
+
+<div class="result result-panel" id="result" hidden>
+    <div class="result-head">
+    <span class="result-label">识别结果</span>
+    <span class="result-meta" id="rMeta">视觉模型</span>
+    </div>
+    
+    <div class="diag" id="diagBox" hidden>
+    <span class="chip" id="diagType">—</span>
+    <span class="chip" id="diagLevel">—</span>
+    </div>
+    
+    <div class="score" id="scoreBox" hidden>
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-unit">分</span>
+      <span class="score-band" id="scoreBand">—</span>
+      <div class="score-bar"><i id="scoreFill"></i></div>
+
+      <ul class="band-legend" id="bandLegend">
+        <li data-band="mild"><b>1–39</b>可自行处理</li>
+        <li data-band="watch"><b>40–74</b>需观察</li>
+        <li data-band="urgent"><b>75–89</b>需立即就医</li>
+        <li data-band="critical"><b>90–100</b>危及生命</li>
+      </ul>
+    </div>
+
+    <ul class="reason-chips" id="reasonChips" hidden></ul>
+    
+    <div class="call120" id="call120Box" hidden>
+    判断为需立即处置，请同时拨打 120 并听从调度员指引
+    </div>
+    
+    <ul class="advice" id="adviceList" hidden></ul>
+    
+    <p class="diag-note" id="diagNote" hidden></p>
+    
+    <pre class="result-text" id="rText" hidden></pre>
+    
+    <button class="btn btn-blue play-video" id="playVideoBtn" type="button" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor" stroke="none"/></svg>
+      <span id="playVideoLabel">播放对应教学视频</span>
+    </button>
+
+    <div class="result-actions">
+    <button class="btn btn-blue btn-sm" id="retryBtn" type="button">重新识别</button>
+    <button class="btn btn-ghost btn-sm" id="clearBtn" type="button">更换图片</button>
+    </div>
     </div>
 
     <div class="flow">
@@ -833,39 +979,7 @@ body{ font-size: 16px; line-height: 1.8; }
     </div>
   </section>
 
-  <!-- ==================== 纠错与建议 ==================== -->
-  <section class="container section-tight" id="feedback">
-    <div class="section-head">
-      <h2 class="h2">纠错与建议</h2>
-      <p>提交后保存到服务器数据库，所有访问者可见</p>
-    </div>
 
-    <form class="fb" id="fbForm" novalidate>
-      <div class="fb-row">
-        <input class="fb-input" id="fbName" maxlength="20" placeholder="称呼（可选）">
-        <select class="fb-input fb-select" id="fbScene">
-          <option value="">相关场景（可选）</option>
-          <option value="burn">烧烫伤</option>
-          <option value="cut">割伤出血</option>
-          <option value="sprain">轻微扭伤</option>
-          <option value="choke">气道异物</option>
-          <option value="heat">中暑</option>
-          <option value="shock">触电</option>
-        </select>
-      </div>
-
-      <textarea class="fb-area" id="fbContent" maxlength="200" required
-                placeholder="发现哪里写错了？或希望补充什么内容？（2–200 字）"></textarea>
-
-      <div class="fb-foot">
-        <span class="fb-count" id="fbCount">0 / 200</span>
-        <button class="btn btn-primary" type="submit" id="fbSubmit">提交</button>
-      </div>
-      <p class="fb-msg" id="fbMsg" aria-live="polite"></p>
-    </form>
-
-    <ul class="fb-list" id="fbList" aria-live="polite"></ul>
-  </section>
 
 </main>
 
@@ -908,7 +1022,18 @@ body{ font-size: 16px; line-height: 1.8; }
     scoreBox: $('scoreBox'),
     scoreNum: $('scoreNum'),
     scoreFill: $('scoreFill'),
+    scoreBand: $('scoreBand'),
+    bandLegend: $('bandLegend'),
+    reasonChips: $('reasonChips'),
+    playVideoBtn: $('playVideoBtn'),
+    playVideoLabel: $('playVideoLabel'),
     rText: $('rText'),
+    diagBox: $('diagBox'),
+    diagType: $('diagType'),
+    diagLevel: $('diagLevel'),
+    adviceList: $('adviceList'),
+    diagNote: $('diagNote'),
+    call120Box: $('call120Box'),
     retryBtn: $('retryBtn'),
     clearBtn: $('clearBtn'),
     errorBox: $('errorBox'),
@@ -932,9 +1057,13 @@ body{ font-size: 16px; line-height: 1.8; }
   /* 支持 ?proxy=http://127.0.0.1:8787/chat/completions 免改代码切代理 */
   /* 由服务端托管时，识别统一走后端代理（密钥留在服务端，同时绕开 CORS） */
   var proxy = new URLSearchParams(location.search).get('proxy');
+  /* window.ANHU_API：静态托管时指向外部识别服务（如 Cloudflare Worker）
+     留空则走同源 /api/analyze */
+  var external = String(window.ANHU_API || '').replace(/\/+$/, '');
   if (API) {
     if (proxy) API.setProxy(proxy);
-    else if (/^https?:$/.test(location.protocol)) API.setProxy('/api/recognize');
+    else if (external) API.setProxy(external + '/api/analyze');
+    else if (/^https?:$/.test(location.protocol)) API.setProxy('/api/analyze');
   }
 
   var reduceMotion = function () {
@@ -1012,12 +1141,26 @@ body{ font-size: 16px; line-height: 1.8; }
     el.result.classList.remove('is-in');
     el.errorBox.hidden = true;
     el.scoreBox.hidden = true;
+    if (el.reasonChips) el.reasonChips.hidden = true;
+    if (el.playVideoBtn) el.playVideoBtn.hidden = true;
+    sceneToPlay = '';
+    el.diagBox.hidden = true;
+    el.adviceList.hidden = true;
+    el.call120Box.hidden = true;
+    el.diagNote.hidden = true;
+    el.rText.hidden = true;
     el.scoreFill.style.width = '0%';
 
     runRecognize();
   }
 
   /* ---------------- 调用混元 ---------------- */
+  /* 读取环形轮播当前选中的场景，作为识别提示 */
+  function activeSceneKey() {
+    var c = document.querySelector('#sceneRing .scene.is-active');
+    return c ? (c.getAttribute('data-key') || '') : '';
+  }
+
   function runRecognize() {
     if (!current) return;
 
@@ -1033,7 +1176,7 @@ body{ font-size: 16px; line-height: 1.8; }
     setStatus('识别中', 'busy');
     startTicker();
 
-    API.recognizeFile(current, { prompt: PROMPT })
+    API.analyzeFile(current, { scene: activeSceneKey() })
       .then(function (res) {
         stopTicker();
         renderResult(res);
@@ -1041,11 +1184,33 @@ body{ font-size: 16px; line-height: 1.8; }
       .catch(function (err) {
         stopTicker();
         el.analysis.hidden = true;
-        showError(err && err.message ? err.message : '识别失败，请重试');
+        showError((err && err.message) || '识别失败，请重试', err && err.hint);
       })
       .then(function () {
         setBusy(false);
       });
+  }
+
+  /* 六个场景的中文名 */
+  var SCENE_LABEL = {
+    burn: '烧烫伤', cut: '割伤出血', sprain: '轻微扭伤',
+    choke: '气道异物', heat: '中暑', shock: '触电'
+  };
+  var sceneToPlay = '';
+
+  if (document.getElementById('playVideoBtn')) {
+    document.getElementById('playVideoBtn').addEventListener('click', function () {
+      if (!sceneToPlay || !window.AnhuPlayer) return;
+      window.AnhuPlayer.play(sceneToPlay);
+    });
+  }
+
+  /* 分数 -> 档位 */
+  function bandOf(n) {
+    if (n >= 90) return { key: 'critical', text: '危及生命 · 90–100' };
+    if (n >= 75) return { key: 'urgent',   text: '需立即就医 · 75–89' };
+    if (n >= 40) return { key: 'watch',    text: '需观察 · 40–74' };
+    return { key: 'mild', text: '可自行处理 · 1–39' };
   }
 
   /* ---------------- 渲染结果（图片下方） ---------------- */
@@ -1053,18 +1218,107 @@ body{ font-size: 16px; line-height: 1.8; }
     el.analysis.hidden = true;
     el.result.hidden = false;
 
-    el.rText.textContent = res.text || '（模型未返回文字内容）';
-    el.rMeta.textContent = 'hunyuan-vision · ' + ((res.elapsed || 0) / 1000).toFixed(1) + 's';
+    var structured = !!res.structured;
+    el.rMeta.textContent = (res.model || '视觉模型') + ' · ' +
+      (((res.elapsed || 0) / 1000).toFixed(1)) + 's';
 
-    var score = typeof res.score === 'number' ? res.score : null;
-    if (score !== null) {
+    /* 伤情类型 + 等级 */
+    if (structured) {
+      el.diagBox.hidden = false;
+      el.diagType.textContent = res.type || '无法判断';
+      el.diagLevel.textContent = res.levelText || '';
+      el.diagLevel.className = 'chip ' +
+        (res.level === 'urgent' ? 'chip-urgent'
+         : res.level === 'watch' ? 'chip-warn' : 'chip-ok');
+    } else {
+      el.diagBox.hidden = true;
+    }
+
+    /* 风险分 + 档位说明 */
+    var score = structured && typeof res.score === 'number' ? res.score : null;
+    if (score !== null && score > 0) {
       el.scoreBox.hidden = false;
       el.scoreNum.textContent = score;
+
+      var band = bandOf(score);
+      if (el.scoreBand) {
+        el.scoreBand.textContent = band.text;
+        el.scoreBand.className = 'score-band is-' + band.key;
+      }
+      if (el.bandLegend) {
+        Array.prototype.forEach.call(el.bandLegend.children, function (li) {
+          li.classList.toggle('is-on', li.getAttribute('data-band') === band.key);
+        });
+      }
+
       window.requestAnimationFrame(function () {
         el.scoreFill.style.width = Math.max(0, Math.min(100, score)) + '%';
       });
     } else {
       el.scoreBox.hidden = true;
+    }
+
+    /* 命中本站六类场景 -> 显示播放按钮 */
+    sceneToPlay = (res.scene && SCENE_LABEL[res.scene]) ? res.scene : '';
+    if (el.playVideoBtn) {
+      if (sceneToPlay) {
+        el.playVideoBtn.hidden = false;
+        if (el.playVideoLabel) {
+          el.playVideoLabel.textContent = '播放「' + SCENE_LABEL[sceneToPlay] + '」教学视频';
+        }
+      } else {
+        el.playVideoBtn.hidden = true;
+      }
+    }
+
+    /* 命中的判定信号 */
+    if (structured && Array.isArray(res.reasons) && res.reasons.length && el.reasonChips) {
+      el.reasonChips.innerHTML = '';
+      res.reasons.forEach(function (t) {
+        var li = document.createElement('li');
+        li.textContent = t;
+        el.reasonChips.appendChild(li);
+      });
+      el.reasonChips.hidden = false;
+    } else if (el.reasonChips) {
+      el.reasonChips.hidden = true;
+    }
+
+    /* 立即拨打 120 */
+    el.call120Box.hidden = !(structured && res.call120);
+
+    /* 处置建议 */
+    el.adviceList.innerHTML = '';
+    if (structured && Array.isArray(res.advice) && res.advice.length) {
+      res.advice.forEach(function (text, i) {
+        var li = document.createElement('li');
+        var no = document.createElement('b');
+        no.textContent = String(i + 1);
+        var span = document.createElement('span');
+        span.textContent = text;
+        li.appendChild(no);
+        li.appendChild(span);
+        el.adviceList.appendChild(li);
+      });
+      el.adviceList.hidden = false;
+    } else {
+      el.adviceList.hidden = true;
+    }
+
+    /* 判断依据 */
+    if (structured && res.note) {
+      el.diagNote.hidden = false;
+      el.diagNote.textContent = '判断依据：' + res.note;
+    } else {
+      el.diagNote.hidden = true;
+    }
+
+    /* 模型没按格式返回时的兜底原文 */
+    if (!structured && res.raw) {
+      el.rText.hidden = false;
+      el.rText.textContent = res.raw;
+    } else {
+      el.rText.hidden = true;
     }
 
     window.requestAnimationFrame(function () {
@@ -1075,17 +1329,18 @@ body{ font-size: 16px; line-height: 1.8; }
   }
 
   /* ---------------- 错误 ---------------- */
-  function showError(msg) {
+  function showError(msg, hint) {
     el.analysis.hidden = true;
     el.result.hidden = true;
     el.errorBox.hidden = false;
 
-    var hint = /CORS|无法直连|Failed to fetch/i.test(msg)
-      ? '<br>浏览器直连被拦截：先运行 <code>node proxy.mjs</code>，' +
-        '再用 <code>index.html?proxy=http://127.0.0.1:8787/chat/completions</code> 打开页面。'
+    var autoHint = /CORS|无法直连|Failed to fetch|连接识别服务/i.test(msg)
+      ? '请先运行 node server.mjs，用 http://127.0.0.1:8788 打开页面再试。'
       : '';
 
-    el.errorBox.innerHTML = '<b>识别失败：</b>' + esc(msg) + hint;
+    var tip = hint || autoHint;
+    el.errorBox.innerHTML = '<b>识别失败：</b>' + esc(msg) +
+      (tip ? '<br>' + esc(tip) : '');
     setStatus('识别失败');
   }
 
@@ -1093,6 +1348,8 @@ body{ font-size: 16px; line-height: 1.8; }
   function reset() {
     current = null;
     if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+    if (el.cameraInput) el.cameraInput.value = '';
+    if (el.uploadInput) el.uploadInput.value = '';
 
     el.preview.hidden = true;
     el.dropzone.hidden = false;
@@ -1112,8 +1369,14 @@ body{ font-size: 16px; line-height: 1.8; }
   if (el.uploadBtn) el.uploadBtn.addEventListener('click', function () { el.uploadInput.click(); });
   if (el.cameraInput) el.cameraInput.addEventListener('change', onPick);
   if (el.uploadInput) el.uploadInput.addEventListener('change', onPick);
-  if (el.reBtn) el.reBtn.addEventListener('click', reset);
-  if (el.clearBtn) el.clearBtn.addEventListener('click', reset);
+  /* 更换图片：重置后直接唤起选图框，不需要再点一次「上传图片」 */
+  function resetAndPick() {
+    reset();
+    if (el.uploadInput) el.uploadInput.click();
+  }
+
+  if (el.reBtn) el.reBtn.addEventListener('click', resetAndPick);
+  if (el.clearBtn) el.clearBtn.addEventListener('click', resetAndPick);
   if (el.retryBtn) {
     el.retryBtn.addEventListener('click', function () { if (current) runRecognize(); });
   }
@@ -1136,6 +1399,38 @@ body{ font-size: 16px; line-height: 1.8; }
     if (file) handleFile(file);
   });
 
+  /* ---------------- 后端可用性自检 ----------------
+     纯静态部署（或后端没启动）时提前提示，避免上传后收到空响应 */
+  (function checkBackend() {
+    if (!/^https?:$/.test(location.protocol)) return;
+
+    var opts = {};
+    if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+      opts.signal = AbortSignal.timeout(5000);
+    }
+
+    var healthBase = String(window.ANHU_API || '').replace(/\/+$/, '');
+    fetch(healthBase + '/api/health', opts)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || j.ok !== true) throw new Error('unexpected');
+      })
+      .catch(function () {
+        setBusy(true);
+        setStatus('后端离线');
+        var dz = el.dropzone;
+        if (dz && !dz.querySelector('.backend-down')) {
+          var note = document.createElement('p');
+          note.className = 'backend-down';
+          note.textContent = '后端未连接：识别需要 Node 服务运行，当前页可能只是静态托管。';
+          dz.appendChild(note);
+        }
+      });
+  })();
+
   /* 平滑滚动用统一的减弱动效判断 */
   void reduceMotion;
 
@@ -1149,6 +1444,7 @@ body{ font-size: 16px; line-height: 1.8; }
 })();
 </script>
 <script>
+  window.__NO_SCENES_API__ = true;
 /* 场景速查：环形轮播 + 选中后播放对应视频 */
 (function () {
   var ring = document.getElementById('sceneRing');
@@ -1449,10 +1745,15 @@ body{ font-size: 16px; line-height: 1.8; }
     if (key) selectScene(key);
   });
 
+  window.AnhuPlayer = {
+    play: selectScene,
+    has: function (k) { return !!SCENES[k]; }
+  };
+
   window.addEventListener('resize', render);
   window.addEventListener('load', render);
 
-  if (location.protocol === 'file:') {
+  if (window.__NO_SCENES_API__ || location.protocol === 'file:') {
     build(normalize(FALLBACK));
     return;
   }
@@ -1471,112 +1772,5 @@ body{ font-size: 16px; line-height: 1.8; }
     });
 })();
 </script>
-<script>
-/* 纠错与建议：写入后端 SQLite（server.mjs） */
-(function () {
-  var form = document.getElementById('fbForm');
-  var nameEl = document.getElementById('fbName');
-  var sceneEl = document.getElementById('fbScene');
-  var area = document.getElementById('fbContent');
-  var count = document.getElementById('fbCount');
-  var msg = document.getElementById('fbMsg');
-  var list = document.getElementById('fbList');
-  var submit = document.getElementById('fbSubmit');
-  if (!form || !area) return;
-
-  var SCENE_NAME = {
-    burn: '烧烫伤', cut: '割伤出血', sprain: '轻微扭伤',
-    choke: '气道异物', heat: '中暑', shock: '触电'
-  };
-
-  function setMsg(text, isErr) {
-    msg.textContent = text || '';
-    msg.className = 'fb-msg' + (isErr ? ' is-err' : '');
-  }
-
-  function renderList(rows) {
-    list.innerHTML = '';
-    if (!rows || !rows.length) {
-      var empty = document.createElement('li');
-      empty.className = 'fb-empty';
-      empty.textContent = '还没有留言，欢迎留下第一条建议。';
-      list.appendChild(empty);
-      return;
-    }
-    rows.forEach(function (r) {
-      var li = document.createElement('li');
-      li.className = 'fb-item';
-
-      var who = document.createElement('b');
-      who.textContent = (r.nickname || '匿名') +
-        (r.scene && SCENE_NAME[r.scene] ? ' · ' + SCENE_NAME[r.scene] : '');
-
-      var t = document.createElement('time');
-      t.textContent = String(r.created_at || '').replace('T', ' ').slice(0, 16);
-
-      var body = document.createElement('div');
-      body.textContent = r.content;
-
-      li.appendChild(who);
-      li.appendChild(t);
-      li.appendChild(body);
-      list.appendChild(li);
-    });
-  }
-
-  function load() {
-    fetch('/api/feedback?limit=5')
-      .then(function (r) { return r.ok ? r.json() : []; })
-      .then(renderList)
-      .catch(function () {
-        list.innerHTML = '<li class="fb-empty">留言加载失败（需要后端服务）。</li>';
-      });
-  }
-
-  area.addEventListener('input', function () {
-    count.textContent = area.value.length + ' / 200';
-  });
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var content = area.value.trim();
-    if (content.length < 2) { setMsg('至少写 2 个字', true); return; }
-
-    submit.disabled = true;
-    setMsg('提交中…');
-
-    fetch('/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scene: sceneEl.value,
-        nickname: nameEl.value.trim(),
-        content: content
-      })
-    })
-      .then(function (r) {
-        return r.json().then(function (j) { return { ok: r.ok, data: j }; });
-      })
-      .then(function (res) {
-        if (!res.ok) {
-          throw new Error((res.data && res.data.error && res.data.error.message) || '提交失败');
-        }
-        area.value = '';
-        nameEl.value = '';
-        count.textContent = '0 / 200';
-        setMsg('已提交，感谢反馈');
-        load();
-      })
-      .catch(function (err) {
-        setMsg(err.message || '网络异常，请稍后重试', true);
-      })
-      .then(function () { submit.disabled = false; });
-  });
-
-  load();
-})();
-</script>
-<script src="../js/site.js"></script>
-
 </body>
 </html>

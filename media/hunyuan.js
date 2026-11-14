@@ -3,7 +3,6 @@
  * ===============================================================
  * 与课程指定的 js 文件保持完全一致：
  *   endpoint : https://tcamp.qq.com/openai/chat/completions
- *   token    : mTIUaeYu2TEGcTDu7eFb628a25484b76Bc052d5971D81c5d
  *   model    : hunyuan-vision
  *   body     : messages[0].content = [ {type:'text'}, {type:'image_url'} ]
  *
@@ -191,7 +190,7 @@
         if (err instanceof TypeError) {
           throw new Error(
             '无法直连接口：可能是浏览器 CORS 策略拦截，或本地网络不可用。' +
-            '请配置 CONFIG.proxy 指向本地代理（见 proxy.mjs）'
+            '请确认后端 server.mjs 已启动'
           );
         }
         throw err;
@@ -253,6 +252,61 @@
           raw: r.raw,
           elapsed: Date.now() - started
         };
+      });
+    },
+
+    /* 主接口：只把图片发给自己的后端，由服务端组装请求、选模型、解析结构化结果
+       返回 { ok, structured, isWound, type, level, levelText, score, advice[], call120, note, elapsed } */
+    analyzeFile: function (file, opts) {
+      opts = opts || {};
+      var started = Date.now();
+
+      return fileToBase64(file, opts).then(function (b64) {
+        var url = CONFIG.proxy || '/api/analyze';
+        var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var timer = controller ? setTimeout(function () { controller.abort(); }, CONFIG.timeout) : null;
+
+        return fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: b64, scene: opts.scene || '' }),
+          signal: controller ? controller.signal : undefined
+        }).then(function (res) {
+          if (timer) clearTimeout(timer);
+
+          /* 先取文本，避免空响应体导致 res.json() 抛 Unexpected end of JSON input */
+          return res.text().then(function (raw) {
+            var data = null;
+            if (raw && raw.trim()) {
+              try { data = JSON.parse(raw); } catch (e) { data = null; }
+            }
+
+            if (!res.ok) {
+              var msg = (data && data.error && data.error.message) || ('接口返回 HTTP ' + res.status);
+              var err = new Error(msg);
+              err.hint = data && data.error && data.error.hint;
+              if (!data) err.hint = '服务器返回的不是 JSON（前 120 字）：' + String(raw || '（空）').slice(0, 120);
+              throw err;
+            }
+
+            if (!data) {
+              var e2 = new Error('服务器没有返回有效数据');
+              e2.hint = raw
+                ? '返回内容不是 JSON：' + String(raw).slice(0, 120)
+                : '响应体为空，通常是后端没有启动，或请求被反向代理拦截。';
+              throw e2;
+            }
+
+            data.base64 = b64;
+            if (!data.elapsed) data.elapsed = Date.now() - started;
+            return data;
+          });
+        }).catch(function (err) {
+          if (timer) clearTimeout(timer);
+          if (err && err.name === 'AbortError') throw new Error('识别超时，请重试');
+          if (err instanceof TypeError) throw new Error('无法连接识别服务，请确认后端已启动');
+          throw err;
+        });
       });
     },
 

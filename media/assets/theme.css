@@ -335,3 +335,28 @@ img, video { max-width: 100%; display: block; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+
+/* ================= 站内导航（本页新增） ================= */
+.quicknav{ display:flex; gap:16px; margin-left:auto; font-size:13.5px; }
+.quicknav a{ color:var(--ink-700); text-decoration:none; padding:6px 0; white-space:nowrap; }
+.quicknav a:hover{ color:var(--brand-700); }
+.quicknav a[aria-current]{ color:var(--brand-700); font-weight:700; }
+@media (max-width:760px){ .quicknav{ gap:12px; font-size:12px; overflow-x:auto; } }
+
+/* ================= 与全站一致的加深版主题（覆盖旧值） ================= */
+[data-theme="clarity"] {
+  --brand-600: #0A6E78; --brand-700: #0B5E68; --brand-500: #12909C;
+  --brand-200: #A2D8DE; --brand-100: #BEE4E8; --brand-50: #D5EDEF;
+  --line: #C6DEE2; --line-soft: #D9EAED; --bg: #DFF0F2;
+}
+[data-theme="rescue"] {
+  --brand-600: #174F91; --brand-700: #133F77; --brand-500: #2A66B0;
+  --brand-200: #A9C4EE; --brand-100: #C4D7F5; --brand-50: #D8E3FA;
+  --line: #C6D6EE; --line-soft: #D5E1F7; --bg: #DFE8FB;
+}
+[data-theme="clarity"] .topbar,
+[data-theme="rescue"] .topbar {
+  background: color-mix(in srgb, var(--brand-50) 92%, transparent);
+  border-bottom: 1px solid var(--brand-200);
+}
