@@ -270,6 +270,9 @@ html[data-theme="rescue"]  { --calc-hero: linear-gradient(120deg,#102A4C 0%,#1B4
   </div>
 </div>
 
+<!-- 识别接口地址：指向已部署好的费用测算后端（跨域已开）。
+     若本页与后端同域，可删掉这一行，前端会退回默认的 /api/vision。 -->
+<script>window.VISION_ENDPOINT="https://emergency-med-calc.app.workbuddy.host/api/vision?sharecode=OXMKYNFLIT";</script>
 <script src="hunyuan.js"></script>
 <script src="engine.js"></script>
 <script src="cloud-sdk.js"></script>

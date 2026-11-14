@@ -43,7 +43,8 @@
 
   // ===== 前端配置：上游地址与鉴权已移到服务端 cloud-env.cjs =====
   var CONFIG = {
-    API_URL: '/api/vision',                 // 同源代理；线上由 server.js 转发
+    // 同源代理；若服务端部署在别的域名，在页面用 window.VISION_ENDPOINT 指定绝对地址
+    API_URL: (typeof window !== 'undefined' && window.VISION_ENDPOINT) || '/api/vision',
     UPSTREAM_URL: 'https://tcamp.qq.com/openai/chat/completions', // 与指定 js 文件一致（仅展示）
     MODEL: 'hunyuan-vision',
     PROMPT: EXPENSE_PROMPT,
@@ -171,6 +172,13 @@
     var out = { items: [], total: 0, note: '', raw: src };
     var expectNote = false, expectTotal = false;
     var lines = src.split(/\r?\n/);
+    /* 部分模型会先把提示词模板原样回显一遍（「项目名称|金额|甲」等），再接真实结果。
+       这里从**最后一个**「费用明细：」开始解析，避免把模板当成数据。 */
+    var lastHead = -1;
+    for (var h = 0; h < lines.length; h++) {
+      if (/^\s*费用明细\s*[:：]/.test(lines[h])) lastHead = h;
+    }
+    if (lastHead > 0) lines = lines.slice(lastHead);
     for (var i=0;i<lines.length;i++){
       var line = lines[i].trim().replace(/^`+|`+$/g,'').trim();
       if (!line) continue;
@@ -182,15 +190,32 @@
       }
       if (/^说明\s*[:：]/.test(line)){
         var noteVal = line.replace(/^说明\s*[:：]\s*/,'').trim();
-        if (noteVal) { out.note = noteVal; expectNote = false; }
-        else expectNote = true;
+        /* 模板回显里的「一句话说明」不是真说明，丢掉 */
+        if (noteVal && noteVal !== '一句话说明') { out.note = noteVal; expectNote = false; }
+        else expectNote = !noteVal;
         continue;
       }
       if (expectTotal && /^\d+(?:\.\d+)?$/.test(line)){
         out.total = Number(line); expectTotal = false; expectNote = false; continue;
       }
       if (expectNote && line.indexOf('|') < 0 && line.indexOf('｜') < 0){
-        out.note = line; expectNote = false; continue;
+        if (line !== '一句话说明') { out.note = line; }
+        expectNote = false; continue;
+      }
+      /* 有些模型把多条挤在同一行：a|50|乙 b|300|乙 —— 按三元组全部取出 */
+      var lineTidy = line.replace(/^费用明细\s*[:：]\s*/, '');
+      var multi = lineTidy.match(/[^\s|｜]+\s*[|｜]\s*-?\d+(?:\.\d+)?\s*[|｜]\s*[甲乙丙ABC]?/g);
+      if (multi && multi.length > 1){
+        multi.forEach(function(t){
+          var pp = t.split(/\s*[|｜]\s*/);
+          var nm = (pp[0]||'').replace(/^(?:[-•*]\s*|\d+[.、)]\s*)/,'').trim();
+          var am = (pp[1]||'').match(/-?\d+(?:\.\d+)?/);
+          if (!nm || !am) return;
+          var cl = String(pp[2]||'乙').trim();
+          out.items.push({ name: nm, amount: Math.max(0, Number(am[0])),
+                           type: /丙|C/.test(cl) ? 'C' : (/甲|A/.test(cl) ? 'A' : 'B'), prepay: '' });
+        });
+        continue;
       }
       if (/^费用明细\s*[:：]/.test(line)){ expectTotal = false; expectNote = false; continue; }
       if (/^[-=|:：\s]+$/.test(line)) continue;             // Markdown 分隔行
