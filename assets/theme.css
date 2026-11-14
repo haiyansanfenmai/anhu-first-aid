@@ -66,13 +66,13 @@
 
 /* 备选风格 A：澄净医疗（仅用于风格对比预览） */
 [data-theme="clarity"] {
-  --brand-900: #0B3B44;
-  --brand-700: #0E6B75;
+  --brand-900: #08333A;
+  --brand-700: #0B5E68;
   --brand-600: #0A6E78;
-  --brand-500: #118A95;
-  --brand-200: #A8DDE2;
-  --brand-100: #CBEAEE;
-  --brand-50:  #E4F4F6;
+  --brand-500: #12909C;
+  --brand-200: #A2D8DE;
+  --brand-100: #BEE4E8;
+  --brand-50:  #D5EDEF;
   --urgent-600: #D94536;
   --urgent-500: #EF5B45;
   --urgent-100: #FBDCD7;
@@ -81,9 +81,9 @@
   --ink-700: #3C525C;
   --ink-500: #5C727D;
   --ink-300: #A9BAC2;
-  --line: #D3E4E8;
-  --line-soft: #E1F0F2;
-  --bg: #E8F4F6;
+  --line: #C6DEE2;
+  --line-soft: #D9EAED;
+  --bg: #DFF0F2;
   --r-sm: 12px; --r: 16px; --r-lg: 22px;
   --sh-1: 0 2px 8px rgba(16, 60, 70, .045), 0 10px 28px rgba(16, 60, 70, .05);
   --sh-2: 0 8px 24px rgba(16, 60, 70, .09);
@@ -92,13 +92,13 @@
 
 /* 备选风格 B：急救响应（仅用于风格对比预览） */
 [data-theme="rescue"] {
-  --brand-900: #102A4C;
-  --brand-700: #1B4B8F;
+  --brand-900: #0D2440;
+  --brand-700: #133F77;
   --brand-600: #174F91;
-  --brand-500: #2C6FB4;
-  --brand-200: #B3CCEA;
-  --brand-100: #CFE0F5;
-  --brand-50:  #E3EDFB;
+  --brand-500: #2A66B0;
+  --brand-200: #A9C4EE;
+  --brand-100: #C4D7F5;
+  --brand-50:  #D8E3FA;
   --urgent-600: #D42E24;
   --urgent-500: #EC4433;
   --urgent-100: #F7C9C5;
@@ -107,9 +107,9 @@
   --ink-700: #3C525C;
   --ink-500: #5C727D;
   --ink-300: #A9BAC2;
-  --line: #D2DEEF;
-  --line-soft: #E1EAF8;
-  --bg: #E7EEFB;
+  --line: #C6D6EE;
+  --line-soft: #D5E1F7;
+  --bg: #DFE8FB;
   --r-sm: 8px; --r: 10px; --r-lg: 14px;
   --sh-1: 0 2px 6px rgba(16, 42, 76, .07), 0 8px 20px rgba(16, 42, 76, .06);
   --sh-2: 0 8px 20px rgba(16, 42, 76, .10);
@@ -484,4 +484,21 @@ img, video { max-width: 100%; display: block; }
 @media (max-width: 620px) {
   .style-switch { right: 12px; bottom: 12px; }
   .style-panel { width: min(272px, calc(100vw - 24px)); }
+}
+
+
+/* ============ 备选风格的可见性增强（只作用于 clarity / rescue） ============
+   原来两套只改底色，大面积仍是白，切换时不明显；这里让顶栏与卡片描边也带品牌色。 */
+[data-theme="clarity"] .topbar,
+[data-theme="rescue"] .topbar {
+  background: color-mix(in srgb, var(--brand-50) 92%, transparent);
+  border-bottom: 1px solid var(--brand-200);
+}
+[data-theme="clarity"] .card,
+[data-theme="rescue"] .card {
+  border-color: var(--brand-100);
+}
+[data-theme="clarity"] .card-hover:hover,
+[data-theme="rescue"] .card-hover:hover {
+  border-color: var(--brand-200);
 }
