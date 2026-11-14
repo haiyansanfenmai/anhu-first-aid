@@ -337,13 +337,6 @@ img, video { max-width: 100%; display: block; }
 }
 
 
-/* ================= 站内导航（本页新增） ================= */
-.quicknav{ display:flex; gap:16px; margin-left:auto; font-size:13.5px; }
-.quicknav a{ color:var(--ink-700); text-decoration:none; padding:6px 0; white-space:nowrap; }
-.quicknav a:hover{ color:var(--brand-700); }
-.quicknav a[aria-current]{ color:var(--brand-700); font-weight:700; }
-@media (max-width:760px){ .quicknav{ gap:12px; font-size:12px; overflow-x:auto; } }
-
 /* ================= 与全站一致的加深版主题（覆盖旧值） ================= */
 [data-theme="clarity"] {
   --brand-600: #0A6E78; --brand-700: #0B5E68; --brand-500: #12909C;
