@@ -170,7 +170,7 @@
     { id: 'walk',      name: '步行 / 公交',      short: '步行',  factor: 2.5,  api: 'walk' }
   ];
 
-  /* 真实医院的能力依据：认证索引（NavCapability）+ 高德 POI 的客观类型字段。
+  /* 真实医院的能力依据：认证索引（NavCapability）+ POI 的客观类型字段。
      命中认证标签的医院排序优先，理由是「已核对」而不是关键词猜测。 */
   var MATCH_WORDS = {
     chest:  ['胸痛中心', '心血管', '心脏', '胸科', '胸痛', '三级甲等', '综合医院'],
@@ -192,7 +192,7 @@
     flow: 'emergency', checked: {}, tab: 'guide',
     routeInfo: null, routeError: '', routeBusy: false,
     farNote: '',
-    hospitals: DEMO_HOSPITALS,   // 当前名单：演示数据 或 高德真实 POI
+    hospitals: DEMO_HOSPITALS,   // 当前名单：演示数据 或 地图服务真实 POI
     dataSource: 'demo',          // 'demo' | 'real'
     cityName: NAV_CITY.name,
     cityAdcode: '',
@@ -492,10 +492,10 @@
   function mapStatusText() {
     var s = window.NavMap ? window.NavMap.status() : { hasWebKey: false };
     var base = s.hasWebKey
-      ? '地图来自高德地图 · A / B / C 是医院' +
+      ? '地图来自在线地图服务 · A / B / C 是医院' +
         (hasPrecise() ? '，S 是你的位置' : '；S 目前是城市中心，不是你的精确位置') +
         '。点「放大查看」后可拖动、缩放。'
-      : '还没有配置高德 Key，当前是位置关系示意图。填入 Web服务 Key 后这里会变成真实高德地图与路线。';
+      : '还没有配置地图 Key，当前是位置关系示意图。填入 Web服务 Key 后这里会变成真实地图与路线。';
     return state.farNote ? state.farNote + ' ' + base : base;
   }
 
@@ -548,7 +548,7 @@
       if (i >= list.length) { onFail(); return; }
       var z = list[i++];
       var url = window.NavMap.staticUrl(mergeOpts(opts, { zoom: z }));
-      box.innerHTML = '<img id="' + imgId + '" alt="高德静态地图：当前位置与医院" src="' + esc(url) + '">';
+      box.innerHTML = '<img id="' + imgId + '" alt="静态地图：当前位置与医院" src="' + esc(url) + '">';
       var el = $(imgId);
       if (el) {
         el.addEventListener('load', function () { markGood(size, z); });
@@ -578,7 +578,7 @@
         path: state.routeInfo ? state.routeInfo.path : null
       }, 'mapMiniImg', function () {
         box.innerHTML = schematic(false);
-        $('mapStatus').textContent = '高德地图图片没能加载，已切回示意图，功能不受影响。' + (state.farNote ? ' ' + state.farNote : '');
+        $('mapStatus').textContent = '地图图片没能加载，已切回示意图，功能不受影响。' + (state.farNote ? ' ' + state.farNote : '');
       });
     } else box.innerHTML = schematic(false);
     // 图片被重建后把手上的缩放倍数重新贴回去（不触发任何请求）
@@ -586,7 +586,7 @@
   }
 
   /* ==========================================================
-     医院现场照片：高德 POI photos，选中医院后按需加载（不拖慢首屏）
+     医院现场照片：POI photos，选中医院后按需加载（不拖慢首屏）
      ========================================================== */
   function renderGuidePhotos() {
     var box = $('guidePhotos');
@@ -598,7 +598,7 @@
     var h = byId(state.hospitals, state.hospital);
     if (!h) { box.innerHTML = ''; return; }
     var list = state.photos[h.id];
-    // 主列表已带回高德 POI 照片时直接用，零额外请求
+    // 主列表已带回POI 照片时直接用，零额外请求
     if (list === undefined && h.photos && h.photos.length) {
       state.photos[h.id] = list = h.photos;
     }
@@ -608,14 +608,14 @@
       return;
     }
     if (!list.length) {
-      box.innerHTML = '<div class="nav-photo-empty">这家医院在高德地图暂未收录现场照片。下面的路线地图与到院动线仍然可用，到了现场请以指示牌为准。</div>';
+      box.innerHTML = '<div class="nav-photo-empty">这家医院暂时没有现场照片。下面的路线地图与到院动线仍然可用，到了现场请以指示牌为准。</div>';
       return;
     }
     box.innerHTML = '<div class="nav-photo-grid">' + list.map(function (u, i) {
       return '<button type="button" class="nav-photo-item" data-photo="' + i + '" aria-label="查看现场照片 ' + (i + 1) + '">' +
              '<img src="' + esc(u) + '" alt="' + esc(h.name) + ' 现场照片 ' + (i + 1) + '" loading="lazy"></button>';
     }).join('') + '</div>' +
-    '<div class="nav-photo-note">照片来自高德地图 POI 收录，点开可看大图。建筑外观可能已变化，到了现场请以指示牌为准。</div>';
+    '<div class="nav-photo-note">照片来自地图 POI 收录，点开可看大图。建筑外观可能已变化，到了现场请以指示牌为准。</div>';
   }
   function loadGuidePhotos(h) {
     if (!h || !window.NavMap || !window.NavMap.photos || !window.NavMap.webKey()) {
@@ -659,7 +659,7 @@
 
   /* ==========================================================
      可拖拽 / 可缩放的大地图
-     预取一张 2048×1536 的高德大图，拖动时只做 CSS transform（零网络请求），
+     预取一张 2048×1536 的地图大图，拖动时只做 CSS transform（零网络请求），
      只有主动缩放 / 复位才重新取图。这样拖动不会卡。
      ========================================================== */
   var bigView = { center: null, zoom: BIG_DEFAULT_ZOOM, panX: 0, panY: 0, scale: 1 };
@@ -678,7 +678,7 @@
     function attempt() {
       if (i >= list.length) {
         $('mapBigBody').innerHTML = schematic(true) +
-          '<div class="nav-big-tip">这一区域的高德地图暂时不可用，已切回示意图。</div>';
+          '<div class="nav-big-tip">这一区域的地图暂时不可用，已切回示意图。</div>';
         return;
       }
       var level = list[i++];
@@ -707,7 +707,7 @@
       ? '双指缩放 · 单指拖动 · 右上角退出大地图'
       : '按住拖动 · 滚轮或双击缩放 · 右上角退出大地图';
     body.innerHTML = '<div class="nav-big-stage" id="mapBigStage">' +
-      '<img id="mapBigImg" alt="高德地图，可双指缩放、按住拖动"></div>' +
+      '<img id="mapBigImg" alt="地图，可双指缩放、按住拖动"></div>' +
       '<div class="nav-big-tip">' + tip + '</div>';
     var img = $('mapBigImg'), stage = $('mapBigStage');
     if (!img || !stage) return;
@@ -832,7 +832,7 @@
         : '地图加载中… 加载后可按住拖动、滚轮缩放';
     } else {
       $('mapBigBody').innerHTML = schematic(true) +
-        '<div class="nav-big-tip">当前是位置关系示意图。配置高德 Web服务 Key 后可显示并拖动真实地图。</div>';
+        '<div class="nav-big-tip">当前是位置关系示意图。配置地图 Key 后可显示并拖动真实地图。</div>';
       $('mapBigTip').textContent = '示意图 · 点右上角「退出大地图」回到页面';
     }
   }
@@ -883,14 +883,14 @@
       return;
     }
     var baseMin = state.routeInfo ? state.routeInfo.min : minutes(hospitalKm(h), TRAVELS[0]);
-    var src = state.routeInfo ? '高德路径规划' : (window.NavMap && window.NavMap.webKey() ? '正在算路线…' : '按内置距离估算');
+    var src = state.routeInfo ? '在线路径规划' : (window.NavMap && window.NavMap.webKey() ? '正在算路线…' : '按内置距离估算');
     var rows = TRAVELS.map(function (t) {
       var min = Math.max(1, Math.round(baseMin * t.factor));
       var on = t.id === state.travel;
       return '<button type="button" class="nav-travel' + (on ? ' is-on' : '') + '" data-travel="' + t.id + '">' +
         '<span class="nav-travel-n">' + esc(t.name) + '</span>' +
         '<span class="nav-travel-t">约 ' + min + ' 分钟</span>' +
-        '<span class="nav-travel-s">' + (on && state.routeInfo ? '高德实时' : '估算') + '</span></button>';
+        '<span class="nav-travel-s">' + (on && state.routeInfo ? '实时' : '估算') + '</span></button>';
     }).join('');
     var m = measure(h);
     var head = '<div class="nav-route-head"><div><div class="nav-li-t">去 ' + esc(h.name) + '</div>' +
@@ -914,8 +914,8 @@
     if (hasUrlLoc && info && (info.mode === 'manual' || info.mode === 'gps' || info.mode === 'district')
         && !state.userLocated) return '链接带入的坐标';
     return {
-      'amap-regeo': '高德逆地理编码', 'amap-ip': '网络位置 · 城市级',
-      'amap-geocode': '高德地址检索', 'amap-district': '所在区 · 区级', 'saved': '上次记住的位置',
+      'amap-regeo': '逆地理编码', 'amap-ip': '网络位置 · 城市级',
+      'amap-geocode': '地址检索', 'amap-district': '所在区 · 区级', 'saved': '上次记住的位置',
       'offline-fallback': '接口未连通 · 离线估算',
       'offline-region': '离线区域估算', 'browser': '浏览器定位',
       'external': '外部模块传入', 'fallback': '自动降级'
@@ -945,7 +945,7 @@
     var forgetBtn = $('btnForget');
     if (forgetBtn) forgetBtn.hidden = !(window.NavLocation && window.NavLocation.recall());
     if (state.dataSource !== 'real') {
-      hint = '当前为离线演示数据。配置高德 Key 后会自动获取真实位置与附近医院。';
+      hint = '当前为离线演示数据。配置地图 Key 后会自动获取真实位置与附近医院。';
     } else if (info && (info.restored || info.source === 'saved')) {
       hint = '已恢复你上次的位置，附近医院按这里重算。想换位置就选区或输入地址。';
     } else if (coarseGps(info)) {
@@ -970,7 +970,7 @@
     $('locSrc').innerHTML = info
       ? '<span class="nav-loc-tag">' + esc(sourceText(info)) + '</span>' +
         '<span>坐标系 ' + esc(info.coordSys || 'WGS-84') + '</span>' +
-        '<span>' + (state.dataSource === 'real' ? '医院名单来自高德真实数据' : '医院名单为课程演示数据') + '</span>'
+        '<span>' + (state.dataSource === 'real' ? '医院名单来自真实数据' : '医院名单为课程演示数据') + '</span>'
       : '';
     renderDiag();
     renderPhone();
@@ -1099,7 +1099,7 @@
     if (g && !g.ok && g.code === 3) {
       tips.push('设备迟迟没给出坐标：笔记本请确认 WiFi 开着、Windows「设置 → 隐私 → 位置」已打开；台式机没有 WiFi 模块时，浏览器通常只能给到城市级。');
     }
-    tips.push('最可靠的两种：点「获取我的精确位置」并允许授权；或在下面输入小区 / 路口名，由高德地址检索定位。');
+    tips.push('最可靠的两种：点「获取我的精确位置」并允许授权；或在下面输入小区 / 路口名，由地址检索定位。');
     box.innerHTML = '<dl class="nav-diag-list">' + rows.map(function (r) {
       return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>';
     }).join('') + '</dl><div class="nav-diag-tips"><b>可以试试</b><ul>' +
@@ -1131,9 +1131,9 @@
       if (r.h.certs && r.h.certs.length) {
         evidence = '<div class="nav-evidence">已核对 · ' + esc(r.h.certs[0].source) + '</div>';
       } else if (r.h.listed && r.h.listed.length) {
-        evidence = '<div class="nav-evidence">高德检索收录 · ' + esc(r.h.listed[0].source) + '</div>';
+        evidence = '<div class="nav-evidence">地图检索收录 · ' + esc(r.h.listed[0].source) + '</div>';
       } else {
-        evidence = '<div class="nav-evidence">医院类型依据高德地图分类字段</div>';
+        evidence = '<div class="nav-evidence">医院类型依据地图分类字段</div>';
       }
     }
     var m = measure(r.h);
@@ -1177,7 +1177,7 @@
     if (!hasPrecise() && state.districts && state.districts.length) {
       $('resSub').textContent = '还没有你的精确位置。先选你在哪个区，再按「' +
         (sit ? sit.label : '情况') + '」帮你排医院。';
-      $('dataNote').textContent = '医院名称、地址、电话、距离与类型来自高德地图；急症请以 120 调度与医院急诊公告为准。';
+      $('dataNote').textContent = '医院名称、地址、电话、距离与类型来自地图服务；急症请以 120 调度与医院急诊公告为准。';
       $('hospList').innerHTML = districtPickerHtml();
       return;
     }
@@ -1187,12 +1187,12 @@
     } else {
       $('resSub').textContent = sit
         ? (real ? '按「' + sit.label + '」的认证信息与医院类型匹配 ' : '按「' + sit.need.join(' + ') + '」匹配 ') +
-          state.hospitals.length + ' 家' + (real ? '高德真实医院' : '演示医院') + '；' + travel().name + '时间为' +
-          (state.routeInfo ? '高德路径规划' : '估算') + '。'
+          state.hospitals.length + ' 家' + (real ? '真实医院' : '演示医院') + '；' + travel().name + '时间为' +
+          (state.routeInfo ? '在线路径规划' : '估算') + '。'
         : '先看看附近的医院；选好情况后，会按「能不能接得住」重排。';
     }
     $('dataNote').textContent = real
-      ? '医院名称、地址、电话、距离与医院类型来自高德地图；胸痛 / 卒中 / 急救中心等认证信息来自高德认证中心 POI 与公开公布名单，每家医院卡片下标有来源。急症请以 120 调度与医院急诊公告为准。' +
+      ? '医院名称、地址、电话、距离与医院类型来自地图服务；胸痛 / 卒中 / 急救中心等认证信息来自地图服务认证中心 POI 与公开公布名单，每家医院卡片下标有来源。急症请以 120 调度与医院急诊公告为准。' +
         (state.realError ? '（部分接口未连通：' + state.realError + '）' : '')
       : '医院与能力标签为课程演示数据，请以当地卫健委公布名单和医院实际公告为准。不提供诊断建议，不掌握实时床位与排队情况。';
     if (!sit) {
@@ -1229,14 +1229,14 @@
       return;
     }
     $('routeSub').textContent = h.name + '　·　' +
-      (h.real ? '以下为高德真实信息与通用到院提醒。' : '以下为演示信息，到院请以现场指引为准。');
+      (h.real ? '以下为地图服务真实信息与通用到院提醒。' : '以下为演示信息，到院请以现场指引为准。');
     var items;
     if (h.real) {
       items = [
-        { k: '址', t: '医院地址', d: h.address || '高德未收录详细地址，到院前可电话确认。' },
-        { k: '话', t: '联系电话', d: h.tel || '高德未收录电话，建议提前在地图 App 查询。' },
+        { k: '址', t: '医院地址', d: h.address || '暂未收录详细地址，到院前可电话确认。' },
+        { k: '话', t: '联系电话', d: h.tel || '暂未收录电话，建议提前在地图 App 查询。' },
         { k: '型', t: '医院类型', d: h.typeShort || '医疗机构' },
-        { k: '门', t: '走哪个门 / 车停哪儿', d: '这类现场信息高德不提供。到院前可电话询问「急诊走哪个门、夜间入口在哪、停车场怎么走」，比到了再找省时间。' }
+        { k: '门', t: '走哪个门 / 车停哪儿', d: '这类现场信息接口不提供。到院前可电话询问「急诊走哪个门、夜间入口在哪、停车场怎么走」，比到了再找省时间。' }
       ];
     } else {
       items = [
@@ -1261,7 +1261,7 @@
       steps.map(function (s, i) {
         return '<div class="nav-guide-step"><span class="nav-guide-n">' + (i + 1) + '</span><span>' + esc(s) + '</span></div>';
       }).join('') +
-      '<p class="nav-note mt-3">' + (state.routeInfo ? '路线文字来自高德路径规划，实际以导航与现场标志为准。' : '未配置 Key 时为大致方向提示，配置后显示高德逐步路线。') + '</p>';
+      '<p class="nav-note mt-3">' + (state.routeInfo ? '路线文字来自在线路径规划，实际以导航与现场标志为准。' : '未配置 Key 时为大致方向提示，配置后显示逐段路线。') + '</p>';
   }
 
   function buildFlow() {
@@ -1324,16 +1324,16 @@
       lines.push('建议医院：' + h.name);
       lines.push(hasPrecise()
         ? '大概多远：' + m.km.toFixed(1) + ' km，' + travel().name + '约 ' + m.min + ' 分钟' +
-          (state.routeInfo ? '（高德路径规划）' : '（估算）')
+          (state.routeInfo ? '（在线路径规划）' : '（估算）')
         : '距离：还没拿到我的精确位置，这段先不算路程');
       if (state.dataSource === 'real') {
-        lines.push('医院地址：' + (h.address || '高德未收录'));
+        lines.push('医院地址：' + (h.address || '暂未收录'));
         if (h.tel) lines.push('医院电话：' + h.tel);
         if (h.certs && h.certs.length) {
           lines.push('认证信息：' + h.certs.map(function (c) { return c.label; }).join('、') +
                      '（来源：' + h.certs[0].source + '）');
         } else {
-          lines.push('医院类型：' + (h.caps || []).join('、') + '（依据高德地图分类字段）');
+          lines.push('医院类型：' + (h.caps || []).join('、') + '（依据地图分类字段）');
         }
         if (state.routeInfo && state.routeInfo.instructions.length) lines.push('路线：' + state.routeInfo.instructions[0]);
       } else {
@@ -1356,7 +1356,7 @@
     lines.push('');
     lines.push('紧急情况请立即拨打 120 求助。这是流程指引，不是诊断建议。');
     lines.push(state.dataSource === 'real'
-      ? '医院信息来自高德地图，能力与急诊开设情况请以医院公告为准。'
+      ? '医院信息来自在线地图服务，能力与急诊开设情况请以医院公告为准。'
       : '医院名单与到院动线为课程演示数据，实际以当地公告为准。');
     return lines.join('\n');
   }
@@ -1519,7 +1519,7 @@
     if (!q) { toast('先写个地址、小区或路口名'); return; }
     if (!window.NavLocation || !window.NavLocation.suggest || !window.NavMap.webKey()) {
       tips.hidden = false;
-      tips.innerHTML = '<div class="nav-addr-tip is-msg">离线模式下不能检索地址；配置高德 Key 后可用。</div>';
+      tips.innerHTML = '<div class="nav-addr-tip is-msg">离线模式下不能检索地址；配置地图 Key 后可用。</div>';
       return;
     }
     tips.hidden = false;
@@ -1609,7 +1609,7 @@
     var u = list[Number(btn.getAttribute('data-photo'))];
     if (!u) return;
     $('photoBigImg').src = u;
-    $('photoCap').textContent = h.name + ' · 照片来自高德地图 POI 收录';
+    $('photoCap').textContent = h.name + ' · 照片来自地图服务 POI 收录';
     $('photoBig').hidden = false;
     document.body.style.overflow = 'hidden';
   });
@@ -1742,7 +1742,7 @@
 
   setOrigin(NAV_CITY.origins[0], 'demo');
 
-  /* 医院名单现在按「当前真实坐标」从高德 place/around 实时拉取，全国通用。
+  /* 医院名单现在按「当前真实坐标」从地图 place/around 实时拉取，全国通用。
      早期「演示数据只在杭州」的远距离回落会把用户的真实坐标偷偷换成杭州假起点，
      再算出看似合理的假距离 —— 必须去掉，否则就是在骗用户。 */
   /* 粗略定位吸附：设备给的是 WiFi/IP 混合定位（误差几公里）时，落到最近的行政区中心。
