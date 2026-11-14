@@ -20,12 +20,12 @@ html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   -webkit-font-smoothing:antialiased}
-.top{background:linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%);color:#fff;padding:34px 0 38px}
+.top{background:linear-gradient(180deg,var(--brand-50) 0%,transparent 92%);border-bottom:1px solid var(--line-soft);color:var(--ink-900);padding:34px 0 32px}
 .top .in{max-width:1000px;margin:0 auto;padding:0 20px}
 .top h1{font-size:26px;margin:0;font-weight:650;letter-spacing:.3px}
-.top p{font-size:13.5px;opacity:.88;margin:8px 0 0}
-.badge{display:inline-block;margin-top:16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
-  border-radius:20px;padding:4px 12px;font-size:11.5px}
+.top p{font-size:13.5px;color:var(--ink-500);margin:8px 0 0}
+.badge{display:inline-block;margin-top:16px;background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:4px 12px;font-size:11.5px;color:var(--ink-700)}
 .page{max-width:1000px;margin:0 auto;padding:28px 20px 60px}
 .lead{font-size:13px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:9px}
 .lead::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -83,10 +83,6 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
   --shadow: var(--sh-1);
 }
 /* 页面自带横幅：默认主题保持原色，切换后随主题走 */
-:root { --calc-hero: linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%); }
-html[data-theme="clarity"] { --calc-hero: linear-gradient(120deg,#0B3B44 0%,#0E6B75 52%,#0F7C86 100%); }
-html[data-theme="rescue"]  { --calc-hero: linear-gradient(120deg,#102A4C 0%,#1B4B8F 52%,#1D5FA8 100%); }
-.topbar, .top { background: var(--calc-hero); }
 </style>
 </head>
 <body>

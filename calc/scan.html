@@ -24,13 +24,13 @@ body{background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
   -webkit-font-smoothing:antialiased}
 a{color:var(--blue);text-decoration:none}
 button,input,select{font-family:inherit;font-size:inherit}
-.top{background:linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%);color:#fff;padding:22px 0 24px}
+.top{background:linear-gradient(180deg,var(--brand-50) 0%,transparent 92%);border-bottom:1px solid var(--line-soft);color:var(--ink-900);padding:22px 0 22px}
 .top .in{max-width:940px;margin:0 auto;padding:0 20px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .top h1{font-size:21px;margin:0;font-weight:650}
-.top p{font-size:12.5px;opacity:.88;margin:5px 0 0}
-.back{color:#fffdf8;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:6px 12px;font-size:12.5px;white-space:nowrap}
-.back:hover{background:rgba(255,255,255,.14)}
+.top p{font-size:12.5px;color:var(--ink-500);margin:5px 0 0}
+.back{color:var(--ink-700);background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12.5px;white-space:nowrap}
+.back:hover{background:var(--brand-50)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 11px;font-size:11.5px}
 .page{max-width:940px;margin:0 auto;padding:20px 20px 60px}
@@ -154,10 +154,6 @@ details.cfg[open] summary::before{transform:rotate(90deg)}
   --shadow: var(--sh-1);
 }
 /* 页面自带横幅：默认主题保持原色，切换后随主题走 */
-:root { --calc-hero: linear-gradient(120deg,#6f4026 0%,#93552f 52%,#a56238 100%); }
-html[data-theme="clarity"] { --calc-hero: linear-gradient(120deg,#0B3B44 0%,#0E6B75 52%,#0F7C86 100%); }
-html[data-theme="rescue"]  { --calc-hero: linear-gradient(120deg,#102A4C 0%,#1B4B8F 52%,#1D5FA8 100%); }
-.topbar, .top { background: var(--calc-hero); }
 </style>
 </head>
 <body>
